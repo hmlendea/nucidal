@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>NuciDAL</RootNamespace>
+    <Version>1.0</Version>
+    <Description>Data access layer helpers</Description>
+    <Authors>Horațiu Mlendea</Authors>
+    <Copyright>Copyright 2019 © Horațiu Mlendea</Copyright>
+    <RepositoryUrl>https://github.com/hmlendea/nucidal</RepositoryUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageTags>DAL DataAccess</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MonoGameContentReference Include="**\*.mgcb" />
+  </ItemGroup>
+
+</Project>
