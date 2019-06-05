@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 using NuciDAL.DataObjects;
 
@@ -7,12 +9,12 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// In-memory repository.
     /// </summary>
-    public abstract class Repository<TDataObject> : Repository<string, TDataObject> where TDataObject : EntityBase { }
+    public class Repository<TDataObject> : Repository<string, TDataObject> where TDataObject : EntityBase { }
 
     /// <summary>
     /// In-memory repository.
     /// </summary>
-    public abstract class Repository<TKey, TDataObject> : IRepository<TKey, TDataObject> where TDataObject : EntityBase<TKey>
+    public class Repository<TKey, TDataObject> : IRepository<TKey, TDataObject> where TDataObject : EntityBase<TKey>
     {
         /// <summary>
         /// The stored entities.
@@ -94,7 +96,18 @@ namespace NuciDAL.Repositories
         /// Updates the specified entity's fields.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public abstract void Update(TDataObject entity);
+        public virtual void Update(TDataObject entity)
+        {
+            Type type = entity.GetType();
+            PropertyInfo[] properties = type.GetProperties();
+            TDataObject entityToUpdate = Get(entity.Id);
+
+            foreach (PropertyInfo property in properties)
+            {
+                object value = property.GetValue(entity);
+                property.SetValue(entityToUpdate, value, null);
+            }
+        }
 
         /// <summary>
         /// Tries to update the specified entity's fields.
