@@ -10,7 +10,8 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public abstract class XmlRepository<TDataObject> : XmlRepository<string, TDataObject> where TDataObject : EntityBase
+    public abstract class XmlRepository<TDataObject> : XmlRepository<string, TDataObject>, IXmlRepository<TDataObject>
+        where TDataObject : EntityBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="T:XmlRepository"/> class.
@@ -22,7 +23,8 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public abstract class XmlRepository<TKey, TDataObject> : Repository<TKey, TDataObject> where TDataObject : EntityBase<TKey>
+    public abstract class XmlRepository<TKey, TDataObject> : Repository<TKey, TDataObject>, IXmlRepository<TKey, TDataObject>
+        where TDataObject : EntityBase<TKey>
     {
         /// <summary>
         /// The XML file.
