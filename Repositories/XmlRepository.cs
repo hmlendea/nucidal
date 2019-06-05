@@ -10,7 +10,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public abstract class XmlRepository<TDataObject> : XmlRepository<string, TDataObject>
+    public class XmlRepository<TDataObject> : XmlRepository<string, TDataObject>
         where TDataObject : EntityBase
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public abstract class XmlRepository<TKey, TDataObject> : Repository<TKey, TDataObject>
+    public class XmlRepository<TKey, TDataObject> : Repository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
