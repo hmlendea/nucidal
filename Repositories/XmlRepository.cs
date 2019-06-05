@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using NuciDAL.DataObjects;
 using NuciDAL.IO;
@@ -43,7 +44,7 @@ namespace NuciDAL.Repositories
         {
             try
             {
-                XmlFile.SaveEntities(Entities.Values);
+                XmlFile.SaveEntities(Entities.Values.ToList());
             }
             catch
             {
