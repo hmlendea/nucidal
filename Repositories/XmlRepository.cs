@@ -10,7 +10,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public class XmlRepository<TDataObject> : XmlRepository<string, TDataObject>
+    public class XmlRepository<TDataObject> : XmlRepository<string, TDataObject>, IRepository<TDataObject>
         where TDataObject : EntityBase
     {
         /// <summary>

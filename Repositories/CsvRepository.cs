@@ -10,7 +10,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// CSV-based repository.
     /// </summary>
-    public class CsvRepository<TDataObject> : CsvRepository<string, TDataObject>
+    public class CsvRepository<TDataObject> : CsvRepository<string, TDataObject>, IRepository<TDataObject>
         where TDataObject : EntityBase, new()
     {
         /// <summary>
