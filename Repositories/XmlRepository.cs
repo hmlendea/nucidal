@@ -10,7 +10,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public abstract class XmlRepository<TDataObject> : XmlRepository<string, TDataObject>, IXmlRepository<TDataObject>
+    public abstract class XmlRepository<TDataObject> : XmlRepository<string, TDataObject>
         where TDataObject : EntityBase
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public abstract class XmlRepository<TKey, TDataObject> : Repository<TKey, TDataObject>, IXmlRepository<TKey, TDataObject>
+    public abstract class XmlRepository<TKey, TDataObject> : Repository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
@@ -42,7 +42,7 @@ namespace NuciDAL.Repositories
             XmlFile = new XmlFileCollection<TDataObject>(fileName);
         }
 
-        public void ApplyChanges()
+        public override void ApplyChanges()
         {
             try
             {

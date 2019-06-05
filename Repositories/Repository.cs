@@ -167,5 +167,10 @@ namespace NuciDAL.Repositories
             }
             catch { }
         }
+
+        public virtual void ApplyChanges()
+        {
+            
+        }
     }
 }

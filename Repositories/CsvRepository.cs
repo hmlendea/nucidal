@@ -10,7 +10,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// CSV-based repository.
     /// </summary>
-    public abstract class CsvRepository<TDataObject> : CsvRepository<string, TDataObject>, ICsvRepository<TDataObject>
+    public abstract class CsvRepository<TDataObject> : CsvRepository<string, TDataObject>
         where TDataObject : EntityBase, new()
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// CSV-based repository.
     /// </summary>
-    public abstract class CsvRepository<TKey, TDataObject> : Repository<TKey, TDataObject>, ICsvRepository<TKey, TDataObject>
+    public abstract class CsvRepository<TKey, TDataObject> : Repository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>, new()
     {
         /// <summary>
@@ -42,7 +42,7 @@ namespace NuciDAL.Repositories
             CsvFile = new CsvFile<TDataObject>(fileName);
         }
 
-        public void ApplyChanges()
+        public override void ApplyChanges()
         {
             try
             {

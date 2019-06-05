@@ -83,5 +83,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="id">Identifier.</param>
         void TryRemove(TKey id);
+        
+        void ApplyChanges();
     }
 }
