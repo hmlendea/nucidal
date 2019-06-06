@@ -78,7 +78,6 @@ namespace NuciDAL.IO
             Type type = entity.GetType();
             string[] fields = line.Split(FieldSeparator);
 
-
             // TODO: This shifting is VERY HACKY and should be fixed soon
             PropertyInfo[] properties2 = type.GetProperties();
             PropertyInfo[] properties = new PropertyInfo[properties2.Length];
@@ -104,12 +103,27 @@ namespace NuciDAL.IO
         string BuildLine(TDataObject entity)
         {
             Type type = entity.GetType();
-            PropertyInfo[] properties = type.GetProperties();
             string line = string.Empty;
+
+            // TODO: This shifting is VERY HACKY and should be fixed soon
+            PropertyInfo[] properties2 = type.GetProperties();
+            PropertyInfo[] properties = new PropertyInfo[properties2.Length];
+
+            Array.Copy(properties2, 0, properties, 1, properties.Length - 1);
+            properties[0] = properties2[properties.Length - 1];
 
             foreach (PropertyInfo property in properties)
             {
-                line += property.GetValue(entity).ToString() + FieldSeparator;
+                object propertyValue = property.GetValue(entity);
+
+                if (propertyValue is null)
+                {
+                    line += FieldSeparator;
+                }
+                else
+                {
+                    line += propertyValue.ToString() + FieldSeparator;
+                }
             }
 
             return line.Substring(0, line.Length - 1);
