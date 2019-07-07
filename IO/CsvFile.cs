@@ -56,19 +56,17 @@ namespace NuciDAL.IO
 
             IList<TDataObject> entities = new List<TDataObject>();
             
-            int i = 0;
+            int lineNumber = 0;
             try
             {
                 foreach (string line in File.ReadAllLines(FilePath))
                 {
+                    lineNumber += 1;
+
                     if (line.Trim().StartsWith(CommentCharacter.ToString()))
                     {
                         continue;
                     }
-
-                    i += 1;
-
-                    Console.WriteLine("Parsing " + i);
 
                     TDataObject entity = ReadLine(line);
                     entities.Add(entity);
@@ -76,7 +74,7 @@ namespace NuciDAL.IO
             }
             catch (Exception ex)
             {
-                throw new SerializationException($"Failed while parsing line {i + 1}: {ex.Message}", ex);
+                throw new SerializationException($"Failed while parsing line {lineNumber}: {ex.Message}", ex);
             }
 
             return entities;
