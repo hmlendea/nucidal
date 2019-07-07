@@ -105,7 +105,8 @@ namespace NuciDAL.IO
             Array.Copy(properties2, 0, properties, 1, properties.Length - 1);
             properties[0] = properties2[properties.Length - 1];
 
-            if (fields.Length != properties.Length)
+            if (fields.Length < properties.Length ||
+                fields.Length != properties.Length && !string.IsNullOrWhiteSpace(fields[fields.Length - 1]))
             {
                 throw new SerializationException($"Wrong number of CSV fields ({fields.Length}/{properties.Length})");
             }
