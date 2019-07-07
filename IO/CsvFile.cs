@@ -54,10 +54,30 @@ namespace NuciDAL.IO
                 return new List<TDataObject>();
             }
 
-            IEnumerable<TDataObject> entities = File
-                .ReadAllLines(FilePath)
-                .Where(line => !line.Trim().StartsWith(CommentCharacter.ToString()))
-                .Select(line => ReadLine(line));
+            IList<TDataObject> entities = new List<TDataObject>();
+            
+            int i = 0;
+            try
+            {
+                foreach (string line in File.ReadAllLines(FilePath))
+                {
+                    if (line.Trim().StartsWith(CommentCharacter.ToString()))
+                    {
+                        continue;
+                    }
+
+                    i += 1;
+
+                    Console.WriteLine("Parsing " + i);
+
+                    TDataObject entity = ReadLine(line);
+                    entities.Add(entity);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SerializationException($"Failed while parsing line {i + 1}: {ex.Message}", ex);
+            }
 
             return entities;
         }
@@ -87,7 +107,7 @@ namespace NuciDAL.IO
 
             if (fields.Length != properties.Length)
             {
-                throw new SerializationException("Wrong number of CSV fields");
+                throw new SerializationException($"Wrong number of CSV fields ({fields.Length}/{properties.Length})");
             }
             
             for (int i = 0; i < properties.Length; i++)
