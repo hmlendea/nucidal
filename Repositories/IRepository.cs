@@ -17,6 +17,11 @@ namespace NuciDAL.Repositories
     public interface IRepository<TKey, TDataObject> where TDataObject : EntityBase<TKey>
     {
         /// <summary>
+        /// Gets the total amount of entities currently stored in this repository.
+        /// </summary>
+        int EntitiesCount { get; }
+
+        /// <summary>
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
