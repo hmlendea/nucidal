@@ -3,3 +3,17 @@
 # About
 
 NuGet package for DataAccess layers
+
+# Installation
+
+[![Get it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciDAL)
+
+**.NET CLI**:
+```bash
+dotnet add package NuciDAL
+```
+
+**Package Manager**:
+```powershell
+Install-PackageNuciDAL
+```
