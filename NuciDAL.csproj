@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net7</TargetFramework>
     <RootNamespace>NuciDAL</RootNamespace>
-    <Version>2.0.0</Version>
+    <Version>2.1.0</Version>
     <Description>Data access layer helpers</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2022 © Horațiu Mlendea</Copyright>
