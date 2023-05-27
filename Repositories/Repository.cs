@@ -57,6 +57,14 @@ namespace NuciDAL.Repositories
         }
 
         /// <summary>
+        /// Checks whether an entity with the specified identifier exists.
+        /// </summary>
+        /// <returns>A boolean representing whether an entity with the specified identifier exists.</returns>
+        /// <param name="id">Identifier.</param>
+        public virtual bool ContainsId(TKey id)
+            => Entities.ContainsKey(id);
+
+        /// <summary>
         /// Get the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity.</returns>
@@ -126,7 +134,7 @@ namespace NuciDAL.Repositories
             }
             catch { }
         }
-        
+
         /// <summary>
         /// Removes the specified entity.
         /// </summary>
@@ -135,7 +143,7 @@ namespace NuciDAL.Repositories
         {
             Entities.Remove(entity.Id);
         }
-        
+
         /// <summary>
         /// Tries to remove the specified entity.
         /// </summary>
@@ -175,7 +183,7 @@ namespace NuciDAL.Repositories
 
         public virtual void ApplyChanges()
         {
-            
+
         }
     }
 }
