@@ -26,12 +26,19 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="entity">Entity.</param>
         void Add(TDataObject entity);
-        
+
         /// <summary>
         /// Tries to add the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
         void TryAdd(TDataObject entity);
+
+        /// <summary>
+        /// Checks whether an entity with the specified identifier exists.
+        /// </summary>
+        /// <returns>A boolean representing whether an entity with the specified identifier exists.</returns>
+        /// <param name="id">Identifier.</param>
+        bool ContainsId(TKey id);
 
         /// <summary>
         /// Gets the entity  with the specified identifier.
@@ -88,7 +95,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="id">Identifier.</param>
         void TryRemove(TKey id);
-        
+
         void ApplyChanges();
     }
 }
