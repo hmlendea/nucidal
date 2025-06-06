@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>NuciDAL</RootNamespace>
-    <Version>2.2.0</Version>
+    <Version>2.2.1</Version>
     <Description>Data access layer helpers</Description>
     <Authors>Horațiu Mlendea</Authors>
-    <Copyright>Copyright 2024 © Horațiu Mlendea</Copyright>
+    <Copyright>Copyright 2025 © Horațiu Mlendea</Copyright>
     <RepositoryUrl>https://github.com/hmlendea/nucidal</RepositoryUrl>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>DAL DataAccess</PackageTags>
