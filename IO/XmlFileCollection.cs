@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
@@ -8,22 +7,17 @@ namespace NuciDAL.IO
     /// <summary>
     /// XML File Collection.
     /// </summary>
-    public class XmlFileCollection<T>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="XmlFileCollection"/> class.
+    /// </remarks>
+    /// <param name="fileName">File name.</param>
+    public class XmlFileCollection<T>(string fileName)
     {
         /// <summary>
         /// Gets the name of the file.
         /// </summary>
         /// <value>The name of the file.</value>
-        public string FileName { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="XmlFileCollection"/> class.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        public XmlFileCollection(string fileName)
-        {
-            FileName = fileName;
-        }
+        public string FileName { get; private set; } = fileName;
 
         /// <summary>
         /// Loads the entities.
@@ -31,15 +25,13 @@ namespace NuciDAL.IO
         /// <returns>The entities.</returns>
         public IEnumerable<T> LoadEntities()
         {
-            XmlSerializer xs = new XmlSerializer(typeof(List<T>));
+            XmlSerializer xs = new(typeof(List<T>));
             IEnumerable<T> entities = null;
 
-            using (FileStream fs = new FileStream(FileName, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new(FileName, FileMode.Open, FileAccess.Read))
             {
-                using (StreamReader sr = new StreamReader(fs))
-                {
-                    entities = (IEnumerable<T>)xs.Deserialize(sr);
-                }
+                using StreamReader sr = new(fs);
+                entities = (IEnumerable<T>)xs.Deserialize(sr);
             }
 
             return entities;
@@ -51,13 +43,11 @@ namespace NuciDAL.IO
         /// <param name="entities">Entities.</param>
         public void SaveEntities(IEnumerable<T> entities)
         {
-            FileStream fs = new FileStream(FileName, FileMode.Create, FileAccess.Write);
+            FileStream fs = new(FileName, FileMode.Create, FileAccess.Write);
 
-            using (StreamWriter sw = new StreamWriter(fs))
-            {
-                XmlSerializer xs = new XmlSerializer(typeof(List<T>));
-                xs.Serialize(sw, entities);
-            }
+            using StreamWriter sw = new(fs);
+            XmlSerializer xs = new(typeof(List<T>));
+            xs.Serialize(sw, entities);
         }
     }
 }

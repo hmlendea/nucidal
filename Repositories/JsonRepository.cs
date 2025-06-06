@@ -10,37 +10,31 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// JSON-based repository.
     /// </summary>
-    public class JsonRepository<TDataObject> : JsonRepository<string, TDataObject>, IRepository<TDataObject>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="T:JsonRepository"/> class.
+    /// </remarks>
+    /// <param name="fileName">File name.</param>
+    public class JsonRepository<TDataObject>(string fileName) : JsonRepository<string, TDataObject>(fileName), IRepository<TDataObject>
         where TDataObject : EntityBase
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:JsonRepository"/> class.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        public JsonRepository(string fileName) : base(fileName) { }
     }
 
     /// <summary>
     /// JSON-based repository.
     /// </summary>
-    public class JsonRepository<TKey, TDataObject> : Repository<TKey, TDataObject>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="T:JsonRepository"/> class.
+    /// </remarks>
+    /// <param name="fileName">File name.</param>
+    public class JsonRepository<TKey, TDataObject>(string fileName) : Repository<TKey, TDataObject>()
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
         /// The JSON file.
         /// </summary>
-        protected readonly JsonFileCollection<TDataObject> JsonFile;
+        protected readonly JsonFileCollection<TDataObject> JsonFile = new(fileName);
 
         bool loadedEntities;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:JsonRepository"/> class.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        public JsonRepository(string fileName) : base()
-        {
-            JsonFile = new JsonFileCollection<TDataObject>(fileName);
-        }
 
         public override void ApplyChanges()
         {

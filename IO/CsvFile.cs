@@ -10,8 +10,11 @@ namespace NuciDAL.IO
     /// <summary>
     /// CSV File.
     /// </summary>
-    public class CsvFile<TDataObject>
-        where TDataObject : new()
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="CsvFile"/> class.
+    /// </remarks>
+    /// <param name="filePath">File path.</param>
+    public class CsvFile<TDataObject>(string filePath, char fieldSeparator) where TDataObject : new()
     {
         const char CommentCharacter = '#';
 
@@ -19,29 +22,15 @@ namespace NuciDAL.IO
         /// Gets the name of the file.
         /// </summary>
         /// <value>The name of the file.</value>
-        public string FilePath { get; private set; }
+        public string FilePath { get; private set; } = filePath;
 
-        public char FieldSeparator { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CsvFile"/> class.
-        /// </summary>
-        /// <param name="filePath">File path.</param>
-        public CsvFile(string filePath)
-            : this(filePath, ',')
-        {
-
-        }
+        public char FieldSeparator { get; private set; } = fieldSeparator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CsvFile"/> class.
         /// </summary>
         /// <param name="filePath">File path.</param>
-        public CsvFile(string filePath, char fieldSeparator)
-        {
-            FilePath = filePath;
-            FieldSeparator = fieldSeparator;
-        }
+        public CsvFile(string filePath) : this(filePath, ',') { }
 
         /// <summary>
         /// Loads the entities.
@@ -51,11 +40,11 @@ namespace NuciDAL.IO
         {
             if (!File.Exists(FilePath))
             {
-                return new List<TDataObject>();
+                return [];
             }
 
-            IList<TDataObject> entities = new List<TDataObject>();
-            
+            IList<TDataObject> entities = [];
+
             int lineNumber = 0;
             try
             {
@@ -92,7 +81,7 @@ namespace NuciDAL.IO
 
         TDataObject ReadLine(string line)
         {
-            TDataObject entity = new TDataObject();
+            TDataObject entity = new();
             Type type = entity.GetType();
             string[] fields = line.Split(FieldSeparator);
 
@@ -108,7 +97,7 @@ namespace NuciDAL.IO
             {
                 throw new SerializationException($"Wrong number of CSV fields ({fields.Length}/{properties.Length})");
             }
-            
+
             for (int i = 0; i < properties.Length; i++)
             {
                 PropertyInfo property = properties[i];

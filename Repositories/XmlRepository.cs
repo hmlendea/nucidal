@@ -10,37 +10,31 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public class XmlRepository<TDataObject> : XmlRepository<string, TDataObject>, IRepository<TDataObject>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="T:XmlRepository"/> class.
+    /// </remarks>
+    /// <param name="fileName">File name.</param>
+    public class XmlRepository<TDataObject>(string fileName) : XmlRepository<string, TDataObject>(fileName), IRepository<TDataObject>
         where TDataObject : EntityBase
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:XmlRepository"/> class.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        public XmlRepository(string fileName) : base(fileName) { }
     }
 
     /// <summary>
     /// XML-based repository.
     /// </summary>
-    public class XmlRepository<TKey, TDataObject> : Repository<TKey, TDataObject>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="T:XmlRepository"/> class.
+    /// </remarks>
+    /// <param name="fileName">File name.</param>
+    public class XmlRepository<TKey, TDataObject>(string fileName) : Repository<TKey, TDataObject>()
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
         /// The XML file.
         /// </summary>
-        protected readonly XmlFileCollection<TDataObject> XmlFile;
+        protected readonly XmlFileCollection<TDataObject> XmlFile = new(fileName);
 
         bool loadedEntities;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:XmlRepository"/> class.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        public XmlRepository(string fileName) : base()
-        {
-            XmlFile = new XmlFileCollection<TDataObject>(fileName);
-        }
 
         public override void ApplyChanges()
         {
@@ -65,7 +59,7 @@ namespace NuciDAL.Repositories
             {
                 LoadEntitiesIfNeeded();
             }
-            
+
             base.Add(entity);
         }
 

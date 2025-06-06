@@ -10,37 +10,31 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// CSV-based repository.
     /// </summary>
-    public class CsvRepository<TDataObject> : CsvRepository<string, TDataObject>, IRepository<TDataObject>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="T:CsvRepository"/> class.
+    /// </remarks>
+    /// <param name="fileName">File name.</param>
+    public class CsvRepository<TDataObject>(string fileName) : CsvRepository<string, TDataObject>(fileName), IRepository<TDataObject>
         where TDataObject : EntityBase, new()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsvRepository"/> class.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        public CsvRepository(string fileName) : base(fileName) { }
     }
 
     /// <summary>
     /// CSV-based repository.
     /// </summary>
-    public class CsvRepository<TKey, TDataObject> : Repository<TKey, TDataObject>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="T:CsvRepository"/> class.
+    /// </remarks>
+    /// <param name="fileName">File name.</param>
+    public class CsvRepository<TKey, TDataObject>(string fileName) : Repository<TKey, TDataObject>()
         where TDataObject : EntityBase<TKey>, new()
     {
         /// <summary>
         /// The CSV file.
         /// </summary>
-        protected readonly CsvFile<TDataObject> CsvFile;
+        protected readonly CsvFile<TDataObject> CsvFile = new(fileName);
 
         bool loadedEntities;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsvRepository"/> class.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        public CsvRepository(string fileName) : base()
-        {
-            CsvFile = new CsvFile<TDataObject>(fileName);
-        }
 
         public override void ApplyChanges()
         {
@@ -65,7 +59,7 @@ namespace NuciDAL.Repositories
             {
                 LoadEntitiesIfNeeded();
             }
-            
+
             base.Add(entity);
         }
 

@@ -7,22 +7,17 @@ namespace NuciDAL.IO
     /// <summary>
     /// JSON File Collection.
     /// </summary>
-    public class JsonFileCollection<T>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="JsonFileCollection"/> class.
+    /// </remarks>
+    /// <param name="fileName">File name.</param>
+    public class JsonFileCollection<T>(string fileName)
     {
         /// <summary>
         /// Gets the name of the file.
         /// </summary>
         /// <value>The name of the file.</value>
-        public string FileName { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonFileCollection"/> class.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        public JsonFileCollection(string fileName)
-        {
-            FileName = fileName;
-        }
+        public string FileName { get; private set; } = fileName;
 
         /// <summary>
         /// Loads the entities from the JSON file.
@@ -32,13 +27,11 @@ namespace NuciDAL.IO
         {
             IEnumerable<T> entities = null;
 
-            using (FileStream fs = new FileStream(FileName, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new(FileName, FileMode.Open, FileAccess.Read))
             {
-                using (StreamReader sr = new StreamReader(fs))
-                {
-                    string json = sr.ReadToEnd();
-                    entities = JsonSerializer.Deserialize<IEnumerable<T>>(json);
-                }
+                using StreamReader sr = new(fs);
+                string json = sr.ReadToEnd();
+                entities = JsonSerializer.Deserialize<IEnumerable<T>>(json);
             }
 
             return entities;
@@ -52,13 +45,9 @@ namespace NuciDAL.IO
         {
             string json = JsonSerializer.Serialize(entities);
 
-            using (FileStream fs = new FileStream(FileName, FileMode.Create, FileAccess.Write))
-            {
-                using (StreamWriter sw = new StreamWriter(fs))
-                {
-                    sw.Write(json);
-                }
-            }
+            using FileStream fs = new(FileName, FileMode.Create, FileAccess.Write);
+            using StreamWriter sw = new(fs);
+            sw.Write(json);
         }
     }
 }

@@ -19,10 +19,7 @@ namespace NuciDAL.IO
         /// <summary>
         /// Initializes a new instance of the <see cref="T:JsonFileObject"/> class.
         /// </summary>
-        public JsonFileObject()
-        {
-            Type = typeof(T);
-        }
+        public JsonFileObject() => Type = typeof(T);
 
         /// <summary>
         /// Reads a <see cref="T"/> from a JSON file.
@@ -34,7 +31,7 @@ namespace NuciDAL.IO
 
             using (StreamReader file = File.OpenText(path))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                JsonSerializer serializer = new();
                 instance = (T)serializer.Deserialize(file, Type);
             }
 
@@ -49,11 +46,9 @@ namespace NuciDAL.IO
         // TODO: Shouldn't I use T instead of object for the obj parameter?
         public void Write(string path, object obj)
         {
-            using (StreamWriter file = File.CreateText(path))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(file, obj);
-            }
+            using StreamWriter file = File.CreateText(path);
+            JsonSerializer serializer = new();
+            serializer.Serialize(file, obj);
         }
     }
 }
