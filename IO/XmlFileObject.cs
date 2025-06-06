@@ -34,7 +34,7 @@ namespace NuciDAL.IO
 
             using (TextReader reader = new StreamReader(path))
             {
-                XmlSerializer xml = new XmlSerializer(Type);
+                XmlSerializer xml = new(Type);
                 instance = (T)xml.Deserialize(reader);
             }
 
@@ -49,11 +49,9 @@ namespace NuciDAL.IO
         // TODO: Shouldn't I use T instead of object for the obj parameter?
         public void Write(string path, object obj)
         {
-            using (TextWriter writer = new StreamWriter(path))
-            {
-                XmlSerializer xml = new XmlSerializer(Type);
-                xml.Serialize(writer, obj);
-            }
+            using TextWriter writer = new StreamWriter(path);
+            XmlSerializer xml = new(Type);
+            xml.Serialize(writer, obj);
         }
     }
 }

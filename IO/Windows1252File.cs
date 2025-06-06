@@ -12,23 +12,12 @@ namespace NuciDAL.IO
     {
         private static readonly Encoding windows1252Encoding;
 
-        static Windows1252File()
-        {
-            windows1252Encoding = Encoding.GetEncoding("windows-1252");
-        }
+        static Windows1252File() => windows1252Encoding = Encoding.GetEncoding("windows-1252");
 
         public static void WriteAllText(string path, string contents)
-        {
-            byte[] contentBytes = windows1252Encoding.GetBytes(contents.ToCharArray());
-
-            File.WriteAllBytes(path, contentBytes);
-        }
+            => File.WriteAllBytes(path, windows1252Encoding.GetBytes(contents.ToCharArray()));
 
         public static async Task WriteAllTextAsync(string path, string contents, CancellationToken cancellationToken = default)
-        {
-            byte[] contentBytes = windows1252Encoding.GetBytes(contents.ToCharArray());
-
-            await File.WriteAllBytesAsync(path, contentBytes, cancellationToken);
-        }
+            => await File.WriteAllBytesAsync(path, windows1252Encoding.GetBytes(contents.ToCharArray()), cancellationToken);
     }
 }

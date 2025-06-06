@@ -7,9 +7,7 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// Repository interface.
     /// </summary>
-    public interface IRepository<TDataObject> : IRepository<string, TDataObject> where TDataObject : EntityBase
-    {
-    }
+    public interface IRepository<TDataObject> : IRepository<string, TDataObject> where TDataObject : EntityBase { }
 
     /// <summary>
     /// Repository interface.

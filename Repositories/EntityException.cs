@@ -18,21 +18,19 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="message">The exception message.</param>
-        public EntityException(EntityBase entity, string message)
-            : base(message)
+        public EntityException(EntityBase entity, string message) : base(message)
         {
             EntityId = entity.Id;
             EntityTypeName = entity.GetType().Name;
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityException"/> exception.
         /// </summary>
         /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         /// <param name="message">The exception message.</param>
-        public EntityException(string entityId, Type entityType, string message)
-            : base(message)
+        public EntityException(string entityId, Type entityType, string message) : base(message)
         {
             EntityId = entityId;
             EntityTypeName = entityType.Name;
@@ -44,8 +42,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         /// <param name="message">The exception message.</param>
-        public EntityException(string entityId, string entityType, string message)
-            : base(message)
+        public EntityException(string entityId, string entityType, string message) : base(message)
         {
             EntityId = entityId;
             EntityTypeName = entityType;
@@ -57,8 +54,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">The entity.</param>
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">Inner exception.</param>
-        public EntityException(EntityBase entity, string message, Exception innerException)
-            : base(message, innerException)
+        public EntityException(EntityBase entity, string message, Exception innerException) : base(message, innerException)
         {
             EntityId = entity.Id;
             EntityTypeName = entity.GetType().Name;
@@ -71,8 +67,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityType">Entity type.</param>
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">Inner exception.</param>
-        public EntityException(string entityId, Type entityType, string message, Exception innerException)
-            : base(message, innerException)
+        public EntityException(string entityId, Type entityType, string message, Exception innerException) : base(message, innerException)
         {
             EntityId = entityId;
             EntityTypeName = entityType.Name;
@@ -85,8 +80,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityType">Entity type.</param>
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">Inner exception.</param>
-        public EntityException(string entityId, string entityType, string message, Exception innerException)
-            : base(message, innerException)
+        public EntityException(string entityId, string entityType, string message, Exception innerException) : base(message, innerException)
         {
             EntityId = entityId;
             EntityTypeName = entityType;
