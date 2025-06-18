@@ -63,7 +63,14 @@ namespace NuciDAL.Repositories
         /// <returns>The entity.</returns>
         /// <param name="id">Identifier.</param>
         public virtual TDataObject Get(TKey id)
-            => TryGet(id) ?? throw new EntityNotFoundException(id.ToString(), nameof(TDataObject));
+        {
+            if (!Entities.TryGetValue(id, out TDataObject value))
+            {
+                throw new EntityNotFoundException(id.ToString(), nameof(TDataObject));
+            }
+
+            return value;
+        }
 
         /// <summary>
         /// Tries to get the entity with the specified identifier.
@@ -72,12 +79,14 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public TDataObject TryGet(TKey id)
         {
-            if (!Entities.TryGetValue(id, out TDataObject value))
+            try
+            {
+                return Get(id);
+            }
+            catch (Exception)
             {
                 return null;
             }
-
-            return value;
         }
 
         /// <summary>
