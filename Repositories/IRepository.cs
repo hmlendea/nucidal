@@ -39,11 +39,17 @@ namespace NuciDAL.Repositories
         bool ContainsId(TKey id);
 
         /// <summary>
-        /// Gets the entity  with the specified identifier.
+        /// Gets the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity.</returns>
         /// <param name="id">Identifier.</param>
         TDataObject Get(TKey id);
+
+        /// <summary>
+        /// Gets a random entity.
+        /// </summary>
+        /// <returns>A random entity.</returns>
+        TDataObject GetRandom();
 
         /// <summary>
         /// Tries to get the entity  with the specified identifier.
