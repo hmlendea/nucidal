@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 using NuciDAL.DataObjects;
 using NuciDAL.IO;
@@ -15,9 +14,7 @@ namespace NuciDAL.Repositories
     /// </remarks>
     /// <param name="fileName">File name.</param>
     public class XmlRepository<TDataObject>(string fileName) : XmlRepository<string, TDataObject>(fileName), IRepository<TDataObject>
-        where TDataObject : EntityBase
-    {
-    }
+        where TDataObject : EntityBase { }
 
     /// <summary>
     /// XML-based repository.
@@ -26,7 +23,7 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:XmlRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class XmlRepository<TKey, TDataObject>(string fileName) : Repository<TKey, TDataObject>()
+    public class XmlRepository<TKey, TDataObject>(string fileName) : FileRepository<TKey, TDataObject>()
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
@@ -34,13 +31,11 @@ namespace NuciDAL.Repositories
         /// </summary>
         protected readonly XmlFileCollection<TDataObject> XmlFile = new(fileName);
 
-        bool loadedEntities;
-
         public override void ApplyChanges()
         {
             try
             {
-                XmlFile.SaveEntities(Entities.Values.ToList());
+                XmlFile.SaveEntities([.. Entities.Values]);
             }
             catch
             {
@@ -49,81 +44,8 @@ namespace NuciDAL.Repositories
             }
         }
 
-        /// <summary>
-        /// Adds the specified entity.
-        /// </summary>
-        /// <param name="entity">Entity.</param>
-        public override void Add(TDataObject entity)
+        protected override void LoadEntities()
         {
-            LoadEntitiesIfNeeded();
-
-            base.Add(entity);
-        }
-
-        /// <summary>
-        /// Get the entity with the specified identifier.
-        /// </summary>
-        /// <returns>The entity.</returns>
-        /// <param name="id">Identifier.</param>
-        public override TDataObject Get(TKey id)
-        {
-            LoadEntitiesIfNeeded();
-
-            return base.Get(id);
-        }
-
-        /// <summary>
-        /// Gets a random entity.
-        /// </summary>
-        /// <returns>A random entity.</returns>
-        public override TDataObject GetRandom()
-        {
-            LoadEntitiesIfNeeded();
-
-            return base.GetRandom();
-        }
-
-        /// <summary>
-        /// Gets all the entities.
-        /// </summary>
-        /// <returns>The entities</returns>
-        public override IEnumerable<TDataObject> GetAll()
-        {
-            LoadEntitiesIfNeeded();
-
-            return base.GetAll();
-        }
-
-        /// <summary>
-        /// Removes the specified entity.
-        /// </summary>
-        /// <param name="entity">Entity.</param>
-        public override void Remove(TDataObject entity)
-        {
-            LoadEntitiesIfNeeded();
-
-            base.Remove(entity);
-
-            try
-            {
-                XmlFile.SaveEntities(Entities.Values);
-            }
-            catch
-            {
-                throw new DuplicateEntityException(entity.Id.ToString(), nameof(TDataObject));
-            }
-        }
-
-        /// <summary>
-        /// Loads the entities if needed.
-        /// </summary>
-        protected void LoadEntitiesIfNeeded()
-        {
-            if (loadedEntities)
-            {
-                return;
-            }
-
             IEnumerable<TDataObject> xmlEntities = XmlFile.LoadEntities();
 
             foreach(TDataObject entity in xmlEntities)
@@ -135,8 +57,6 @@ namespace NuciDAL.Repositories
 
                 Entities.Add(entity.Id, entity);
             }
-
-            loadedEntities = true;
         }
     }
 }
