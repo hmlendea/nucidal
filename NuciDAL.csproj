@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>NuciDAL</RootNamespace>
-    <Version>2.2.2</Version>
+    <Version>2.3.0</Version>
     <Description>Data access layer helpers</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2025 © Horațiu Mlendea</Copyright>
@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NuciExtensions" Version="5.1.0" />
   </ItemGroup>
 
 </Project>

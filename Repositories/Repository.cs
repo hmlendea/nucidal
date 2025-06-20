@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using NuciDAL.DataObjects;
+using NuciExtensions;
 
 namespace NuciDAL.Repositories
 {
@@ -71,6 +72,13 @@ namespace NuciDAL.Repositories
 
             return value;
         }
+
+        /// <summary>
+        /// Gets a random entity.
+        /// </summary>
+        /// <returns>A random entity.</returns>
+        public virtual TDataObject GetRandom()
+            => Entities.Values.GetRandomElement();
 
         /// <summary>
         /// Tries to get the entity with the specified identifier.

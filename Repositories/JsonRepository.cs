@@ -55,10 +55,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public override void Add(TDataObject entity)
         {
-            if (!loadedEntities)
-            {
-                LoadEntitiesIfNeeded();
-            }
+            LoadEntitiesIfNeeded();
 
             base.Add(entity);
         }
@@ -70,12 +67,20 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public override TDataObject Get(TKey id)
         {
-            if (!loadedEntities)
-            {
-                LoadEntitiesIfNeeded();
-            }
+            LoadEntitiesIfNeeded();
 
             return base.Get(id);
+        }
+
+        /// <summary>
+        /// Gets a random entity.
+        /// </summary>
+        /// <returns>A random entity.</returns>
+        public override TDataObject GetRandom()
+        {
+            LoadEntitiesIfNeeded();
+
+            return base.GetRandom();
         }
 
         /// <summary>
@@ -84,10 +89,7 @@ namespace NuciDAL.Repositories
         /// <returns>The entities</returns>
         public override IEnumerable<TDataObject> GetAll()
         {
-            if (!loadedEntities)
-            {
-                LoadEntitiesIfNeeded();
-            }
+            LoadEntitiesIfNeeded();
 
             return base.GetAll();
         }
@@ -98,10 +100,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public override void Remove(TDataObject entity)
         {
-            if (!loadedEntities)
-            {
-                LoadEntitiesIfNeeded();
-            }
+            LoadEntitiesIfNeeded();
 
             base.Remove(entity);
 
@@ -120,6 +119,11 @@ namespace NuciDAL.Repositories
         /// </summary>
         protected void LoadEntitiesIfNeeded()
         {
+            if (loadedEntities)
+            {
+                return;
+            }
+
             IEnumerable<TDataObject> jsonEntities = JsonFile.LoadEntities();
 
             foreach(TDataObject entity in jsonEntities)
