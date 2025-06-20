@@ -14,7 +14,7 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:CsvRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class CsvRepository<TDataObject>(string fileName) : CsvRepository<string, TDataObject>(fileName), IRepository<TDataObject>
+    public class CsvRepository<TDataObject>(string fileName) : CsvRepository<string, TDataObject>(fileName), IFileRepository<TDataObject>
         where TDataObject : EntityBase, new() { }
 
     /// <summary>
@@ -24,7 +24,7 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:CsvRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class CsvRepository<TKey, TDataObject>(string fileName) : FileRepository<TKey, TDataObject>()
+    public class CsvRepository<TKey, TDataObject>(string fileName) : FileRepository<TKey, TDataObject>(), IFileRepository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>, new()
     {
         /// <summary>

@@ -11,7 +11,7 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:FileRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public abstract class FileRepository<TDataObject> : FileRepository<string, TDataObject>, IRepository<TDataObject>
+    public abstract class FileRepository<TDataObject> : FileRepository<string, TDataObject>, IFileRepository<TDataObject>
         where TDataObject : EntityBase
     {
     }
@@ -23,7 +23,7 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:FileRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public abstract class FileRepository<TKey, TDataObject> : Repository<TKey, TDataObject>
+    public abstract class FileRepository<TKey, TDataObject> : Repository<TKey, TDataObject>, IFileRepository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>
     {
         bool loadedEntities;
