@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 using NuciDAL.DataObjects;
 using NuciDAL.IO;
@@ -14,7 +13,7 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:JsonRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class JsonRepository<TDataObject>(string fileName) : JsonRepository<string, TDataObject>(fileName), IRepository<TDataObject>
+    public class JsonRepository<TDataObject>(string fileName) : JsonRepository<string, TDataObject>(fileName), IFileRepository<TDataObject>
         where TDataObject : EntityBase { }
 
     /// <summary>
@@ -24,7 +23,7 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:JsonRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class JsonRepository<TKey, TDataObject>(string fileName) : FileRepository<TKey, TDataObject>()
+    public class JsonRepository<TKey, TDataObject>(string fileName) : FileRepository<TKey, TDataObject>(), IFileRepository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
