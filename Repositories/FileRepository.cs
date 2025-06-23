@@ -78,6 +78,17 @@ namespace NuciDAL.Repositories
         }
 
         /// <summary>
+        /// Updates the specified entity's fields.
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        public override void Update(TDataObject entity)
+        {
+            LoadEntitiesIfNeeded();
+
+            base.Update(entity);
+        }
+
+        /// <summary>
         /// Removes the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
