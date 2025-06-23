@@ -31,6 +31,10 @@ namespace NuciDAL.Repositories
         /// </summary>
         protected readonly XmlFileCollection<TDataObject> XmlFile = new(fileName);
 
+        /// <summary>
+        /// Applies the changes to the XML file.
+        /// </summary>
+        /// <exception cref="IOException">Thrown when the changes cannot be saved.</exception>
         public override void ApplyChanges()
         {
             try
@@ -44,11 +48,15 @@ namespace NuciDAL.Repositories
             }
         }
 
+        /// <summary>
+        /// Loads the entities from the XML file.
+        /// </summary>
+        /// <exception cref="DuplicateEntityException">Thrown when a duplicate entity is found.</exception>
         protected override void LoadEntities()
         {
             IEnumerable<TDataObject> xmlEntities = XmlFile.LoadEntities();
 
-            foreach(TDataObject entity in xmlEntities)
+            foreach (TDataObject entity in xmlEntities)
             {
                 if (Entities.ContainsKey(entity.Id))
                 {

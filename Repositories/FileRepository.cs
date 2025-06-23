@@ -28,8 +28,14 @@ namespace NuciDAL.Repositories
     {
         bool loadedEntities;
 
+        /// <summary>
+        /// Applies the changes to the file.
+        /// </summary>
         public abstract void ApplyChanges();
 
+        /// <summary>
+        /// Loads the entities from the file.
+        /// </summary>
         protected abstract void LoadEntities();
 
         /// <summary>

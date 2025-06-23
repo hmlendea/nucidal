@@ -9,8 +9,14 @@ namespace NuciDAL.Repositories
     /// </summary>
     public abstract class EntityException : Exception
     {
+        /// <summary>
+        /// Entity identifier.
+        /// </summary>
         public string EntityId { get; }
 
+        /// <summary>
+        /// Entity type name.
+        /// </summary>
         public string EntityTypeName { get; }
 
         /// <summary>
