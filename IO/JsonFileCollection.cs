@@ -13,6 +13,12 @@ namespace NuciDAL.IO
     /// <param name="fileName">File name.</param>
     public class JsonFileCollection<T>(string fileName)
     {
+        readonly JsonSerializerOptions options = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
+
         /// <summary>
         /// Gets the name of the file.
         /// </summary>
@@ -31,7 +37,8 @@ namespace NuciDAL.IO
             {
                 using StreamReader sr = new(fs);
                 string json = sr.ReadToEnd();
-                entities = JsonSerializer.Deserialize<IEnumerable<T>>(json);
+
+                entities = JsonSerializer.Deserialize<IEnumerable<T>>(json, options);
             }
 
             return entities;
@@ -43,10 +50,11 @@ namespace NuciDAL.IO
         /// <param name="entities">Entities.</param>
         public void SaveEntities(IEnumerable<T> entities)
         {
-            string json = JsonSerializer.Serialize(entities);
+            string json = JsonSerializer.Serialize(entities, options);
 
             using FileStream fs = new(FileName, FileMode.Create, FileAccess.Write);
             using StreamWriter sw = new(fs);
+
             sw.Write(json);
         }
     }
