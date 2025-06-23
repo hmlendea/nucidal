@@ -31,6 +31,10 @@ namespace NuciDAL.Repositories
         /// </summary>
         protected readonly JsonFileCollection<TDataObject> JsonFile = new(fileName);
 
+        /// <summary>
+        /// Applies the changes to the JSON file.
+        /// </summary>
+        /// <exception cref="IOException">Thrown when the changes cannot be saved.</exception>
         public override void ApplyChanges()
         {
             try
@@ -44,11 +48,15 @@ namespace NuciDAL.Repositories
             }
         }
 
+        /// <summary>
+        /// Loads the entities from the JSON file.
+        /// </summary>
+        /// <exception cref="DuplicateEntityException">Thrown when a duplicate entity is found.</exception>
         protected override void LoadEntities()
         {
             IEnumerable<TDataObject> jsonEntities = JsonFile.LoadEntities();
 
-            foreach(TDataObject entity in jsonEntities)
+            foreach (TDataObject entity in jsonEntities)
             {
                 if (Entities.ContainsKey(entity.Id))
                 {

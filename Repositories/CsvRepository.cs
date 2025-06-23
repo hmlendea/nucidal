@@ -32,6 +32,10 @@ namespace NuciDAL.Repositories
         /// </summary>
         protected readonly CsvFile<TDataObject> CsvFile = new(fileName);
 
+        /// <summary>
+        /// Applies the changes to the CSV file.
+        /// </summary>
+        /// <exception cref="IOException">Thrown when the changes cannot be saved.</exception>
         public override void ApplyChanges()
         {
             try
@@ -45,11 +49,15 @@ namespace NuciDAL.Repositories
             }
         }
 
+        /// <summary>
+        /// Loads the entities from the CSV file.
+        /// </summary>
+        /// <exception cref="DuplicateEntityException">Thrown when a duplicate entity is found.</exception>
         protected override void LoadEntities()
         {
             IEnumerable<TDataObject> entities = CsvFile.LoadEntities();
 
-            foreach(TDataObject entity in entities)
+            foreach (TDataObject entity in entities)
             {
                 if (Entities.ContainsKey(entity.Id))
                 {
