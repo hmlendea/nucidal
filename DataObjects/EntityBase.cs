@@ -1,4 +1,6 @@
 using System;
+using System.Reflection;
+using NuciExtensions;
 
 namespace NuciDAL.DataObjects
 {
@@ -25,7 +27,42 @@ namespace NuciDAL.DataObjects
         /// <param name="other">The <see cref="EntityBase{TKey}"/> to compare with the current <see cref="EntityBase{TKey}"/>.</param>
         /// <returns><c>true</c> if the specified <see cref="EntityBase{TKey}"/> is equal to the current <see cref="EntityBase{TKey}"/>; otherwise, <c>false</c>.</returns>
         public bool Equals(EntityBase<TKey> other)
-            => other is not null && Id.Equals(other.Id);
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (GetType().NotEquals(other.GetType()))
+            {
+                return false;
+            }
+
+            PropertyInfo[] props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (PropertyInfo prop in props)
+            {
+                object thisValue = prop.GetValue(this);
+                object otherValue = prop.GetValue(other);
+
+                if (thisValue is null && otherValue is null)
+                {
+                    continue;
+                }
+
+                if (thisValue is null || otherValue is null || thisValue.NotEquals(otherValue))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current <see cref="EntityBase{TKey}"/>.
