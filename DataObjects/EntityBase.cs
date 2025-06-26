@@ -77,6 +77,17 @@ namespace NuciDAL.DataObjects
         /// </summary>
         /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
         public override int GetHashCode()
-            => Id?.GetHashCode() ?? 0;
+        {
+            PropertyInfo[] props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            int hash = 17;
+
+            foreach (PropertyInfo prop in props)
+            {
+                hash = hash * 31 + (prop.GetValue(this)?.GetHashCode() ?? 0);
+            }
+
+            return hash;
+        }
     }
 }
