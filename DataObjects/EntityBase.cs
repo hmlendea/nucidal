@@ -89,5 +89,11 @@ namespace NuciDAL.DataObjects
 
             return hash;
         }
+
+        /// <summary>
+        /// Returns a string that represents the current object in JSON format.
+        /// </summary>
+        /// <returns>A JSON string representation of the current object.</returns>
+        public override string ToString() => this.ToJson();
     }
 }
