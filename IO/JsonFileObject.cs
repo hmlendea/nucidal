@@ -31,8 +31,8 @@ namespace NuciDAL.IO
 
             using (StreamReader file = File.OpenText(path))
             {
-                JsonSerializer serializer = new();
-                instance = (T)serializer.Deserialize(file, Type);
+                JsonSerializer serialiser = new();
+                instance = (T)serialiser.Deserialize(file, Type);
             }
 
             return instance;
@@ -43,12 +43,13 @@ namespace NuciDAL.IO
         /// </summary>
         /// <param name="path">Path.</param>
         /// <param name="obj">Object to write.</param>
-        // TODO: Shouldn't I use T instead of object for the obj parameter?
-        public void Write(string path, object obj)
+        public void Write(string path, T obj)
         {
-            using StreamWriter file = File.CreateText(path);
-            JsonSerializer serializer = new();
-            serializer.Serialize(file, obj);
+            JsonSerializer serialiser = new();
+            using StringWriter stringWriter = new();
+            serialiser.Serialize(stringWriter, obj);
+
+            File.WriteAllText(path, stringWriter.ToString());
         }
     }
 }

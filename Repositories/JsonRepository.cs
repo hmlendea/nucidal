@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NuciDAL.DataObjects;
 using NuciDAL.IO;
@@ -32,21 +31,10 @@ namespace NuciDAL.Repositories
         protected readonly JsonFileCollection<TDataObject> JsonFile = new(fileName);
 
         /// <summary>
-        /// Applies the changes to the JSON file.
+        /// Performs the file save operation.
         /// </summary>
-        /// <exception cref="IOException">Thrown when the changes cannot be saved.</exception>
-        public override void ApplyChanges()
-        {
-            try
-            {
-                JsonFile.SaveEntities(Entities.Values.ToList());
-            }
-            catch
-            {
-                // TODO: Better exception message
-                throw new IOException("Cannot save the changes");
-            }
-        }
+        protected override void PerformFileSave()
+            => JsonFile.SaveEntities(Entities.Values.ToList());
 
         /// <summary>
         /// Loads the entities from the JSON file.
