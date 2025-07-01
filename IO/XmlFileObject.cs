@@ -46,12 +46,13 @@ namespace NuciDAL.IO
         /// </summary>
         /// <param name="path">Path.</param>
         /// <param name="obj">Object to write.</param>
-        // TODO: Shouldn't I use T instead of object for the obj parameter?
-        public void Write(string path, object obj)
+        public void Write(string path, T obj)
         {
-            using TextWriter writer = new StreamWriter(path);
-            XmlSerializer xml = new(Type);
-            xml.Serialize(writer, obj);
+            XmlSerializer serialiser = new(Type);
+            using StringWriter stringWriter = new();
+            serialiser.Serialize(stringWriter, obj);
+
+            File.WriteAllText(path, stringWriter.ToString());
         }
     }
 }

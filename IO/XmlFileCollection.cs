@@ -43,11 +43,11 @@ namespace NuciDAL.IO
         /// <param name="entities">Entities.</param>
         public void SaveEntities(IEnumerable<T> entities)
         {
-            FileStream fs = new(FileName, FileMode.Create, FileAccess.Write);
+            XmlSerializer serialiser = new(typeof(List<T>));
+            using StringWriter stringWriter = new();
+            serialiser.Serialize(stringWriter, entities);
 
-            using StreamWriter sw = new(fs);
-            XmlSerializer xs = new(typeof(List<T>));
-            xs.Serialize(sw, entities);
+            File.WriteAllText(FileName, stringWriter.ToString());
         }
     }
 }

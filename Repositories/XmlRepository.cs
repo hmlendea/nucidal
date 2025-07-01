@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NuciDAL.DataObjects;
 using NuciDAL.IO;
-using NuciExtensions;
 
 namespace NuciDAL.Repositories
 {
