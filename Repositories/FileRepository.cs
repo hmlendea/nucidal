@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using NuciDAL.DataObjects;
 using NuciExtensions;
 
@@ -31,7 +33,27 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Applies the changes to the file.
         /// </summary>
-        public abstract void ApplyChanges();
+        public void ApplyChanges()
+        {
+            if (!loadedEntities || EnumerableExt.IsNullOrEmpty(Entities))
+            {
+                return;
+            }
+
+            try
+            {
+                PerformFileSave();
+            }
+            catch (Exception ex)
+            {
+                throw new IOException("Cannot save the changes", ex);
+            }
+        }
+
+        /// <summary>
+        /// Performs the file save operation.
+        /// </summary>
+        protected abstract void PerformFileSave();
 
         /// <summary>
         /// Loads the entities from the file.

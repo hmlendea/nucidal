@@ -33,21 +33,10 @@ namespace NuciDAL.Repositories
         protected readonly CsvFile<TDataObject> CsvFile = new(fileName);
 
         /// <summary>
-        /// Applies the changes to the CSV file.
+        /// Performs the file save operation.
         /// </summary>
-        /// <exception cref="IOException">Thrown when the changes cannot be saved.</exception>
-        public override void ApplyChanges()
-        {
-            try
-            {
-                CsvFile.SaveEntities(Entities.Values.ToList());
-            }
-            catch
-            {
-                // TODO: Better exception message
-                throw new IOException("Cannot save the changes");
-            }
-        }
+        protected override void PerformFileSave()
+            => CsvFile.SaveEntities(Entities.Values.ToList());
 
         /// <summary>
         /// Loads the entities from the CSV file.
