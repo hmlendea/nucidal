@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
 using NuciDAL.DataObjects;
 using NuciDAL.IO;
 
@@ -39,7 +39,7 @@ namespace NuciDAL.Repositories
         {
             try
             {
-                JsonFile.SaveEntities([.. Entities.Values]);
+                JsonFile.SaveEntities(Entities.Values.ToList());
             }
             catch
             {
