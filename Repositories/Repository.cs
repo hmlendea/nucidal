@@ -10,7 +10,8 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// In-memory repository.
     /// </summary>
-    public class Repository<TDataObject> : Repository<string, TDataObject> where TDataObject : EntityBase { }
+    public class Repository<TDataObject> : Repository<string, TDataObject>
+        where TDataObject : EntityBase { }
 
     /// <summary>
     /// In-memory repository.
@@ -36,7 +37,17 @@ namespace NuciDAL.Repositories
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public virtual void Add(TDataObject entity) => Entities.Add(entity.Id, entity);
+        public virtual void Add(TDataObject entity)
+        {
+            if (Entities.ContainsKey(entity.Id))
+            {
+                throw new EntityAlreadyExistsException(
+                    entity.Id.ToString(),
+                    entity.GetType());
+            }
+
+            Entities.Add(entity.Id, entity);
+        }
 
         /// <summary>
         /// Tries to add the specified entity.
