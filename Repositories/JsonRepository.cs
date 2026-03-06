@@ -37,22 +37,10 @@ namespace NuciDAL.Repositories
             => JsonFile.SaveEntities(Entities.Values.ToList());
 
         /// <summary>
-        /// Loads the entities from the JSON file.
+        /// Fetches the entities from the JSON file.
         /// </summary>
         /// <exception cref="DuplicateEntityException">Thrown when a duplicate entity is found.</exception>
-        protected override void LoadEntities()
-        {
-            IEnumerable<TDataObject> jsonEntities = JsonFile.LoadEntities();
-
-            foreach (TDataObject entity in jsonEntities)
-            {
-                if (Entities.ContainsKey(entity.Id))
-                {
-                    throw new DuplicateEntityException(entity.Id.ToString(), nameof(TDataObject));
-                }
-
-                Entities.Add(entity.Id, entity);
-            }
-        }
+        protected override IEnumerable<TDataObject> FetchEntitiesFromFile()
+            => JsonFile.LoadEntities();
     }
 }
