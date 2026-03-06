@@ -9,7 +9,7 @@ namespace NuciDAL.Repositories
     /// </summary>
     public class EntityAlreadyExistsException : EntityException
     {
-        private static string DefaultMessageFormat => "The {0} {1} entity already exists.";
+        private static string DefaultMessageFormat => "The '{0}' {1} already exists.";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityAlreadyExistsException"/> exception.
