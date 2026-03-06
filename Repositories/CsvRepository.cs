@@ -38,22 +38,10 @@ namespace NuciDAL.Repositories
             => CsvFile.SaveEntities(Entities.Values.ToList());
 
         /// <summary>
-        /// Loads the entities from the CSV file.
+        /// Fetches the entities from the CSV file.
         /// </summary>
         /// <exception cref="DuplicateEntityException">Thrown when a duplicate entity is found.</exception>
-        protected override void LoadEntities()
-        {
-            IEnumerable<TDataObject> entities = CsvFile.LoadEntities();
-
-            foreach (TDataObject entity in entities)
-            {
-                if (Entities.ContainsKey(entity.Id))
-                {
-                    throw new DuplicateEntityException(entity.Id.ToString(), nameof(TDataObject));
-                }
-
-                Entities.Add(entity.Id, entity);
-            }
-        }
+        protected override IEnumerable<TDataObject> FetchEntitiesFromFile()
+            => CsvFile.LoadEntities();
     }
 }

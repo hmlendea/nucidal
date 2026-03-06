@@ -10,7 +10,8 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// In-memory repository.
     /// </summary>
-    public class Repository<TDataObject> : Repository<string, TDataObject> where TDataObject : EntityBase { }
+    public class Repository<TDataObject> : Repository<string, TDataObject>
+        where TDataObject : EntityBase { }
 
     /// <summary>
     /// In-memory repository.
@@ -36,7 +37,17 @@ namespace NuciDAL.Repositories
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public virtual void Add(TDataObject entity) => Entities.Add(entity.Id, entity);
+        public virtual void Add(TDataObject entity)
+        {
+            if (ContainsId(entity.Id))
+            {
+                throw new EntityAlreadyExistsException(
+                    entity.Id.ToString(),
+                    entity.GetType());
+            }
+
+            Entities.Add(entity.Id, entity);
+        }
 
         /// <summary>
         /// Tries to add the specified entity.
@@ -56,7 +67,8 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>A boolean representing whether an entity with the specified identifier exists.</returns>
         /// <param name="id">Identifier.</param>
-        public virtual bool ContainsId(TKey id) => Entities.ContainsKey(id);
+        public virtual bool ContainsId(TKey id)
+            => Entities.ContainsKey(id);
 
         /// <summary>
         /// Get the entity with the specified identifier.
@@ -65,12 +77,9 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public virtual TDataObject Get(TKey id)
         {
-            if (!Entities.TryGetValue(id, out TDataObject value))
-            {
-                throw new EntityNotFoundException(id.ToString(), nameof(TDataObject));
-            }
+            EnsureEntityExists(id);
 
-            return value;
+            return Entities[id];
         }
 
         /// <summary>
@@ -78,7 +87,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>A random entity.</returns>
         public virtual TDataObject GetRandom()
-            => Entities.Values.GetRandomElement();
+            => GetAll().GetRandomElement();
 
         /// <summary>
         /// Tries to get the entity with the specified identifier.
@@ -91,7 +100,7 @@ namespace NuciDAL.Repositories
             {
                 return Get(id);
             }
-            catch (Exception)
+            catch
             {
                 return null;
             }
@@ -101,7 +110,8 @@ namespace NuciDAL.Repositories
         /// Gets all the entities.
         /// </summary>
         /// <returns>The entities</returns>
-        public virtual IEnumerable<TDataObject> GetAll() => Entities.Values;
+        public virtual IEnumerable<TDataObject> GetAll()
+            => Entities.Values;
 
         /// <summary>
         /// Updates the specified entity's fields.
@@ -137,7 +147,12 @@ namespace NuciDAL.Repositories
         /// Removes the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public virtual void Remove(TDataObject entity) => Entities.Remove(entity.Id);
+        public virtual void Remove(TDataObject entity)
+        {
+            EnsureEntityExists(entity.Id);
+
+            Entities.Remove(entity.Id);
+        }
 
         /// <summary>
         /// Tries to remove the specified entity.
@@ -169,6 +184,16 @@ namespace NuciDAL.Repositories
                 Remove(id);
             }
             catch { }
+        }
+
+        void EnsureEntityExists(TKey id)
+        {
+            if (!ContainsId(id))
+            {
+                throw new EntityNotFoundException(
+                    id.ToString(),
+                    typeof(TDataObject));
+            }
         }
     }
 }

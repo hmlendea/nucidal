@@ -37,22 +37,10 @@ namespace NuciDAL.Repositories
             => XmlFile.SaveEntities(Entities.Values.ToList());
 
         /// <summary>
-        /// Loads the entities from the XML file.
+        /// Fetches the entities from the XML file.
         /// </summary>
         /// <exception cref="DuplicateEntityException">Thrown when a duplicate entity is found.</exception>
-        protected override void LoadEntities()
-        {
-            IEnumerable<TDataObject> xmlEntities = XmlFile.LoadEntities();
-
-            foreach (TDataObject entity in xmlEntities)
-            {
-                if (Entities.ContainsKey(entity.Id))
-                {
-                    throw new DuplicateEntityException(entity.Id.ToString(), nameof(TDataObject));
-                }
-
-                Entities.Add(entity.Id, entity);
-            }
-        }
+        protected override IEnumerable<TDataObject> FetchEntitiesFromFile()
+            => XmlFile.LoadEntities();
     }
 }

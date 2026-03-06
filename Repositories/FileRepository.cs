@@ -56,9 +56,29 @@ namespace NuciDAL.Repositories
         protected abstract void PerformFileSave();
 
         /// <summary>
-        /// Loads the entities from the file.
+        /// Loads the stored entities into memory.
         /// </summary>
-        protected abstract void LoadEntities();
+        protected void LoadEntities()
+        {
+            IEnumerable<TDataObject> entities = FetchEntitiesFromFile();
+
+            foreach (TDataObject entity in entities)
+            {
+                if (Entities.ContainsKey(entity.Id))
+                {
+                    throw new DuplicateEntityException(
+                        entity.Id.ToString(),
+                        entity.GetType());
+                }
+
+                Entities.Add(entity.Id, entity);
+            }
+        }
+
+        /// <summary>
+        /// Fetches the entities from the file.
+        /// </summary>
+        protected abstract IEnumerable<TDataObject> FetchEntitiesFromFile();
 
         /// <summary>
         /// Adds the specified entity.
