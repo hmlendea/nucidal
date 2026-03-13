@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-
 using NuciDAL.DataObjects;
 using NuciDAL.IO;
 
@@ -13,7 +11,8 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:CsvRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class CsvRepository<TDataObject>(string fileName) : CsvRepository<string, TDataObject>(fileName), IFileRepository<TDataObject>
+    public class CsvRepository<TDataObject>(string fileName)
+        : CsvRepository<string, TDataObject>(fileName), IFileRepository<TDataObject>
         where TDataObject : EntityBase, new() { }
 
     /// <summary>
@@ -23,7 +22,8 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:CsvRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class CsvRepository<TKey, TDataObject>(string fileName) : FileRepository<TKey, TDataObject>(), IFileRepository<TKey, TDataObject>
+    public class CsvRepository<TKey, TDataObject>(string fileName)
+        : FileRepository<TKey, TDataObject>(), IFileRepository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>, new()
     {
         /// <summary>
@@ -35,7 +35,7 @@ namespace NuciDAL.Repositories
         /// Performs the file save operation.
         /// </summary>
         protected override void PerformFileSave()
-            => CsvFile.SaveEntities(Entities.Values.ToList());
+            => CsvFile.SaveEntities([.. Entities.Values]);
 
         /// <summary>
         /// Fetches the entities from the CSV file.

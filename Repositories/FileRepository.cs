@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using NuciDAL.DataObjects;
-using NuciExtensions;
 
 namespace NuciDAL.Repositories
 {
@@ -13,7 +12,8 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:FileRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public abstract class FileRepository<TDataObject> : FileRepository<string, TDataObject>, IFileRepository<TDataObject>
+    public abstract class FileRepository<TDataObject>
+        : FileRepository<string, TDataObject>, IFileRepository<TDataObject>
         where TDataObject : EntityBase
     {
     }
@@ -25,28 +25,34 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:FileRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public abstract class FileRepository<TKey, TDataObject> : Repository<TKey, TDataObject>, IFileRepository<TKey, TDataObject>
+    public abstract class FileRepository<TKey, TDataObject>
+        : Repository<TKey, TDataObject>, IFileRepository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>
     {
-        bool loadedEntities;
+        volatile bool loadedEntities;
 
         /// <summary>
         /// Applies the changes to the file.
         /// </summary>
         public void ApplyChanges()
         {
-            if (!loadedEntities || EnumerableExt.IsNullOrEmpty(Entities))
-            {
-                return;
-            }
+            LoadEntitiesIfNeeded();
 
-            try
+            lock (SyncRoot)
             {
-                PerformFileSave();
-            }
-            catch (Exception ex)
-            {
-                throw new IOException("Cannot save the changes", ex);
+                if (!loadedEntities || Entities.IsEmpty)
+                {
+                    return;
+                }
+
+                try
+                {
+                    PerformFileSave();
+                }
+                catch (Exception ex)
+                {
+                    throw new IOException("Cannot save the changes", ex);
+                }
             }
         }
 
@@ -64,14 +70,12 @@ namespace NuciDAL.Repositories
 
             foreach (TDataObject entity in entities)
             {
-                if (Entities.ContainsKey(entity.Id))
+                if (!Entities.TryAdd(entity.Id, entity))
                 {
                     throw new DuplicateEntityException(
                         entity.Id.ToString(),
                         entity.GetType());
                 }
-
-                Entities.Add(entity.Id, entity);
             }
         }
 
@@ -157,15 +161,22 @@ namespace NuciDAL.Repositories
                 return;
             }
 
-            if (!EnumerableExt.IsNullOrEmpty(Entities))
+            lock (SyncRoot)
             {
+                if (loadedEntities)
+                {
+                    return;
+                }
+
+                if (!Entities.IsEmpty)
+                {
+                    loadedEntities = true;
+                    return;
+                }
+
+                LoadEntities();
                 loadedEntities = true;
-                return;
             }
-
-            LoadEntities();
-
-            loadedEntities = true;
         }
     }
 }

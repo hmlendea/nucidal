@@ -1,7 +1,5 @@
-using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Reflection;
-
 using NuciDAL.DataObjects;
 using NuciExtensions;
 
@@ -10,18 +8,26 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// In-memory repository.
     /// </summary>
-    public class Repository<TDataObject> : Repository<string, TDataObject>
+    public class Repository<TDataObject>
+        : Repository<string, TDataObject>
         where TDataObject : EntityBase { }
 
     /// <summary>
     /// In-memory repository.
     /// </summary>
-    public class Repository<TKey, TDataObject> : IRepository<TKey, TDataObject> where TDataObject : EntityBase<TKey>
+    public class Repository<TKey, TDataObject>
+        : IRepository<TKey, TDataObject>
+        where TDataObject : EntityBase<TKey>
     {
         /// <summary>
         /// The stored entities.
         /// </summary>
-        protected Dictionary<TKey, TDataObject> Entities;
+        protected ConcurrentDictionary<TKey, TDataObject> Entities;
+
+        /// <summary>
+        /// The synchronization root for this repository.
+        /// </summary>
+        protected readonly object SyncRoot = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Repository"/> class.
@@ -39,14 +45,12 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Add(TDataObject entity)
         {
-            if (ContainsId(entity.Id))
+            if (!Entities.TryAdd(entity.Id, entity))
             {
                 throw new EntityAlreadyExistsException(
                     entity.Id.ToString(),
                     entity.GetType());
             }
-
-            Entities.Add(entity.Id, entity);
         }
 
         /// <summary>
@@ -54,13 +58,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="entity">Entity.</param>
         public void TryAdd(TDataObject entity)
-        {
-            try
-            {
-                Add(entity);
-            }
-            catch { }
-        }
+            => Entities.TryAdd(entity.Id, entity);
 
         /// <summary>
         /// Checks whether an entity with the specified identifier exists.
@@ -77,9 +75,12 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public virtual TDataObject Get(TKey id)
         {
-            EnsureEntityExists(id);
+            if (!Entities.TryGetValue(id, out TDataObject entity))
+            {
+                ThrowEntityNotFoundException(id);
+            }
 
-            return Entities[id];
+            return entity;
         }
 
         /// <summary>
@@ -95,23 +96,14 @@ namespace NuciDAL.Repositories
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
         public TDataObject TryGet(TKey id)
-        {
-            try
-            {
-                return Get(id);
-            }
-            catch
-            {
-                return null;
-            }
-        }
+            => Entities.TryGetValue(id, out TDataObject entity) ? entity : null;
 
         /// <summary>
         /// Gets all the entities.
         /// </summary>
         /// <returns>The entities</returns>
         public virtual IEnumerable<TDataObject> GetAll()
-            => Entities.Values;
+            => [.. Entities.Values];
 
         /// <summary>
         /// Updates the specified entity's fields.
@@ -119,14 +111,16 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Update(TDataObject entity)
         {
-            Type type = entity.GetType();
-            PropertyInfo[] properties = type.GetProperties();
-            TDataObject entityToUpdate = Get(entity.Id);
-
-            foreach (PropertyInfo property in properties)
+            lock (SyncRoot)
             {
-                object value = property.GetValue(entity);
-                property.SetValue(entityToUpdate, value, null);
+                if (!Entities.ContainsKey(entity.Id))
+                {
+                    throw new EntityNotFoundException(
+                        entity.Id.ToString(),
+                        entity.GetType());
+                }
+
+                Entities[entity.Id] = entity;
             }
         }
 
@@ -149,9 +143,10 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Remove(TDataObject entity)
         {
-            EnsureEntityExists(entity.Id);
-
-            Entities.Remove(entity.Id);
+            if (!Entities.TryRemove(entity.Id, out _))
+            {
+                ThrowEntityNotFoundException(entity.Id);
+            }
         }
 
         /// <summary>
@@ -159,41 +154,30 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="entity">Entity.</param>
         public void TryRemove(TDataObject entity)
-        {
-            try
-            {
-                Remove(entity);
-            }
-            catch { }
-        }
+            => Entities.TryRemove(entity.Id, out _);
 
         /// <summary>
         /// Removes the entity with the specified identifier.
         /// </summary>
         /// <param name="id">Identifier.</param>
-        public void Remove(TKey id) => Remove(Get(id));
+        public void Remove(TKey id)
+        {
+            if (!Entities.TryRemove(id, out _))
+            {
+                ThrowEntityNotFoundException(id);
+            }
+        }
 
         /// <summary>
         /// Tries to remove the entity with the specified identifier.
         /// </summary>
         /// <param name="id">Identifier.</param>
         public void TryRemove(TKey id)
-        {
-            try
-            {
-                Remove(id);
-            }
-            catch { }
-        }
+            => Entities.TryRemove(id, out _);
 
-        void EnsureEntityExists(TKey id)
-        {
-            if (!ContainsId(id))
-            {
-                throw new EntityNotFoundException(
-                    id.ToString(),
-                    typeof(TDataObject));
-            }
-        }
+        void ThrowEntityNotFoundException(TKey id)
+            => throw new EntityNotFoundException(
+                id.ToString(),
+                typeof(TDataObject));
     }
 }
