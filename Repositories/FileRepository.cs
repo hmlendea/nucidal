@@ -115,6 +115,14 @@ namespace NuciDAL.Repositories
             base.Get(id));
 
         /// <summary>
+        /// Tries to get the entity  with the specified identifier.
+        /// </summary>
+        /// <returns>The entity if it exists, null otherwise.</returns>
+        /// <param name="id">Identifier.</param>
+        public override TDataObject TryGet(TKey id) => ExecuteReadOperation(() =>
+            base.TryGet(id));
+
+        /// <summary>
         /// Gets a random entity.
         /// </summary>
         /// <returns>A random entity.</returns>
@@ -143,6 +151,13 @@ namespace NuciDAL.Repositories
             base.TryUpdate(entity));
 
         /// <summary>
+        /// Removes the entity with the specified identifier.
+        /// </summary>
+        /// <param name="id">Identifier.</param>
+        public override void Remove(TKey id) => ExecuteWriteOperation(() =>
+            base.Remove(id));
+
+        /// <summary>
         /// Removes the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
@@ -155,6 +170,13 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public override void TryRemove(TDataObject entity) => ExecuteWriteOperation(() =>
             base.TryRemove(entity));
+
+        /// <summary>
+        /// Tries to remove the entity with the specified identifier.
+        /// </summary>
+        /// <param name="id">Identifier.</param>
+        public override void TryRemove(TKey id) => ExecuteWriteOperation(() =>
+            base.TryRemove(id));
 
         /// <summary>
         /// Loads the entities if needed.
