@@ -32,9 +32,9 @@ namespace NuciDAL.Repositories
         volatile bool loadedEntities;
 
         /// <summary>
-        /// Applies the changes to the file.
+        /// Saves the entities to the file.
         /// </summary>
-        public void ApplyChanges()
+        public void SaveChanges()
         {
             LoadEntitiesIfNeeded();
 

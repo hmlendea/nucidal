@@ -17,6 +17,6 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Saves the entities to the file.
         /// </summary>
-        void ApplyChanges();
+        void SaveChanges();
     }
 }
