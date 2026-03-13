@@ -39,7 +39,7 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Gets the total amount of entities currently stored in this repository.
         /// </summary>
-        public int EntitiesCount => Entities.Count;
+        public virtual int EntitiesCount => Entities.Count;
 
         /// <summary>
         /// Adds the specified entity.

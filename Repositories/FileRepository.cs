@@ -85,6 +85,12 @@ namespace NuciDAL.Repositories
         protected abstract IEnumerable<TDataObject> FetchEntitiesFromFile();
 
         /// <summary>
+        /// Gets the total amount of entities currently stored in this repository.
+        /// </summary>
+        public override int EntitiesCount => ExecuteReadOperation(() =>
+            base.EntitiesCount);
+
+        /// <summary>
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
