@@ -88,14 +88,14 @@ namespace NuciDAL.Repositories
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void Add(TDataObject entity) => ExecuteOperation(() =>
+        public override void Add(TDataObject entity) => ExecuteWriteOperation(() =>
             base.Add(entity));
 
         /// <summary>
         /// Tries to add the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void TryAdd(TDataObject entity) => ExecuteOperation(() =>
+        public override void TryAdd(TDataObject entity) => ExecuteWriteOperation(() =>
             base.TryAdd(entity));
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>A boolean representing whether an entity with the specified identifier exists.</returns>
         /// <param name="id">Identifier.</param>
-        public override bool ContainsId(TKey id) => ExecuteOperation(() =>
+        public override bool ContainsId(TKey id) => ExecuteReadOperation(() =>
             base.ContainsId(id));
 
         /// <summary>
@@ -111,49 +111,49 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The entity.</returns>
         /// <param name="id">Identifier.</param>
-        public override TDataObject Get(TKey id) => ExecuteOperation(() =>
+        public override TDataObject Get(TKey id) => ExecuteReadOperation(() =>
             base.Get(id));
 
         /// <summary>
         /// Gets a random entity.
         /// </summary>
         /// <returns>A random entity.</returns>
-        public override TDataObject GetRandom() => ExecuteOperation(() =>
+        public override TDataObject GetRandom() => ExecuteReadOperation(() =>
             base.GetRandom());
 
         /// <summary>
         /// Gets all the entities.
         /// </summary>
         /// <returns>The entities</returns>
-        public override IEnumerable<TDataObject> GetAll() => ExecuteOperation(() =>
+        public override IEnumerable<TDataObject> GetAll() => ExecuteReadOperation(() =>
             base.GetAll());
 
         /// <summary>
         /// Updates the specified entity's fields.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void Update(TDataObject entity) => ExecuteOperation(() =>
+        public override void Update(TDataObject entity) => ExecuteWriteOperation(() =>
             base.Update(entity));
 
         /// <summary>
         /// Tries to update the specified entity's fields.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void TryUpdate(TDataObject entity) => ExecuteOperation(() =>
+        public override void TryUpdate(TDataObject entity) => ExecuteWriteOperation(() =>
             base.TryUpdate(entity));
 
         /// <summary>
         /// Removes the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void Remove(TDataObject entity) => ExecuteOperation(() =>
+        public override void Remove(TDataObject entity) => ExecuteWriteOperation(() =>
             base.Remove(entity));
 
         /// <summary>
         /// Tries to remove the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void TryRemove(TDataObject entity) => ExecuteOperation(() =>
+        public override void TryRemove(TDataObject entity) => ExecuteWriteOperation(() =>
             base.TryRemove(entity));
 
         /// <summary>
@@ -184,14 +184,14 @@ namespace NuciDAL.Repositories
             }
         }
 
-        void ExecuteOperation(Action action)
+        void ExecuteWriteOperation(Action action)
         {
             LoadEntitiesIfNeeded();
 
             action();
         }
 
-        TResult ExecuteOperation<TResult>(Func<TResult> action)
+        TResult ExecuteReadOperation<TResult>(Func<TResult> action)
         {
             LoadEntitiesIfNeeded();
 
