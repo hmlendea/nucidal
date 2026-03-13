@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>NuciDAL</RootNamespace>
-    <Version>2.5.0</Version>
+    <Version>3.0.0</Version>
     <Description>Data access layer helpers</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2025 © Horațiu Mlendea</Copyright>
