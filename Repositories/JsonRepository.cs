@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using NuciDAL.DataObjects;
 using NuciDAL.IO;
 
@@ -12,7 +11,8 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:JsonRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class JsonRepository<TDataObject>(string fileName) : JsonRepository<string, TDataObject>(fileName), IFileRepository<TDataObject>
+    public class JsonRepository<TDataObject>(string fileName)
+        : JsonRepository<string, TDataObject>(fileName), IFileRepository<TDataObject>
         where TDataObject : EntityBase { }
 
     /// <summary>
@@ -22,7 +22,8 @@ namespace NuciDAL.Repositories
     /// Initializes a new instance of the <see cref="T:JsonRepository"/> class.
     /// </remarks>
     /// <param name="fileName">File name.</param>
-    public class JsonRepository<TKey, TDataObject>(string fileName) : FileRepository<TKey, TDataObject>(), IFileRepository<TKey, TDataObject>
+    public class JsonRepository<TKey, TDataObject>(string fileName)
+        : FileRepository<TKey, TDataObject>(), IFileRepository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
@@ -34,7 +35,7 @@ namespace NuciDAL.Repositories
         /// Performs the file save operation.
         /// </summary>
         protected override void PerformFileSave()
-            => JsonFile.SaveEntities(Entities.Values.ToList());
+            => JsonFile.SaveEntities(GetAll());
 
         /// <summary>
         /// Fetches the entities from the JSON file.
