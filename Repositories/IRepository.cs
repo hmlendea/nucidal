@@ -83,16 +83,16 @@ namespace NuciDAL.Repositories
         void Remove(TDataObject entity);
 
         /// <summary>
-        /// Tries to remove the specified entity.
-        /// </summary>
-        /// <param name="entity">Entity.</param>
-        void TryRemove(TDataObject entity);
-
-        /// <summary>
         /// Removes the entity with the specified identifier.
         /// </summary>
         /// <param name="id">Identifier.</param>
         void Remove(TKey id);
+
+        /// <summary>
+        /// Tries to remove the specified entity.
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        void TryRemove(TDataObject entity);
 
         /// <summary>
         /// Tries to remove the entity with the specified identifier.

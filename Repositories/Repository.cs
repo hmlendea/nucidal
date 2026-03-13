@@ -39,7 +39,7 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Gets the total amount of entities currently stored in this repository.
         /// </summary>
-        public int EntitiesCount => Entities.Count;
+        public virtual int EntitiesCount => Entities.Count;
 
         /// <summary>
         /// Adds the specified entity.
@@ -61,7 +61,7 @@ namespace NuciDAL.Repositories
         /// Tries to add the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public void TryAdd(TDataObject entity) => ExecuteWrite(() =>
+        public virtual void TryAdd(TDataObject entity) => ExecuteWrite(() =>
         {
             TDataObject entityClone = CloneEntity(entity);
 
@@ -103,7 +103,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
-        public TDataObject TryGet(TKey id)
+        public virtual TDataObject TryGet(TKey id)
             => CloneEntity(Entities.TryGetValue(id, out TDataObject entity) ? entity : null);
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace NuciDAL.Repositories
         /// Tries to update the specified entity's fields.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public void TryUpdate(TDataObject entity) => ExecuteWrite(() =>
+        public virtual void TryUpdate(TDataObject entity) => ExecuteWrite(() =>
         {
             TDataObject entityClone = CloneEntity(entity);
 
@@ -155,17 +155,10 @@ namespace NuciDAL.Repositories
         });
 
         /// <summary>
-        /// Tries to remove the specified entity.
-        /// </summary>
-        /// <param name="entity">Entity.</param>
-        public void TryRemove(TDataObject entity) => ExecuteWrite(() =>
-            Entities.TryRemove(entity.Id, out _));
-
-        /// <summary>
         /// Removes the entity with the specified identifier.
         /// </summary>
         /// <param name="id">Identifier.</param>
-        public void Remove(TKey id) => ExecuteWrite(() =>
+        public virtual void Remove(TKey id) => ExecuteWrite(() =>
         {
             if (!Entities.TryRemove(id, out _))
             {
@@ -174,10 +167,17 @@ namespace NuciDAL.Repositories
         });
 
         /// <summary>
+        /// Tries to remove the specified entity.
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        public virtual void TryRemove(TDataObject entity) => ExecuteWrite(() =>
+            Entities.TryRemove(entity.Id, out _));
+
+        /// <summary>
         /// Tries to remove the entity with the specified identifier.
         /// </summary>
         /// <param name="id">Identifier.</param>
-        public void TryRemove(TKey id) => ExecuteWrite(() =>
+        public virtual void TryRemove(TKey id) => ExecuteWrite(() =>
             Entities.TryRemove(id, out _));
 
         void ThrowEntityNotFoundException(TKey id)
