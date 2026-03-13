@@ -35,7 +35,7 @@ namespace NuciDAL.Repositories
         /// Performs the file save operation.
         /// </summary>
         protected override void PerformFileSave()
-            => JsonFile.SaveEntities([.. Entities.Values]);
+            => JsonFile.SaveEntities(GetAll());
 
         /// <summary>
         /// Fetches the entities from the JSON file.

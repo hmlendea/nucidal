@@ -35,7 +35,7 @@ namespace NuciDAL.Repositories
         /// Performs the file save operation.
         /// </summary>
         protected override void PerformFileSave()
-            => CsvFile.SaveEntities([.. Entities.Values]);
+            => CsvFile.SaveEntities(GetAll());
 
         /// <summary>
         /// Fetches the entities from the CSV file.

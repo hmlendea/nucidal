@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using NuciDAL.DataObjects;
 using NuciExtensions;
 
@@ -43,30 +45,28 @@ namespace NuciDAL.Repositories
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public virtual void Add(TDataObject entity)
+        public virtual void Add(TDataObject entity) => ExecuteWrite(() =>
         {
-            lock (SyncRoot)
+            TDataObject entityClone = CloneEntity(entity);
+
+            if (!Entities.TryAdd(entityClone.Id, entityClone))
             {
-                if (!Entities.TryAdd(entity.Id, entity))
-                {
-                    throw new EntityAlreadyExistsException(
-                        entity.Id.ToString(),
-                        entity.GetType());
-                }
+                throw new EntityAlreadyExistsException(
+                    entityClone.Id.ToString(),
+                    entityClone.GetType());
             }
-        }
+        });
 
         /// <summary>
         /// Tries to add the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public void TryAdd(TDataObject entity)
+        public void TryAdd(TDataObject entity) => ExecuteWrite(() =>
         {
-            lock (SyncRoot)
-            {
-                Entities.TryAdd(entity.Id, entity);
-            }
-        }
+            TDataObject entityClone = CloneEntity(entity);
+
+            Entities.TryAdd(entityClone.Id, entityClone);
+        });
 
         /// <summary>
         /// Checks whether an entity with the specified identifier exists.
@@ -88,7 +88,7 @@ namespace NuciDAL.Repositories
                 ThrowEntityNotFoundException(id);
             }
 
-            return entity;
+            return CloneEntity(entity);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>A random entity.</returns>
         public virtual TDataObject GetRandom()
-            => GetAll().GetRandomElement();
+            => CloneEntity(GetAll().GetRandomElement());
 
         /// <summary>
         /// Tries to get the entity with the specified identifier.
@@ -104,104 +104,111 @@ namespace NuciDAL.Repositories
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
         public TDataObject TryGet(TKey id)
-            => Entities.TryGetValue(id, out TDataObject entity) ? entity : null;
+            => CloneEntity(Entities.TryGetValue(id, out TDataObject entity) ? entity : null);
 
         /// <summary>
         /// Gets all the entities.
         /// </summary>
         /// <returns>The entities</returns>
         public virtual IEnumerable<TDataObject> GetAll()
-            => [.. Entities.Values];
+            => [.. Entities.Values.Select(CloneEntity)];
 
         /// <summary>
         /// Updates the specified entity's fields.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public virtual void Update(TDataObject entity)
+        public virtual void Update(TDataObject entity) => ExecuteWrite(() =>
         {
-            lock (SyncRoot)
-            {
-                if (!Entities.TryGetValue(entity.Id, out _))
-                {
-                    throw new EntityNotFoundException(
-                        entity.Id.ToString(),
-                        entity.GetType());
-                }
+            TDataObject entityClone = CloneEntity(entity);
 
-                Entities[entity.Id] = entity;
+            if (!Entities.TryGetValue(entityClone.Id, out _))
+            {
+                throw new EntityNotFoundException(
+                    entityClone.Id.ToString(),
+                    entityClone.GetType());
             }
-        }
+
+            Entities[entityClone.Id] = entityClone;
+        });
 
         /// <summary>
         /// Tries to update the specified entity's fields.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public void TryUpdate(TDataObject entity)
+        public void TryUpdate(TDataObject entity) => ExecuteWrite(() =>
         {
-            try
-            {
-                Update(entity);
-            }
-            catch { }
-        }
+            TDataObject entityClone = CloneEntity(entity);
+
+            Entities[entityClone.Id] = entityClone;
+        });
 
         /// <summary>
         /// Removes the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public virtual void Remove(TDataObject entity)
+        public virtual void Remove(TDataObject entity) => ExecuteWrite(() =>
         {
-            lock (SyncRoot)
+            if (!Entities.TryRemove(entity.Id, out _))
             {
-                if (!Entities.TryRemove(entity.Id, out _))
-                {
-                    ThrowEntityNotFoundException(entity.Id);
-                }
+                ThrowEntityNotFoundException(entity.Id);
             }
-        }
+        });
 
         /// <summary>
         /// Tries to remove the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public void TryRemove(TDataObject entity)
-        {
-            lock (SyncRoot)
-            {
-                Entities.TryRemove(entity.Id, out _);
-            }
-        }
+        public void TryRemove(TDataObject entity) => ExecuteWrite(() =>
+            Entities.TryRemove(entity.Id, out _));
 
         /// <summary>
         /// Removes the entity with the specified identifier.
         /// </summary>
         /// <param name="id">Identifier.</param>
-        public void Remove(TKey id)
+        public void Remove(TKey id) => ExecuteWrite(() =>
         {
-            lock (SyncRoot)
+            if (!Entities.TryRemove(id, out _))
             {
-                if (!Entities.TryRemove(id, out _))
-                {
-                    ThrowEntityNotFoundException(id);
-                }
+                ThrowEntityNotFoundException(id);
             }
-        }
+        });
 
         /// <summary>
         /// Tries to remove the entity with the specified identifier.
         /// </summary>
         /// <param name="id">Identifier.</param>
-        public void TryRemove(TKey id)
-        {
-            lock (SyncRoot)
-            {
-                Entities.TryRemove(id, out _);
-            }
-        }
+        public void TryRemove(TKey id) => ExecuteWrite(() =>
+            Entities.TryRemove(id, out _));
 
         void ThrowEntityNotFoundException(TKey id)
             => throw new EntityNotFoundException(
                 id.ToString(),
                 typeof(TDataObject));
+
+        void ExecuteWrite(Action action)
+        {
+            lock (SyncRoot)
+            {
+                action();
+            }
+        }
+
+        TResult ExecuteWrite<TResult>(Func<TResult> action)
+        {
+            lock (SyncRoot)
+            {
+                return action();
+            }
+        }
+
+        TDataObject CloneEntity(TDataObject entity)
+        {
+            if (entity is null)
+            {
+                return null;
+            }
+
+            return entity.ToJson().FromJson<TDataObject>();
+        }
     }
 }
