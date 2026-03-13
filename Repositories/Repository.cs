@@ -22,7 +22,7 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// The stored entities.
         /// </summary>
-        protected ConcurrentDictionary<TKey, TDataObject> Entities;
+        protected readonly ConcurrentDictionary<TKey, TDataObject> Entities;
 
         /// <summary>
         /// The synchronization root for this repository.
@@ -45,11 +45,14 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Add(TDataObject entity)
         {
-            if (!Entities.TryAdd(entity.Id, entity))
+            lock (SyncRoot)
             {
-                throw new EntityAlreadyExistsException(
-                    entity.Id.ToString(),
-                    entity.GetType());
+                if (!Entities.TryAdd(entity.Id, entity))
+                {
+                    throw new EntityAlreadyExistsException(
+                        entity.Id.ToString(),
+                        entity.GetType());
+                }
             }
         }
 
@@ -58,7 +61,12 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="entity">Entity.</param>
         public void TryAdd(TDataObject entity)
-            => Entities.TryAdd(entity.Id, entity);
+        {
+            lock (SyncRoot)
+            {
+                Entities.TryAdd(entity.Id, entity);
+            }
+        }
 
         /// <summary>
         /// Checks whether an entity with the specified identifier exists.
@@ -113,7 +121,7 @@ namespace NuciDAL.Repositories
         {
             lock (SyncRoot)
             {
-                if (!Entities.ContainsKey(entity.Id))
+                if (!Entities.TryGetValue(entity.Id, out _))
                 {
                     throw new EntityNotFoundException(
                         entity.Id.ToString(),
@@ -143,9 +151,12 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Remove(TDataObject entity)
         {
-            if (!Entities.TryRemove(entity.Id, out _))
+            lock (SyncRoot)
             {
-                ThrowEntityNotFoundException(entity.Id);
+                if (!Entities.TryRemove(entity.Id, out _))
+                {
+                    ThrowEntityNotFoundException(entity.Id);
+                }
             }
         }
 
@@ -154,7 +165,12 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="entity">Entity.</param>
         public void TryRemove(TDataObject entity)
-            => Entities.TryRemove(entity.Id, out _);
+        {
+            lock (SyncRoot)
+            {
+                Entities.TryRemove(entity.Id, out _);
+            }
+        }
 
         /// <summary>
         /// Removes the entity with the specified identifier.
@@ -162,9 +178,12 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public void Remove(TKey id)
         {
-            if (!Entities.TryRemove(id, out _))
+            lock (SyncRoot)
             {
-                ThrowEntityNotFoundException(id);
+                if (!Entities.TryRemove(id, out _))
+                {
+                    ThrowEntityNotFoundException(id);
+                }
             }
         }
 
@@ -173,7 +192,12 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="id">Identifier.</param>
         public void TryRemove(TKey id)
-            => Entities.TryRemove(id, out _);
+        {
+            lock (SyncRoot)
+            {
+                Entities.TryRemove(id, out _);
+            }
+        }
 
         void ThrowEntityNotFoundException(TKey id)
             => throw new EntityNotFoundException(
