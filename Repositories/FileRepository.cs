@@ -40,7 +40,7 @@ namespace NuciDAL.Repositories
 
             lock (SyncRoot)
             {
-                if (!loadedEntities || Entities.IsEmpty)
+                if (!loadedEntities)
                 {
                     return;
                 }
