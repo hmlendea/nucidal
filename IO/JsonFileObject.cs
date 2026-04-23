@@ -13,6 +13,7 @@ namespace NuciDAL.IO
         readonly JsonSerializerOptions options = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
             WriteIndented = true
         };
 
