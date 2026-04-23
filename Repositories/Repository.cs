@@ -99,12 +99,28 @@ namespace NuciDAL.Repositories
             => CloneEntity(GetAll().GetRandomElement());
 
         /// <summary>
+        /// Gets the first entity matching the specified predicate.
+        /// </summary>
+        /// <returns>The first matching entity.</returns>
+        /// <param name="predicate">Predicate used to filter entities.</param>
+        public TDataObject GetFirst(Func<TDataObject, bool> predicate)
+            => TryGetFirst(predicate) ?? throw new EntityNotFoundException(typeof(TDataObject));
+
+        /// <summary>
         /// Tries to get the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
         public virtual TDataObject TryGet(TKey id)
             => CloneEntity(Entities.TryGetValue(id, out TDataObject entity) ? entity : null);
+
+        /// <summary>
+        /// Tries to get the first entity matching the specified predicate.
+        /// </summary>
+        /// <returns>The first matching entity if it exists, null otherwise.</returns>
+        /// <param name="predicate">Predicate used to filter entities.</param>
+        public TDataObject TryGetFirst(Func<TDataObject, bool> predicate)
+            => CloneEntity(GetAll().FirstOrDefault(predicate));
 
         /// <summary>
         /// Gets all the entities.

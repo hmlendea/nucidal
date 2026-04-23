@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 
 using NuciDAL.DataObjects;
 
@@ -52,11 +53,25 @@ namespace NuciDAL.Repositories
         TDataObject GetRandom();
 
         /// <summary>
+        /// Gets the first entity matching the specified predicate.
+        /// </summary>
+        /// <returns>The first matching entity.</returns>
+        /// <param name="predicate">Predicate used to filter entities.</param>
+        TDataObject GetFirst(Func<TDataObject, bool> predicate);
+
+        /// <summary>
         /// Tries to get the entity  with the specified identifier.
         /// </summary>
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
         TDataObject TryGet(TKey id);
+
+        /// <summary>
+        /// Tries to get the first entity matching the specified predicate.
+        /// </summary>
+        /// <returns>The first matching entity if it exists, null otherwise.</returns>
+        /// <param name="predicate">Predicate used to filter entities.</param>
+        TDataObject TryGetFirst(Func<TDataObject, bool> predicate);
 
         /// <summary>
         /// Gets all the entities.
