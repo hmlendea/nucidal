@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace NuciDAL.IO
 {
@@ -10,6 +10,13 @@ namespace NuciDAL.IO
     // TODO: Create an interface
     public class JsonFileObject<T>
     {
+        readonly JsonSerializerOptions options = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true
+        };
+
         /// <summary>
         /// Gets or sets the type.
         /// </summary>
@@ -27,15 +34,8 @@ namespace NuciDAL.IO
         /// <param name="path">Path.</param>
         public T Read(string path)
         {
-            T instance;
-
-            using (StreamReader file = File.OpenText(path))
-            {
-                JsonSerializer serialiser = new();
-                instance = (T)serialiser.Deserialize(file, Type);
-            }
-
-            return instance;
+            using FileStream fs = new(path, FileMode.Open, FileAccess.Read);
+            return JsonSerializer.Deserialize<T>(fs, options);
         }
 
         /// <summary>
@@ -45,11 +45,8 @@ namespace NuciDAL.IO
         /// <param name="obj">Object to write.</param>
         public void Write(string path, T obj)
         {
-            JsonSerializer serialiser = new();
-            using StringWriter stringWriter = new();
-            serialiser.Serialize(stringWriter, obj);
-
-            File.WriteAllText(path, stringWriter.ToString());
+            string json = JsonSerializer.Serialize(obj, options);
+            File.WriteAllText(path, json);
         }
     }
 }
