@@ -13,8 +13,10 @@ namespace NuciDAL.UnitTests.Repositories
         private static string EntityId => "angetenar";
         private static string EntityTypeName => nameof(TestEntityDataObject);
 
+        // -- Constructor(EntityBase) ------
+
         [Test]
-        public void Constructor_WithEntity_SetsEntityId()
+        public void GivenEntityArgument_WhenConstructed_ThenEntityIdIsSet()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
 
@@ -24,7 +26,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntity_SetsEntityTypeName()
+        public void GivenEntityArgument_WhenConstructed_ThenEntityTypeNameIsSet()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
 
@@ -34,7 +36,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntity_SetsMessage()
+        public void GivenEntityArgument_WhenConstructed_ThenMessageContainsEntityDetails()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
 
@@ -45,7 +47,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntity_MessageIndicatesDuplicated()
+        public void GivenEntityArgument_WhenConstructed_ThenMessageIndicatesDuplicated()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
 
@@ -54,8 +56,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(exception.Message, Does.Contain("duplicated"));
         }
 
+        // -- Constructor(string, Type) ------
+
         [Test]
-        public void Constructor_WithEntityIdAndType_SetsEntityId()
+        public void GivenEntityIdAndTypeArguments_WhenConstructed_ThenEntityIdIsSet()
         {
             DuplicateEntityException exception = new(EntityId, typeof(TestEntityDataObject));
 
@@ -63,7 +67,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdAndType_SetsEntityTypeName()
+        public void GivenEntityIdAndTypeArguments_WhenConstructed_ThenEntityTypeNameIsSet()
         {
             DuplicateEntityException exception = new(EntityId, typeof(TestEntityDataObject));
 
@@ -71,7 +75,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdAndType_SetsMessage()
+        public void GivenEntityIdAndTypeArguments_WhenConstructed_ThenMessageContainsEntityDetails()
         {
             DuplicateEntityException exception = new(EntityId, typeof(TestEntityDataObject));
 
@@ -80,7 +84,35 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdAndStringType_SetsEntityId()
+        public void GivenEntityIdAndTypeArguments_WhenConstructed_ThenMessageIndicatesDuplicated()
+        {
+            DuplicateEntityException exception = new(EntityId, typeof(TestEntityDataObject));
+
+            Assert.That(exception.Message, Does.Contain("duplicated"));
+        }
+
+        [Test]
+        public void GivenEntityIdAndTypeArguments_WhenConstructed_ThenInnerExceptionIsNull()
+        {
+            DuplicateEntityException exception = new(EntityId, typeof(TestEntityDataObject));
+
+            Assert.That(exception.InnerException, Is.Null);
+        }
+
+        [TestCase("angetenar")]
+        [TestCase("solaire-of-astora")]
+        [TestCase("ilarion-pintilie")]
+        public void GivenVariousEntityIds_WhenConstructedWithIdAndType_ThenEntityIdIsSetCorrectly(string entityId)
+        {
+            DuplicateEntityException exception = new(entityId, typeof(TestEntityDataObject));
+
+            Assert.That(exception.EntityId, Is.EqualTo(entityId));
+        }
+
+        // -- Constructor(string, string) ------
+
+        [Test]
+        public void GivenEntityIdAndStringTypeArguments_WhenConstructed_ThenEntityIdIsSet()
         {
             DuplicateEntityException exception = new(EntityId, EntityTypeName);
 
@@ -88,7 +120,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdAndStringType_SetsEntityTypeName()
+        public void GivenEntityIdAndStringTypeArguments_WhenConstructed_ThenEntityTypeNameIsSet()
         {
             DuplicateEntityException exception = new(EntityId, EntityTypeName);
 
@@ -96,7 +128,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdAndStringType_SetsMessage()
+        public void GivenEntityIdAndStringTypeArguments_WhenConstructed_ThenMessageContainsEntityDetails()
         {
             DuplicateEntityException exception = new(EntityId, EntityTypeName);
 
@@ -105,7 +137,17 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityAndInnerException_SetsEntityId()
+        public void GivenEntityIdAndStringTypeArguments_WhenConstructed_ThenMessageIndicatesDuplicated()
+        {
+            DuplicateEntityException exception = new(EntityId, EntityTypeName);
+
+            Assert.That(exception.Message, Does.Contain("duplicated"));
+        }
+
+        // -- Constructor(EntityBase, Exception) ------
+
+        [Test]
+        public void GivenEntityAndInnerExceptionArguments_WhenConstructed_ThenEntityIdIsSet()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
             Exception innerException = new("inner");
@@ -116,7 +158,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityAndInnerException_SetsEntityTypeName()
+        public void GivenEntityAndInnerExceptionArguments_WhenConstructed_ThenEntityTypeNameIsSet()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
             Exception innerException = new("inner");
@@ -127,7 +169,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityAndInnerException_SetsInnerException()
+        public void GivenEntityAndInnerExceptionArguments_WhenConstructed_ThenInnerExceptionIsSet()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
             Exception innerException = new("inner");
@@ -138,7 +180,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityAndInnerException_SetsMessage()
+        public void GivenEntityAndInnerExceptionArguments_WhenConstructed_ThenMessageContainsEntityDetails()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
             Exception innerException = new("inner");
@@ -148,8 +190,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(exception.Message, Does.Contain(EntityId));
         }
 
+        // -- Constructor(string, Type, Exception) ------
+
         [Test]
-        public void Constructor_WithEntityIdTypeAndInnerException_SetsEntityId()
+        public void GivenEntityIdTypeAndInnerExceptionArguments_WhenConstructed_ThenEntityIdIsSet()
         {
             Exception innerException = new("inner");
 
@@ -162,7 +206,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdTypeAndInnerException_SetsEntityTypeName()
+        public void GivenEntityIdTypeAndInnerExceptionArguments_WhenConstructed_ThenEntityTypeNameIsSet()
         {
             Exception innerException = new("inner");
 
@@ -175,7 +219,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdTypeAndInnerException_SetsInnerException()
+        public void GivenEntityIdTypeAndInnerExceptionArguments_WhenConstructed_ThenInnerExceptionIsSet()
         {
             Exception innerException = new("inner");
 
@@ -187,8 +231,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(exception.InnerException, Is.SameAs(innerException));
         }
 
+        // -- Constructor(string, string, Exception) ------
+
         [Test]
-        public void Constructor_WithEntityIdStringTypeAndInnerException_SetsEntityId()
+        public void GivenEntityIdStringTypeAndInnerExceptionArguments_WhenConstructed_ThenEntityIdIsSet()
         {
             Exception innerException = new("inner");
 
@@ -198,7 +244,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdStringTypeAndInnerException_SetsEntityTypeName()
+        public void GivenEntityIdStringTypeAndInnerExceptionArguments_WhenConstructed_ThenEntityTypeNameIsSet()
         {
             Exception innerException = new("inner");
 
@@ -208,7 +254,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Constructor_WithEntityIdStringTypeAndInnerException_SetsInnerException()
+        public void GivenEntityIdStringTypeAndInnerExceptionArguments_WhenConstructed_ThenInnerExceptionIsSet()
         {
             Exception innerException = new("inner");
 
@@ -217,8 +263,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(exception.InnerException, Is.SameAs(innerException));
         }
 
+        // -- Type hierarchy ------
+
         [Test]
-        public void IsEntityException()
+        public void GivenException_WhenCheckedForType_ThenIsEntityException()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
 
@@ -228,47 +276,13 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void IsException()
+        public void GivenException_WhenCheckedForType_ThenIsException()
         {
             TestEntityDataObject entity = new() { Id = EntityId };
 
             DuplicateEntityException exception = new(entity);
 
             Assert.That(exception, Is.InstanceOf<Exception>());
-        }
-
-        [TestCase("angetenar")]
-        [TestCase("solaire-of-astora")]
-        [TestCase("ilarion-pintilie")]
-        public void Constructor_WithEntityIdAndType_EntityIdIsSetCorrectly(string entityId)
-        {
-            DuplicateEntityException exception = new(entityId, typeof(TestEntityDataObject));
-
-            Assert.That(exception.EntityId, Is.EqualTo(entityId));
-        }
-
-        [Test]
-        public void Constructor_WithEntityIdAndType_HasNullInnerException()
-        {
-            DuplicateEntityException exception = new(EntityId, typeof(TestEntityDataObject));
-
-            Assert.That(exception.InnerException, Is.Null);
-        }
-
-        [Test]
-        public void Constructor_WithEntityIdAndStringType_MessageIndicatesDuplicated()
-        {
-            DuplicateEntityException exception = new(EntityId, EntityTypeName);
-
-            Assert.That(exception.Message, Does.Contain("duplicated"));
-        }
-
-        [Test]
-        public void Constructor_WithEntityIdAndType_MessageIndicatesDuplicated()
-        {
-            DuplicateEntityException exception = new(EntityId, typeof(TestEntityDataObject));
-
-            Assert.That(exception.Message, Does.Contain("duplicated"));
         }
     }
 }

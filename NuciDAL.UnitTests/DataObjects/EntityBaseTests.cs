@@ -15,8 +15,10 @@ namespace NuciDAL.UnitTests.DataObjects
         private static int FirstEntityValue => 613;
         private static int SecondEntityValue => 873;
 
+        // -- Equals ------
+
         [Test]
-        public void Equals_WhenComparingToNull_ReturnsFalse()
+        public void GivenNullComparison_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity = new()
             {
@@ -31,7 +33,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenComparingToSameReference_ReturnsTrue()
+        public void GivenSameReference_WhenEqualsIsCalled_ThenReturnsTrue()
         {
             TestEntityDataObject entity = new()
             {
@@ -46,7 +48,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenEntitiesHaveIdenticalProperties_ReturnsTrue()
+        public void GivenIdenticalEntities_WhenEqualsIsCalled_ThenReturnsTrue()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -67,7 +69,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenEntitiesHaveIdenticalProperties_IsSymmetric()
+        public void GivenIdenticalEntities_WhenEqualsIsCalled_ThenIsSymmetric()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -86,7 +88,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenEntitiesHaveDifferentIds_ReturnsFalse()
+        public void GivenEntitiesWithDifferentIds_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -107,7 +109,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenEntitiesHaveDifferentNames_ReturnsFalse()
+        public void GivenEntitiesWithDifferentNames_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -128,7 +130,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenEntitiesHaveDifferentValues_ReturnsFalse()
+        public void GivenEntitiesWithDifferentValues_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -149,7 +151,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenComparingToDifferentEntityType_ReturnsFalse()
+        public void GivenDifferentEntityType_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -170,7 +172,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenNameIsNullOnFirstEntityOnly_ReturnsFalse()
+        public void GivenNameNullOnFirstEntityOnly_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -191,7 +193,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenNameIsNullOnSecondEntityOnly_ReturnsFalse()
+        public void GivenNameNullOnSecondEntityOnly_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -212,7 +214,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenNameIsNullOnBothEntities_ReturnsTrue()
+        public void GivenNameNullOnBothEntities_WhenEqualsIsCalled_ThenReturnsTrue()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -233,7 +235,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenIdIsNullOnBothEntitiesAndOtherPropertiesMatch_ReturnsTrue()
+        public void GivenIdNullOnBothEntitiesWithMatchingProperties_WhenEqualsIsCalled_ThenReturnsTrue()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -254,7 +256,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WhenAllPropertiesAreNull_ReturnsTrue()
+        public void GivenAllPropertiesNull_WhenEqualsIsCalled_ThenReturnsTrue()
         {
             TestEntityDataObject entity1 = new() { Id = null, Name = null };
             TestEntityDataObject entity2 = new() { Id = null, Name = null };
@@ -264,8 +266,10 @@ namespace NuciDAL.UnitTests.DataObjects
             Assert.That(result, Is.True);
         }
 
+        // -- Equals (object overload) ------
+
         [Test]
-        public void ObjectEquals_WhenComparingToNull_ReturnsFalse()
+        public void GivenNullObjectComparison_WhenObjectEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity = new()
             {
@@ -280,7 +284,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void ObjectEquals_WhenComparingToNonEntityObject_ReturnsFalse()
+        public void GivenNonEntityObjectComparison_WhenObjectEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity = new()
             {
@@ -295,7 +299,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void ObjectEquals_WhenComparingToSameReference_ReturnsTrue()
+        public void GivenSameReferenceObjectComparison_WhenObjectEqualsIsCalled_ThenReturnsTrue()
         {
             TestEntityDataObject entity = new()
             {
@@ -310,7 +314,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void ObjectEquals_WhenComparingToEntityWithIdenticalProperties_ReturnsTrue()
+        public void GivenEntityWithIdenticalProperties_WhenObjectEqualsIsCalled_ThenReturnsTrue()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -331,7 +335,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void ObjectEquals_WhenComparingToEntityWithDifferentId_ReturnsFalse()
+        public void GivenEntityWithDifferentId_WhenObjectEqualsIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -351,8 +355,10 @@ namespace NuciDAL.UnitTests.DataObjects
             Assert.That(result, Is.False);
         }
 
+        // -- GetHashCode ------
+
         [Test]
-        public void GetHashCode_WhenEntitiesAreEqual_ReturnsSameHashCode()
+        public void GivenEqualEntities_WhenGetHashCodeIsCalled_ThenReturnsSameHashCode()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -371,7 +377,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void GetHashCode_WhenCalledMultipleTimes_ReturnsSameValue()
+        public void GivenSingleEntity_WhenGetHashCodeIsCalledMultipleTimes_ThenReturnsSameValue()
         {
             TestEntityDataObject entity = new()
             {
@@ -387,7 +393,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void GetHashCode_WhenAllPropertiesAreNull_DoesNotThrow()
+        public void GivenAllPropertiesNull_WhenGetHashCodeIsCalled_ThenDoesNotThrow()
         {
             TestEntityDataObject entity = new() { Id = null, Name = null };
 
@@ -395,7 +401,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void GetHashCode_WhenEntitiesHaveDifferentIds_ReturnsDifferentHashCodes()
+        public void GivenEntitiesWithDifferentIds_WhenGetHashCodeIsCalled_ThenReturnsDifferentHashCodes()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -414,7 +420,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void GetHashCode_WhenEntitiesHaveDifferentNames_ReturnsDifferentHashCodes()
+        public void GivenEntitiesWithDifferentNames_WhenGetHashCodeIsCalled_ThenReturnsDifferentHashCodes()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -432,8 +438,10 @@ namespace NuciDAL.UnitTests.DataObjects
             Assert.That(entity1.GetHashCode(), Is.Not.EqualTo(entity2.GetHashCode()));
         }
 
+        // -- ToString ------
+
         [Test]
-        public void ToString_ReturnsNonNullString()
+        public void GivenEntity_WhenToStringIsCalled_ThenReturnsNonNullString()
         {
             TestEntityDataObject entity = new()
             {
@@ -448,7 +456,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void ToString_ReturnsNonEmptyString()
+        public void GivenEntity_WhenToStringIsCalled_ThenReturnsNonEmptyString()
         {
             TestEntityDataObject entity = new()
             {
@@ -463,7 +471,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void ToString_ReturnsStringContainingEntityId()
+        public void GivenEntity_WhenToStringIsCalled_ThenReturnsStringContainingEntityId()
         {
             TestEntityDataObject entity = new()
             {
@@ -478,7 +486,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void ToString_WhenCalledOnDifferentEntities_ReturnsDifferentStrings()
+        public void GivenDifferentEntities_WhenToStringIsCalled_ThenReturnsDifferentStrings()
         {
             TestEntityDataObject entity1 = new()
             {
@@ -496,8 +504,10 @@ namespace NuciDAL.UnitTests.DataObjects
             Assert.That(entity1.ToString(), Is.Not.EqualTo(entity2.ToString()));
         }
 
+        // -- Equals (int key) ------
+
         [Test]
-        public void Equals_WithIntKey_WhenEntitiesHaveIdenticalProperties_ReturnsTrue()
+        public void GivenIntKeyEntitiesWithIdenticalProperties_WhenEqualsIsCalled_ThenReturnsTrue()
         {
             IntKeyEntityDataObject entity1 = new()
             {
@@ -516,7 +526,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WithIntKey_WhenEntitiesHaveDifferentIds_ReturnsFalse()
+        public void GivenIntKeyEntitiesWithDifferentIds_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             IntKeyEntityDataObject entity1 = new()
             {
@@ -535,7 +545,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WithIntKey_WhenComparingToNull_ReturnsFalse()
+        public void GivenIntKeyNullComparison_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             IntKeyEntityDataObject entity = new()
             {
@@ -549,7 +559,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WithIntKey_WhenComparingToSameReference_ReturnsTrue()
+        public void GivenIntKeySameReference_WhenEqualsIsCalled_ThenReturnsTrue()
         {
             IntKeyEntityDataObject entity = new()
             {
@@ -563,7 +573,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void Equals_WithIntKey_WhenEntitiesHaveDifferentNames_ReturnsFalse()
+        public void GivenIntKeyEntitiesWithDifferentNames_WhenEqualsIsCalled_ThenReturnsFalse()
         {
             IntKeyEntityDataObject entity1 = new()
             {
@@ -581,8 +591,10 @@ namespace NuciDAL.UnitTests.DataObjects
             Assert.That(result, Is.False);
         }
 
+        // -- GetHashCode (int key) ------
+
         [Test]
-        public void GetHashCode_WithIntKey_WhenEntitiesAreEqual_ReturnsSameHashCode()
+        public void GivenEqualIntKeyEntities_WhenGetHashCodeIsCalled_ThenReturnsSameHashCode()
         {
             IntKeyEntityDataObject entity1 = new()
             {
@@ -599,7 +611,7 @@ namespace NuciDAL.UnitTests.DataObjects
         }
 
         [Test]
-        public void GetHashCode_WithIntKey_WhenEntitiesHaveDifferentIds_ReturnsDifferentHashCodes()
+        public void GivenIntKeyEntitiesWithDifferentIds_WhenGetHashCodeIsCalled_ThenReturnsDifferentHashCodes()
         {
             IntKeyEntityDataObject entity1 = new()
             {

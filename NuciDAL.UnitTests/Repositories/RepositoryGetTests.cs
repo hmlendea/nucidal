@@ -21,7 +21,7 @@ namespace NuciDAL.UnitTests.Repositories
         private static int FirstEntityValue => 613;
         private static int SecondEntityValue => 873;
 
-        private Repository<TestEntityDataObject> repository;
+        Repository<TestEntityDataObject> repository;
 
         [SetUp]
         public void SetUp()
@@ -29,8 +29,10 @@ namespace NuciDAL.UnitTests.Repositories
             repository = new();
         }
 
+        // -- Get ------
+
         [Test]
-        public void Get_WhenEntityExists_ReturnsNonNullEntity()
+        public void GivenEntityExists_WhenGetIsCalled_ThenReturnsNonNullEntity()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -40,7 +42,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Get_WhenEntityExists_ReturnsEntityWithCorrectId()
+        public void GivenEntityExists_WhenGetIsCalled_ThenReturnsEntityWithCorrectId()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -50,7 +52,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Get_WhenEntityExists_ReturnsEntityWithCorrectName()
+        public void GivenEntityExists_WhenGetIsCalled_ThenReturnsEntityWithCorrectName()
         {
             repository.Add(new()
             {
@@ -65,7 +67,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Get_WhenEntityExists_ReturnsEntityWithCorrectValue()
+        public void GivenEntityExists_WhenGetIsCalled_ThenReturnsEntityWithCorrectValue()
         {
             repository.Add(new()
             {
@@ -80,15 +82,13 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Get_WhenEntityDoesNotExist_ThrowsEntityNotFoundException()
-        {
-            Assert.That(
+        public void GivenAbsentEntity_WhenGetIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
                 () => repository.Get(AbsentEntityId),
                 Throws.TypeOf<EntityNotFoundException>());
-        }
 
         [Test]
-        public void Get_WhenEntityDoesNotExist_ExceptionCarriesCorrectEntityId()
+        public void GivenAbsentEntity_WhenGetIsCalled_ThenExceptionCarriesCorrectEntityId()
         {
             EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
                 () => repository.Get(AbsentEntityId));
@@ -97,15 +97,13 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Get_WhenRepositoryIsEmpty_ThrowsEntityNotFoundException()
-        {
-            Assert.That(
+        public void GivenEmptyRepository_WhenGetIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
                 () => repository.Get(FirstEntityId),
                 Throws.TypeOf<EntityNotFoundException>());
-        }
 
         [Test]
-        public void Get_ReturnsCloneNotOriginalReference()
+        public void GivenEntity_WhenGetIsCalled_ThenReturnsCloneNotOriginalReference()
         {
             TestEntityDataObject originalEntity = new()
             {
@@ -122,7 +120,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Get_WhenReturnedCloneIsModified_StoredEntityRemainsUnchanged()
+        public void GivenReturnedCloneIsModified_WhenGetIsCalled_ThenStoredEntityRemainsUnchanged()
         {
             repository.Add(new()
             {
@@ -140,7 +138,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Get_WhenCalledTwice_ReturnsDifferentInstances()
+        public void GivenEntity_WhenGetIsCalledTwice_ThenReturnsDifferentInstances()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -151,7 +149,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Get_WhenCalledTwice_ReturnedInstancesAreEqual()
+        public void GivenEntity_WhenGetIsCalledTwice_ThenReturnedInstancesAreEqual()
         {
             repository.Add(new()
             {
@@ -169,7 +167,7 @@ namespace NuciDAL.UnitTests.Repositories
         [TestCase("angetenar", "Iancu Robilă", 613)]
         [TestCase("solaire-of-astora", "Vasile Ciupitu", 873)]
         [TestCase("ilarion-pintilie", "Ilarion Pintilie", 613)]
-        public void Get_WithVariousEntities_ReturnsCorrectEntity(
+        public void GivenVariousEntities_WhenGetIsCalled_ThenReturnsCorrectEntity(
             string entityId,
             string entityName,
             int entityValue)
@@ -183,8 +181,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(result.Value, Is.EqualTo(entityValue));
         }
 
+        // -- TryGet ------
+
         [Test]
-        public void TryGet_WhenEntityExists_ReturnsNonNullEntity()
+        public void GivenEntityExists_WhenTryGetIsCalled_ThenReturnsNonNullEntity()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -194,7 +194,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryGet_WhenEntityExists_ReturnsEntityWithCorrectId()
+        public void GivenEntityExists_WhenTryGetIsCalled_ThenReturnsEntityWithCorrectId()
         {
             repository.Add(new()
             {
@@ -209,7 +209,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryGet_WhenEntityExists_ReturnsEntityWithCorrectName()
+        public void GivenEntityExists_WhenTryGetIsCalled_ThenReturnsEntityWithCorrectName()
         {
             repository.Add(new()
             {
@@ -224,7 +224,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryGet_WhenEntityDoesNotExist_ReturnsNull()
+        public void GivenEntityDoesNotExist_WhenTryGetIsCalled_ThenReturnsNull()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -234,15 +234,13 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryGet_WhenRepositoryIsEmpty_ReturnsNull()
-        {
-            TestEntityDataObject result = repository.TryGet(FirstEntityId);
-
-            Assert.That(result, Is.Null);
-        }
+        public void GivenEmptyRepository_WhenTryGetIsCalled_ThenReturnsNull()
+            => Assert.That(
+                repository.TryGet(FirstEntityId),
+                Is.Null);
 
         [Test]
-        public void TryGet_ReturnsCloneNotOriginalReference()
+        public void GivenEntity_WhenTryGetIsCalled_ThenReturnsCloneNotOriginalReference()
         {
             TestEntityDataObject originalEntity = new()
             {
@@ -261,7 +259,7 @@ namespace NuciDAL.UnitTests.Repositories
         [TestCase("angetenar")]
         [TestCase("solaire-of-astora")]
         [TestCase("ilarion-pintilie")]
-        public void TryGet_WhenEntityWithIdExists_ReturnsEntityWithCorrectId(string entityId)
+        public void GivenEntityWithId_WhenTryGetIsCalled_ThenReturnsEntityWithCorrectId(string entityId)
         {
             repository.Add(new() { Id = entityId });
 
@@ -270,8 +268,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(result.Id, Is.EqualTo(entityId));
         }
 
+        // -- GetFirst ------
+
         [Test]
-        public void GetFirst_WhenMatchingEntityExists_ReturnsCorrectEntity()
+        public void GivenMatchingEntityExists_WhenGetFirstIsCalled_ThenReturnsCorrectEntity()
         {
             repository.Add(new()
             {
@@ -293,7 +293,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetFirst_WhenPredicateMatchesName_ReturnsEntityWithThatName()
+        public void GivenMatchingEntityExists_WhenGetFirstIsCalledByName_ThenReturnsEntityWithThatName()
         {
             repository.Add(new()
             {
@@ -315,7 +315,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetFirst_WhenPredicateMatchesValue_ReturnsEntityWithThatValue()
+        public void GivenMatchingEntityExists_WhenGetFirstIsCalledByValue_ThenReturnsEntityWithThatValue()
         {
             repository.Add(new()
             {
@@ -337,7 +337,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetFirst_WhenNoEntityMatchesPredicate_ThrowsEntityNotFoundException()
+        public void GivenNoMatchingEntity_WhenGetFirstIsCalled_ThenThrowsEntityNotFoundException()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -347,15 +347,15 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetFirst_WhenRepositoryIsEmpty_ThrowsEntityNotFoundException()
-        {
-            Assert.That(
+        public void GivenEmptyRepository_WhenGetFirstIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
                 () => repository.GetFirst(entity => entity.Value == FirstEntityValue),
                 Throws.TypeOf<EntityNotFoundException>());
-        }
+
+        // -- TryGetFirst ------
 
         [Test]
-        public void TryGetFirst_WhenMatchingEntityExists_ReturnsCorrectEntity()
+        public void GivenMatchingEntityExists_WhenTryGetFirstIsCalled_ThenReturnsCorrectEntity()
         {
             repository.Add(new()
             {
@@ -377,7 +377,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryGetFirst_WhenMatchingEntityExists_ReturnsEntityWithCorrectName()
+        public void GivenMatchingEntityExists_WhenTryGetFirstIsCalledByName_ThenReturnsEntityWithThatName()
         {
             repository.Add(new()
             {
@@ -393,7 +393,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryGetFirst_WhenNoEntityMatchesPredicate_ReturnsNull()
+        public void GivenNoMatchingEntity_WhenTryGetFirstIsCalled_ThenReturnsNull()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -404,24 +404,21 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryGetFirst_WhenRepositoryIsEmpty_ReturnsNull()
-        {
-            TestEntityDataObject result = repository.TryGetFirst(
-                entity => entity.Value == FirstEntityValue);
+        public void GivenEmptyRepository_WhenTryGetFirstIsCalled_ThenReturnsNull()
+            => Assert.That(
+                repository.TryGetFirst(entity => entity.Value == FirstEntityValue),
+                Is.Null);
 
-            Assert.That(result, Is.Null);
-        }
-
-        [Test]
-        public void GetAll_WhenRepositoryIsEmpty_ReturnsEmptyCollection()
-        {
-            IEnumerable<TestEntityDataObject> result = repository.GetAll();
-
-            Assert.That(result, Is.Empty);
-        }
+        // -- GetAll ------
 
         [Test]
-        public void GetAll_WhenOneEntityExists_ReturnsCollectionWithOneElement()
+        public void GivenEmptyRepository_WhenGetAllIsCalled_ThenReturnsEmptyCollection()
+            => Assert.That(
+                repository.GetAll(),
+                Is.Empty);
+
+        [Test]
+        public void GivenOneEntityExists_WhenGetAllIsCalled_ThenReturnsCollectionWithOneElement()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -431,7 +428,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetAll_WhenMultipleEntitiesExist_ReturnsAllEntities()
+        public void GivenMultipleEntitiesExist_WhenGetAllIsCalled_ThenReturnsAllEntities()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -443,7 +440,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetAll_WhenMultipleEntitiesExist_ContainsAllEntityIds()
+        public void GivenMultipleEntitiesExist_WhenGetAllIsCalled_ThenContainsAllEntityIds()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -458,7 +455,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetAll_WhenEntitiesHaveProperties_ReturnsEntitiesWithCorrectProperties()
+        public void GivenEntitiesWithProperties_WhenGetAllIsCalled_ThenReturnsEntitiesWithCorrectProperties()
         {
             repository.Add(new()
             {
@@ -475,7 +472,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetAll_ReturnsClones_ModifyingResultDoesNotAffectStoredEntities()
+        public void GivenEntity_WhenGetAllIsCalledAndResultIsModified_ThenStoredEntityRemainsUnchanged()
         {
             repository.Add(new()
             {
@@ -493,7 +490,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetAll_WhenCalledMultipleTimes_ReturnsConsistentCount()
+        public void GivenMultipleEntities_WhenGetAllIsCalledMultipleTimes_ThenReturnsConsistentCount()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -505,7 +502,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetAll_AfterEntityIsRemoved_DoesNotContainRemovedEntity()
+        public void GivenEntityRemoved_WhenGetAllIsCalled_ThenDoesNotContainRemovedEntity()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -519,8 +516,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(resultIds, Contains.Item(SecondEntityId));
         }
 
+        // -- GetRandom ------
+
         [Test]
-        public void GetRandom_WhenRepositoryHasOneEntity_ReturnsThatEntity()
+        public void GivenRepositoryHasOneEntity_WhenGetRandomIsCalled_ThenReturnsThatEntity()
         {
             repository.Add(new()
             {
@@ -535,7 +534,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetRandom_WhenRepositoryHasMultipleEntities_ReturnsEntityContainedInRepository()
+        public void GivenRepositoryHasMultipleEntities_WhenGetRandomIsCalled_ThenReturnsEntityInRepository()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -547,7 +546,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetRandom_WhenRepositoryHasOneEntity_ReturnsCloneNotOriginalReference()
+        public void GivenRepositoryHasOneEntity_WhenGetRandomIsCalled_ThenReturnsCloneNotOriginalReference()
         {
             TestEntityDataObject original = new()
             {
@@ -564,7 +563,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetRandom_WhenRepositoryHasOneEntity_ReturnsEntityWithCorrectName()
+        public void GivenRepositoryHasOneEntity_WhenGetRandomIsCalled_ThenReturnsEntityWithCorrectName()
         {
             repository.Add(new()
             {
@@ -579,7 +578,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GetRandom_WhenRepositoryHasOneEntity_ReturnsEntityWithCorrectValue()
+        public void GivenRepositoryHasOneEntity_WhenGetRandomIsCalled_ThenReturnsEntityWithCorrectValue()
         {
             repository.Add(new()
             {

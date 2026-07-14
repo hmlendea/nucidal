@@ -16,7 +16,7 @@ namespace NuciDAL.UnitTests.Repositories
         private static string SecondEntityName => "Solaire of Astora";
         private static int FirstEntityValue => 613;
 
-        private Repository<TestEntityDataObject> repository;
+        Repository<TestEntityDataObject> repository;
 
         [SetUp]
         public void SetUp()
@@ -24,8 +24,10 @@ namespace NuciDAL.UnitTests.Repositories
             repository = new();
         }
 
+        // -- Remove (by entity) ------
+
         [Test]
-        public void RemoveByEntity_WhenEntityExists_DecreasesEntitiesCount()
+        public void GivenEntityExists_WhenRemoveByEntityIsCalled_ThenDecreasesEntitiesCount()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -36,7 +38,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveByEntity_WhenEntityExists_EntityIsNoLongerRetrievable()
+        public void GivenEntityExists_WhenRemoveByEntityIsCalled_ThenEntityIsNoLongerRetrievable()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -47,7 +49,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveByEntity_WhenEntityExists_GetThrowsEntityNotFoundException()
+        public void GivenEntityExists_WhenRemoveByEntityIsCalled_ThenGetThrowsEntityNotFoundException()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -60,7 +62,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveByEntity_WhenEntityDoesNotExist_ThrowsEntityNotFoundException()
+        public void GivenEntityDoesNotExist_WhenRemoveByEntityIsCalled_ThenThrowsEntityNotFoundException()
         {
             TestEntityDataObject entity = new() { Id = AbsentEntityId };
 
@@ -70,7 +72,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveByEntity_WhenRepositoryIsEmpty_ThrowsEntityNotFoundException()
+        public void GivenEmptyRepository_WhenRemoveByEntityIsCalled_ThenThrowsEntityNotFoundException()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -80,7 +82,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveByEntity_WhenEntityDoesNotExist_ExceptionCarriesCorrectEntityId()
+        public void GivenEntityDoesNotExist_WhenRemoveByEntityIsCalled_ThenExceptionCarriesCorrectEntityId()
         {
             TestEntityDataObject entity = new() { Id = AbsentEntityId };
 
@@ -91,7 +93,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveByEntity_DoesNotAffectOtherEntities()
+        public void GivenEntityRemoved_WhenRemoveByEntityIsCalled_ThenOtherEntitiesAreUnaffected()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -103,8 +105,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(repository.ContainsId(SecondEntityId), Is.True);
         }
 
+        // -- Remove (by id) ------
+
         [Test]
-        public void RemoveById_WhenEntityExists_DecreasesEntitiesCount()
+        public void GivenEntityExists_WhenRemoveByIdIsCalled_ThenDecreasesEntitiesCount()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -114,7 +118,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveById_WhenEntityExists_EntityIsNoLongerRetrievable()
+        public void GivenEntityExists_WhenRemoveByIdIsCalled_ThenEntityIsNoLongerRetrievable()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -124,7 +128,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveById_WhenEntityExists_GetThrowsEntityNotFoundException()
+        public void GivenEntityExists_WhenRemoveByIdIsCalled_ThenGetThrowsEntityNotFoundException()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -136,23 +140,19 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveById_WhenEntityDoesNotExist_ThrowsEntityNotFoundException()
-        {
-            Assert.That(
+        public void GivenAbsentEntityId_WhenRemoveByIdIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
                 () => repository.Remove(AbsentEntityId),
                 Throws.TypeOf<EntityNotFoundException>());
-        }
 
         [Test]
-        public void RemoveById_WhenRepositoryIsEmpty_ThrowsEntityNotFoundException()
-        {
-            Assert.That(
+        public void GivenEmptyRepository_WhenRemoveByIdIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
                 () => repository.Remove(FirstEntityId),
                 Throws.TypeOf<EntityNotFoundException>());
-        }
 
         [Test]
-        public void RemoveById_WhenEntityDoesNotExist_ExceptionCarriesCorrectEntityId()
+        public void GivenAbsentEntityId_WhenRemoveByIdIsCalled_ThenExceptionCarriesCorrectEntityId()
         {
             EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
                 () => repository.Remove(AbsentEntityId));
@@ -161,7 +161,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveById_DoesNotAffectOtherEntities()
+        public void GivenEntityRemoved_WhenRemoveByIdIsCalled_ThenOtherEntitiesAreUnaffected()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -174,7 +174,7 @@ namespace NuciDAL.UnitTests.Repositories
         [TestCase("angetenar")]
         [TestCase("solaire-of-astora")]
         [TestCase("ilarion-pintilie")]
-        public void RemoveById_WhenEntityExists_EntityIsRemoved(string entityId)
+        public void GivenVariousEntityIds_WhenRemoveByIdIsCalled_ThenEntityIsRemoved(string entityId)
         {
             repository.Add(new() { Id = entityId });
 
@@ -183,8 +183,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(repository.ContainsId(entityId), Is.False);
         }
 
+        // -- TryRemove (by entity) ------
+
         [Test]
-        public void TryRemoveByEntity_WhenEntityExists_DecreasesEntitiesCount()
+        public void GivenEntityExists_WhenTryRemoveByEntityIsCalled_ThenDecreasesEntitiesCount()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -195,7 +197,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryRemoveByEntity_WhenEntityExists_EntityIsNoLongerRetrievable()
+        public void GivenEntityExists_WhenTryRemoveByEntityIsCalled_ThenEntityIsNoLongerRetrievable()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -206,7 +208,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryRemoveByEntity_WhenEntityDoesNotExist_DoesNotThrow()
+        public void GivenEntityDoesNotExist_WhenTryRemoveByEntityIsCalled_ThenDoesNotThrow()
         {
             TestEntityDataObject entity = new() { Id = AbsentEntityId };
 
@@ -214,7 +216,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryRemoveByEntity_WhenRepositoryIsEmpty_DoesNotThrow()
+        public void GivenEmptyRepository_WhenTryRemoveByEntityIsCalled_ThenDoesNotThrow()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -222,7 +224,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryRemoveByEntity_WhenEntityDoesNotExist_EntitiesCountUnchanged()
+        public void GivenEntityDoesNotExist_WhenTryRemoveByEntityIsCalled_ThenEntitiesCountUnchanged()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -233,7 +235,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryRemoveByEntity_DoesNotAffectOtherEntities()
+        public void GivenEntityRemoved_WhenTryRemoveByEntityIsCalled_ThenOtherEntitiesAreUnaffected()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -244,8 +246,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(repository.ContainsId(SecondEntityId), Is.True);
         }
 
+        // -- TryRemove (by id) ------
+
         [Test]
-        public void TryRemoveById_WhenEntityExists_DecreasesEntitiesCount()
+        public void GivenEntityExists_WhenTryRemoveByIdIsCalled_ThenDecreasesEntitiesCount()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -255,7 +259,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryRemoveById_WhenEntityExists_EntityIsNoLongerRetrievable()
+        public void GivenEntityExists_WhenTryRemoveByIdIsCalled_ThenEntityIsNoLongerRetrievable()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -265,19 +269,19 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryRemoveById_WhenEntityDoesNotExist_DoesNotThrow()
-        {
-            Assert.That(() => repository.TryRemove(AbsentEntityId), Throws.Nothing);
-        }
+        public void GivenAbsentEntityId_WhenTryRemoveByIdIsCalled_ThenDoesNotThrow()
+            => Assert.That(
+                () => repository.TryRemove(AbsentEntityId),
+                Throws.Nothing);
 
         [Test]
-        public void TryRemoveById_WhenRepositoryIsEmpty_DoesNotThrow()
-        {
-            Assert.That(() => repository.TryRemove(FirstEntityId), Throws.Nothing);
-        }
+        public void GivenEmptyRepository_WhenTryRemoveByIdIsCalled_ThenDoesNotThrow()
+            => Assert.That(
+                () => repository.TryRemove(FirstEntityId),
+                Throws.Nothing);
 
         [Test]
-        public void TryRemoveById_WhenEntityDoesNotExist_EntitiesCountUnchanged()
+        public void GivenAbsentEntityId_WhenTryRemoveByIdIsCalled_ThenEntitiesCountUnchanged()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -287,7 +291,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryRemoveById_DoesNotAffectOtherEntities()
+        public void GivenEntityRemoved_WhenTryRemoveByIdIsCalled_ThenOtherEntitiesAreUnaffected()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -300,7 +304,7 @@ namespace NuciDAL.UnitTests.Repositories
         [TestCase("angetenar")]
         [TestCase("solaire-of-astora")]
         [TestCase("ilarion-pintilie")]
-        public void TryRemoveById_WhenEntityExists_EntityIsRemoved(string entityId)
+        public void GivenVariousEntityIds_WhenTryRemoveByIdIsCalled_ThenEntityIsRemoved(string entityId)
         {
             repository.Add(new() { Id = entityId });
 
@@ -310,7 +314,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveById_ThenAddSameId_Succeeds()
+        public void GivenEntityRemovedById_WhenSameIdAddedAgain_ThenSucceeds()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -322,7 +326,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveByEntity_ThenAddSameId_NewEntityIsStored()
+        public void GivenEntityRemovedByEntity_WhenSameIdAddedAgain_ThenNewEntityIsStored()
         {
             TestEntityDataObject originalEntity = new()
             {
@@ -341,7 +345,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void RemoveById_WhenRemovingAllEntitiesOneByOne_RepositoryBecomesEmpty()
+        public void GivenMultipleEntities_WhenAllRemovedOneByOne_ThenRepositoryBecomesEmpty()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });

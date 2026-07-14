@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+
 using NuciDAL.DataObjects;
 
 namespace NuciDAL.Repositories
@@ -29,7 +30,7 @@ namespace NuciDAL.Repositories
         : Repository<TKey, TDataObject>, IFileRepository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>
     {
-        volatile bool loadedEntities;
+        private volatile bool loadedEntities;
 
         /// <summary>
         /// Saves the entities to the file.
@@ -187,7 +188,7 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Loads the entities if needed.
         /// </summary>
-        void LoadEntitiesIfNeeded()
+        private void LoadEntitiesIfNeeded()
         {
             if (loadedEntities)
             {
@@ -212,14 +213,14 @@ namespace NuciDAL.Repositories
             }
         }
 
-        void ExecuteWriteOperation(Action action)
+        private void ExecuteWriteOperation(Action action)
         {
             LoadEntitiesIfNeeded();
 
             action();
         }
 
-        TResult ExecuteReadOperation<TResult>(Func<TResult> action)
+        private TResult ExecuteReadOperation<TResult>(Func<TResult> action)
         {
             LoadEntitiesIfNeeded();
 

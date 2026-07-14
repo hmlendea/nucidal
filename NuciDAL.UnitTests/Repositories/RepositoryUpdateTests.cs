@@ -17,7 +17,7 @@ namespace NuciDAL.UnitTests.Repositories
         private static int FirstEntityValue => 613;
         private static int SecondEntityValue => 873;
 
-        private Repository<TestEntityDataObject> repository;
+        Repository<TestEntityDataObject> repository;
 
         [SetUp]
         public void SetUp()
@@ -25,8 +25,10 @@ namespace NuciDAL.UnitTests.Repositories
             repository = new();
         }
 
+        // -- Update ------
+
         [Test]
-        public void Update_WhenEntityExists_UpdatesEntityName()
+        public void GivenEntityExists_WhenUpdateIsCalled_ThenUpdatesEntityName()
         {
             repository.Add(new()
             {
@@ -48,7 +50,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Update_WhenEntityExists_UpdatesEntityValue()
+        public void GivenEntityExists_WhenUpdateIsCalled_ThenUpdatesEntityValue()
         {
             repository.Add(new()
             {
@@ -70,7 +72,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Update_WhenEntityExists_UpdatesBothNameAndValue()
+        public void GivenEntityExists_WhenUpdateIsCalled_ThenUpdatesBothNameAndValue()
         {
             repository.Add(new()
             {
@@ -93,15 +95,13 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Update_WhenEntityDoesNotExist_ThrowsEntityNotFoundException()
-        {
-            Assert.That(
+        public void GivenAbsentEntity_WhenUpdateIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
                 () => repository.Update(new() { Id = AbsentEntityId, Name = FirstEntityName }),
                 Throws.TypeOf<EntityNotFoundException>());
-        }
 
         [Test]
-        public void Update_WhenEntityDoesNotExist_ExceptionCarriesCorrectEntityId()
+        public void GivenAbsentEntity_WhenUpdateIsCalled_ThenExceptionCarriesCorrectEntityId()
         {
             EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
                 () => repository.Update(new() { Id = AbsentEntityId }));
@@ -110,15 +110,13 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Update_WhenRepositoryIsEmpty_ThrowsEntityNotFoundException()
-        {
-            Assert.That(
+        public void GivenEmptyRepository_WhenUpdateIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
                 () => repository.Update(new() { Id = FirstEntityId }),
                 Throws.TypeOf<EntityNotFoundException>());
-        }
 
         [Test]
-        public void Update_StoresCloneNotReference()
+        public void GivenEntity_WhenUpdateIsCalled_ThenStoresCloneNotReference()
         {
             repository.Add(new()
             {
@@ -144,7 +142,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Update_WhenCalledMultipleTimes_StoresLatestVersion()
+        public void GivenEntity_WhenUpdateIsCalledMultipleTimes_ThenStoresLatestVersion()
         {
             repository.Add(new()
             {
@@ -174,7 +172,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Update_DoesNotAffectOtherEntities()
+        public void GivenOneEntityUpdated_WhenUpdateIsCalled_ThenOtherEntitiesAreUnaffected()
         {
             repository.Add(new()
             {
@@ -203,7 +201,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Update_DoesNotChangeEntityCount()
+        public void GivenEntityUpdated_WhenUpdateIsCalled_ThenEntityCountDoesNotChange()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -215,7 +213,7 @@ namespace NuciDAL.UnitTests.Repositories
 
         [TestCase("angetenar", "Iancu Robilă", 613)]
         [TestCase("solaire-of-astora", "Vasile Ciupitu", 873)]
-        public void Update_WithVariousEntities_StoredEntityIsUpdated(
+        public void GivenVariousEntities_WhenUpdateIsCalled_ThenStoredEntityIsUpdated(
             string entityId,
             string updatedName,
             int updatedValue)
@@ -230,8 +228,10 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(stored.Value, Is.EqualTo(updatedValue));
         }
 
+        // -- TryUpdate ------
+
         [Test]
-        public void TryUpdate_WhenEntityExists_UpdatesEntityName()
+        public void GivenEntityExists_WhenTryUpdateIsCalled_ThenUpdatesEntityName()
         {
             repository.Add(new()
             {
@@ -253,7 +253,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryUpdate_WhenEntityExists_UpdatesEntityValue()
+        public void GivenEntityExists_WhenTryUpdateIsCalled_ThenUpdatesEntityValue()
         {
             repository.Add(new()
             {
@@ -275,15 +275,13 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryUpdate_WhenEntityDoesNotExist_DoesNotThrow()
-        {
-            Assert.That(
+        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenDoesNotThrow()
+            => Assert.That(
                 () => repository.TryUpdate(new() { Id = AbsentEntityId, Name = FirstEntityName }),
                 Throws.Nothing);
-        }
 
         [Test]
-        public void TryUpdate_WhenEntityDoesNotExist_InsertsEntity()
+        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenInsertsEntity()
         {
             repository.TryUpdate(new()
             {
@@ -296,7 +294,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryUpdate_WhenEntityDoesNotExist_InsertedEntityHasCorrectName()
+        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenInsertedEntityHasCorrectName()
         {
             repository.TryUpdate(new()
             {
@@ -311,7 +309,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryUpdate_WhenEntityDoesNotExist_EntitiesCountIncreases()
+        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenEntitiesCountIncreases()
         {
             repository.TryUpdate(new() { Id = AbsentEntityId, Name = FirstEntityName });
 
@@ -319,7 +317,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryUpdate_StoresCloneNotReference()
+        public void GivenEntity_WhenTryUpdateIsCalled_ThenStoresCloneNotReference()
         {
             repository.Add(new()
             {
@@ -345,7 +343,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryUpdate_WhenCalledMultipleTimes_StoresLatestVersion()
+        public void GivenEntity_WhenTryUpdateIsCalledMultipleTimes_ThenStoresLatestVersion()
         {
             repository.Add(new()
             {

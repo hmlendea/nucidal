@@ -7,16 +7,9 @@ namespace NuciDAL.IO
     /// <summary>
     /// JSON File Object.
     /// </summary>
-    // TODO: Create an interface
+    // TODO: Create an interface.
     public class JsonFileObject<T>
     {
-        readonly JsonSerializerOptions options = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            WriteIndented = true
-        };
-
         /// <summary>
         /// Gets or sets the type.
         /// </summary>
@@ -34,8 +27,9 @@ namespace NuciDAL.IO
         /// <param name="path">Path.</param>
         public T Read(string path)
         {
-            using FileStream fs = new(path, FileMode.Open, FileAccess.Read);
-            return JsonSerializer.Deserialize<T>(fs, options);
+            using FileStream fileStream = new(path, FileMode.Open, FileAccess.Read);
+
+            return JsonSerializer.Deserialize<T>(fileStream, options);
         }
 
         /// <summary>
@@ -46,7 +40,15 @@ namespace NuciDAL.IO
         public void Write(string path, T obj)
         {
             string json = JsonSerializer.Serialize(obj, options);
+
             File.WriteAllText(path, json);
         }
+
+        private readonly JsonSerializerOptions options = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true
+        };
     }
 }
