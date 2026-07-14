@@ -1,6 +1,4 @@
 using NUnit.Framework;
-
-using NuciDAL.DataObjects;
 using NuciDAL.UnitTests.Stubs;
 
 namespace NuciDAL.UnitTests.DataObjects

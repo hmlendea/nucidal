@@ -17,11 +17,11 @@ namespace NuciDAL.UnitTests.Repositories
         private static string AbsentEntityId => "vasile-ciupitu";
         private static string FirstEntityName => "Vasile Ciupitu";
         private static string SecondEntityName => "Solaire of Astora";
-        private static string ThirdEntityName => "Ilarion Pintilie";
+
         private static int FirstEntityValue => 613;
         private static int SecondEntityValue => 873;
 
-        Repository<TestEntityDataObject> repository;
+        private Repository<TestEntityDataObject> repository;
 
         [SetUp]
         public void SetUp()

@@ -25,24 +25,14 @@ namespace NuciDAL.Repositories
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
-        /// The stored entities.
+        /// Gets the total amount of entities currently stored in this repository.
         /// </summary>
-        protected readonly ConcurrentDictionary<TKey, TDataObject> Entities;
-
-        /// <summary>
-        /// The synchronization root for this repository.
-        /// </summary>
-        protected readonly object SyncRoot = new();
+        public virtual int EntitiesCount => Entities.Count;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Repository"/> class.
         /// </summary>
         public Repository() => Entities = [];
-
-        /// <summary>
-        /// Gets the total amount of entities currently stored in this repository.
-        /// </summary>
-        public virtual int EntitiesCount => Entities.Count;
 
         /// <summary>
         /// Adds the specified entity.
@@ -80,7 +70,7 @@ namespace NuciDAL.Repositories
             => Entities.ContainsKey(id);
 
         /// <summary>
-        /// Get the entity with the specified identifier.
+        /// Gets the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity.</returns>
         /// <param name="id">Identifier.</param>
@@ -135,7 +125,7 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Gets all the entities.
         /// </summary>
-        /// <returns>The entities</returns>
+        /// <returns>The entities.</returns>
         public virtual IEnumerable<TDataObject> GetAll()
             => [.. Entities.Values.Select(CloneEntity)];
 
@@ -205,6 +195,16 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public virtual void TryRemove(TKey id) => ExecuteWrite(() =>
             Entities.TryRemove(id, out _));
+
+        /// <summary>
+        /// The stored entities.
+        /// </summary>
+        protected readonly ConcurrentDictionary<TKey, TDataObject> Entities;
+
+        /// <summary>
+        /// The synchronization root for this repository.
+        /// </summary>
+        protected readonly object SyncRoot = new();
 
         [DoesNotReturn]
         private void ThrowEntityNotFoundException(TKey id)

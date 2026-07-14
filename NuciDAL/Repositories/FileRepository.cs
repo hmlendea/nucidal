@@ -9,10 +9,6 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// File-based repository.
     /// </summary>
-    /// <remarks>
-    /// Initializes a new instance of the <see cref="T:FileRepository"/> class.
-    /// </remarks>
-    /// <param name="fileName">File name.</param>
     public abstract class FileRepository<TDataObject>
         : FileRepository<string, TDataObject>, IFileRepository<TDataObject>
         where TDataObject : EntityBase
@@ -22,15 +18,15 @@ namespace NuciDAL.Repositories
     /// <summary>
     /// File-based repository.
     /// </summary>
-    /// <remarks>
-    /// Initializes a new instance of the <see cref="T:FileRepository"/> class.
-    /// </remarks>
-    /// <param name="fileName">File name.</param>
     public abstract class FileRepository<TKey, TDataObject>
         : Repository<TKey, TDataObject>, IFileRepository<TKey, TDataObject>
         where TDataObject : EntityBase<TKey>
     {
-        private volatile bool loadedEntities;
+        /// <summary>
+        /// Gets the total amount of entities currently stored in this repository.
+        /// </summary>
+        public override int EntitiesCount => ExecuteReadOperation(() =>
+            base.EntitiesCount);
 
         /// <summary>
         /// Saves the entities to the file.
@@ -58,40 +54,6 @@ namespace NuciDAL.Repositories
         }
 
         /// <summary>
-        /// Performs the file save operation.
-        /// </summary>
-        protected abstract void PerformFileSave();
-
-        /// <summary>
-        /// Loads the stored entities into memory.
-        /// </summary>
-        protected void LoadEntities()
-        {
-            IEnumerable<TDataObject> entities = FetchEntitiesFromFile();
-
-            foreach (TDataObject entity in entities)
-            {
-                if (!Entities.TryAdd(entity.Id, entity))
-                {
-                    throw new DuplicateEntityException(
-                        entity.Id.ToString(),
-                        entity.GetType());
-                }
-            }
-        }
-
-        /// <summary>
-        /// Fetches the entities from the file.
-        /// </summary>
-        protected abstract IEnumerable<TDataObject> FetchEntitiesFromFile();
-
-        /// <summary>
-        /// Gets the total amount of entities currently stored in this repository.
-        /// </summary>
-        public override int EntitiesCount => ExecuteReadOperation(() =>
-            base.EntitiesCount);
-
-        /// <summary>
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
@@ -114,7 +76,7 @@ namespace NuciDAL.Repositories
             base.ContainsId(id));
 
         /// <summary>
-        /// Get the entity with the specified identifier.
+        /// Gets the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity.</returns>
         /// <param name="id">Identifier.</param>
@@ -122,7 +84,7 @@ namespace NuciDAL.Repositories
             base.Get(id));
 
         /// <summary>
-        /// Tries to get the entity  with the specified identifier.
+        /// Tries to get the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
@@ -139,7 +101,7 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Gets all the entities.
         /// </summary>
-        /// <returns>The entities</returns>
+        /// <returns>The entities.</returns>
         public override IEnumerable<TDataObject> GetAll() => ExecuteReadOperation(() =>
             base.GetAll());
 
@@ -186,8 +148,35 @@ namespace NuciDAL.Repositories
             base.TryRemove(id));
 
         /// <summary>
-        /// Loads the entities if needed.
+        /// Performs the file save operation.
         /// </summary>
+        protected abstract void PerformFileSave();
+
+        /// <summary>
+        /// Fetches the entities from the file.
+        /// </summary>
+        protected abstract IEnumerable<TDataObject> FetchEntitiesFromFile();
+
+        /// <summary>
+        /// Loads the stored entities into memory.
+        /// </summary>
+        protected void LoadEntities()
+        {
+            IEnumerable<TDataObject> entities = FetchEntitiesFromFile();
+
+            foreach (TDataObject entity in entities)
+            {
+                if (!Entities.TryAdd(entity.Id, entity))
+                {
+                    throw new DuplicateEntityException(
+                        entity.Id.ToString(),
+                        entity.GetType());
+                }
+            }
+        }
+
+        private volatile bool loadedEntities;
+
         private void LoadEntitiesIfNeeded()
         {
             if (loadedEntities)

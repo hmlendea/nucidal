@@ -29,7 +29,13 @@ namespace NuciDAL.IO
         /// <param name="contents">The contents to write.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public static async Task WriteAllTextAsync(string path, string contents, CancellationToken cancellationToken = default)
-            => await File.WriteAllBytesAsync(path, windows1252Encoding.GetBytes(contents.ToCharArray()), cancellationToken);
+        public static async Task WriteAllTextAsync(
+            string path,
+            string contents,
+            CancellationToken cancellationToken = default)
+            => await File.WriteAllBytesAsync(
+                path,
+                windows1252Encoding.GetBytes(contents.ToCharArray()),
+                cancellationToken);
     }
 }

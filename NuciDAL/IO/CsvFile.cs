@@ -31,7 +31,7 @@ namespace NuciDAL.IO
         /// Initializes a new instance of the <see cref="CsvFile"/> class.
         /// </summary>
         /// <param name="filePath">File path.</param>
-        public CsvFile(string filePath) : this(filePath, ',') { }
+        public CsvFile(string filePath) : this(filePath, DefaultFieldSeparator) { }
 
         /// <summary>
         /// Loads the entities.
@@ -85,22 +85,17 @@ namespace NuciDAL.IO
 
         private static char CommentCharacter => '#';
 
+        private static char DefaultFieldSeparator => ',';
+
         private TDataObject ReadLine(string line)
         {
             TDataObject entity = new();
-            Type entityType = entity.GetType();
             string[] fields = line.Split(FieldSeparator);
-
-            // TODO: This shifting is VERY HACKY and should be fixed soon.
-            PropertyInfo[] allProperties = entityType.GetProperties();
-            PropertyInfo[] reorderedProperties = new PropertyInfo[allProperties.Length];
-
-            Array.Copy(allProperties, 0, reorderedProperties, 1, reorderedProperties.Length - 1);
-            reorderedProperties[0] = allProperties[allProperties.Length - 1];
+            PropertyInfo[] reorderedProperties = GetReorderedProperties(entity.GetType());
 
             if (fields.Length < reorderedProperties.Length ||
                 fields.Length != reorderedProperties.Length &&
-                !string.IsNullOrWhiteSpace(fields[fields.Length - 1]))
+                !string.IsNullOrWhiteSpace(fields[^1]))
             {
                 throw new SerializationException(
                     $"Wrong number of CSV fields ({fields.Length}/{reorderedProperties.Length})");
@@ -118,14 +113,7 @@ namespace NuciDAL.IO
 
         private string BuildLine(TDataObject entity)
         {
-            Type entityType = entity.GetType();
-
-            // TODO: This shifting is VERY HACKY and should be fixed soon.
-            PropertyInfo[] allProperties = entityType.GetProperties();
-            PropertyInfo[] reorderedProperties = new PropertyInfo[allProperties.Length];
-
-            Array.Copy(allProperties, 0, reorderedProperties, 1, reorderedProperties.Length - 1);
-            reorderedProperties[0] = allProperties[allProperties.Length - 1];
+            PropertyInfo[] reorderedProperties = GetReorderedProperties(entity.GetType());
 
             IEnumerable<string> fieldValues = reorderedProperties
                 .Select(property => GetPropertyFieldValue(entity, property));
@@ -143,6 +131,18 @@ namespace NuciDAL.IO
             }
 
             return value.ToString();
+        }
+
+        // TODO: This shifting is VERY HACKY and should be fixed soon.
+        private static PropertyInfo[] GetReorderedProperties(Type entityType)
+        {
+            PropertyInfo[] allProperties = entityType.GetProperties();
+            PropertyInfo[] reorderedProperties = new PropertyInfo[allProperties.Length];
+
+            Array.Copy(allProperties, 0, reorderedProperties, 1, reorderedProperties.Length - 1);
+            reorderedProperties[0] = allProperties[^1];
+
+            return reorderedProperties;
         }
     }
 }

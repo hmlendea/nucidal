@@ -60,7 +60,7 @@ namespace NuciDAL.Repositories
         TDataObject GetFirst(Func<TDataObject, bool> predicate);
 
         /// <summary>
-        /// Tries to get the entity  with the specified identifier.
+        /// Tries to get the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>

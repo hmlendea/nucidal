@@ -12,7 +12,7 @@ namespace NuciDAL.UnitTests.Repositories
         private static string SecondEntityId => "solaire-of-astora";
         private static string ThirdEntityId => "ilarion-pintilie";
 
-        Repository<TestEntityDataObject> repository;
+        private Repository<TestEntityDataObject> repository;
 
         [SetUp]
         public void SetUp()

@@ -16,7 +16,7 @@ namespace NuciDAL.UnitTests.Repositories
         private static int FirstEntityValue => 613;
         private static int SecondEntityValue => 873;
 
-        Repository<TestEntityDataObject> repository;
+        private Repository<TestEntityDataObject> repository;
 
         [SetUp]
         public void SetUp()

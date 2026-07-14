@@ -16,7 +16,7 @@ namespace NuciDAL.UnitTests.Repositories
         private static string SecondEntityName => "Solaire of Astora";
         private static int FirstEntityValue => 613;
 
-        Repository<TestEntityDataObject> repository;
+        private Repository<TestEntityDataObject> repository;
 
         [SetUp]
         public void SetUp()
