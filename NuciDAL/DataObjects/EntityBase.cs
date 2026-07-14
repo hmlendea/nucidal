@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+
 using NuciExtensions;
 
 namespace NuciDAL.DataObjects
@@ -80,15 +81,24 @@ namespace NuciDAL.DataObjects
         {
             PropertyInfo[] props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            int hash = 17;
+            int hash = InitialHashValue;
 
             foreach (PropertyInfo prop in props)
             {
-                hash = hash * 31 + (prop.GetValue(this)?.GetHashCode() ?? 0);
+                object propertyValue = prop.GetValue(this);
+
+                if (propertyValue is not null)
+                {
+                    hash = hash * HashCodeMultiplier + propertyValue.GetHashCode();
+                }
             }
 
             return hash;
         }
+
+        private static int InitialHashValue => 17;
+
+        private static int HashCodeMultiplier => 31;
 
         /// <summary>
         /// Returns a string that represents the current object in JSON format.

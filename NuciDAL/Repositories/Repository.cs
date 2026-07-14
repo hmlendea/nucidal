@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using NuciDAL.DataObjects;
+
 using NuciExtensions;
+
+using NuciDAL.DataObjects;
 
 namespace NuciDAL.Repositories
 {
@@ -22,24 +25,14 @@ namespace NuciDAL.Repositories
         where TDataObject : EntityBase<TKey>
     {
         /// <summary>
-        /// The stored entities.
+        /// Gets the total amount of entities currently stored in this repository.
         /// </summary>
-        protected readonly ConcurrentDictionary<TKey, TDataObject> Entities;
-
-        /// <summary>
-        /// The synchronization root for this repository.
-        /// </summary>
-        protected readonly object SyncRoot = new();
+        public virtual int EntitiesCount => Entities.Count;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Repository"/> class.
         /// </summary>
         public Repository() => Entities = [];
-
-        /// <summary>
-        /// Gets the total amount of entities currently stored in this repository.
-        /// </summary>
-        public virtual int EntitiesCount => Entities.Count;
 
         /// <summary>
         /// Adds the specified entity.
@@ -77,7 +70,7 @@ namespace NuciDAL.Repositories
             => Entities.ContainsKey(id);
 
         /// <summary>
-        /// Get the entity with the specified identifier.
+        /// Gets the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity.</returns>
         /// <param name="id">Identifier.</param>
@@ -96,7 +89,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>A random entity.</returns>
         public virtual TDataObject GetRandom()
-            => CloneEntity(GetAll().GetRandomElement());
+            => CloneEntity(Entities.Values.GetRandomElement());
 
         /// <summary>
         /// Gets the first entity matching the specified predicate.
@@ -112,7 +105,14 @@ namespace NuciDAL.Repositories
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
         public virtual TDataObject TryGet(TKey id)
-            => CloneEntity(Entities.TryGetValue(id, out TDataObject entity) ? entity : null);
+        {
+            if (!Entities.TryGetValue(id, out TDataObject entity))
+            {
+                return null;
+            }
+
+            return CloneEntity(entity);
+        }
 
         /// <summary>
         /// Tries to get the first entity matching the specified predicate.
@@ -125,7 +125,7 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Gets all the entities.
         /// </summary>
-        /// <returns>The entities</returns>
+        /// <returns>The entities.</returns>
         public virtual IEnumerable<TDataObject> GetAll()
             => [.. Entities.Values.Select(CloneEntity)];
 
@@ -196,12 +196,23 @@ namespace NuciDAL.Repositories
         public virtual void TryRemove(TKey id) => ExecuteWrite(() =>
             Entities.TryRemove(id, out _));
 
-        void ThrowEntityNotFoundException(TKey id)
+        /// <summary>
+        /// The stored entities.
+        /// </summary>
+        protected readonly ConcurrentDictionary<TKey, TDataObject> Entities;
+
+        /// <summary>
+        /// The synchronization root for this repository.
+        /// </summary>
+        protected readonly object SyncRoot = new();
+
+        [DoesNotReturn]
+        private void ThrowEntityNotFoundException(TKey id)
             => throw new EntityNotFoundException(
                 id.ToString(),
                 typeof(TDataObject));
 
-        void ExecuteWrite(Action action)
+        private void ExecuteWrite(Action action)
         {
             lock (SyncRoot)
             {
@@ -209,15 +220,7 @@ namespace NuciDAL.Repositories
             }
         }
 
-        TResult ExecuteWrite<TResult>(Func<TResult> action)
-        {
-            lock (SyncRoot)
-            {
-                return action();
-            }
-        }
-
-        TDataObject CloneEntity(TDataObject entity)
+        private TDataObject CloneEntity(TDataObject entity)
         {
             if (entity is null)
             {

@@ -17,7 +17,7 @@ namespace NuciDAL.IO
         /// Gets the name of the file.
         /// </summary>
         /// <value>The name of the file.</value>
-        public string FileName { get; private set; } = fileName;
+        public string FileName { get; } = fileName;
 
         /// <summary>
         /// Loads the entities.
@@ -25,16 +25,12 @@ namespace NuciDAL.IO
         /// <returns>The entities.</returns>
         public IEnumerable<T> LoadEntities()
         {
-            XmlSerializer xs = new(typeof(List<T>));
-            IEnumerable<T> entities = null;
+            XmlSerializer serialiser = new(typeof(List<T>));
 
-            using (FileStream fs = new(FileName, FileMode.Open, FileAccess.Read))
-            {
-                using StreamReader sr = new(fs);
-                entities = (IEnumerable<T>)xs.Deserialize(sr);
-            }
+            using FileStream fileStream = new(FileName, FileMode.Open, FileAccess.Read);
+            using StreamReader streamReader = new(fileStream);
 
-            return entities;
+            return (IEnumerable<T>)serialiser.Deserialize(streamReader);
         }
 
         /// <summary>
@@ -44,7 +40,9 @@ namespace NuciDAL.IO
         public void SaveEntities(IEnumerable<T> entities)
         {
             XmlSerializer serialiser = new(typeof(List<T>));
+
             using StringWriter stringWriter = new();
+
             serialiser.Serialize(stringWriter, entities);
 
             File.WriteAllText(FileName, stringWriter.ToString());

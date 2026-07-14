@@ -23,16 +23,16 @@ namespace NuciDAL.UnitTests.Repositories
             repository = new();
         }
 
-        [Test]
-        public void ContainsId_WhenRepositoryIsEmpty_ReturnsFalse()
-        {
-            bool result = repository.ContainsId(FirstEntityId);
-
-            Assert.That(result, Is.False);
-        }
+        // -- ContainsId ------
 
         [Test]
-        public void ContainsId_WhenEntityWithIdExists_ReturnsTrue()
+        public void GivenEmptyRepository_WhenContainsIdIsCalled_ThenReturnsFalse()
+            => Assert.That(
+                repository.ContainsId(FirstEntityId),
+                Is.False);
+
+        [Test]
+        public void GivenEntityExists_WhenContainsIdIsCalled_ThenReturnsTrue()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -42,7 +42,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_WhenEntityWithIdDoesNotExist_ReturnsFalse()
+        public void GivenEntityDoesNotExist_WhenContainsIdIsCalled_ThenReturnsFalse()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -52,7 +52,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_WhenEntityIsAddedViaTryAdd_ReturnsTrue()
+        public void GivenEntityAddedViaTryAdd_WhenContainsIdIsCalled_ThenReturnsTrue()
         {
             repository.TryAdd(new() { Id = FirstEntityId });
 
@@ -62,7 +62,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_WhenEntityIsRemovedByEntity_ReturnsFalse()
+        public void GivenEntityRemovedByEntity_WhenContainsIdIsCalled_ThenReturnsFalse()
         {
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
@@ -75,7 +75,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_WhenEntityIsRemovedById_ReturnsFalse()
+        public void GivenEntityRemovedById_WhenContainsIdIsCalled_ThenReturnsFalse()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Remove(FirstEntityId);
@@ -86,7 +86,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_AfterEntityIsUpdated_StillReturnsTrue()
+        public void GivenUpdatedEntity_WhenContainsIdIsCalled_ThenReturnsTrue()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
             repository.Update(new() { Id = FirstEntityId, Name = SecondEntityName });
@@ -97,7 +97,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_WithMultipleEntities_ReturnsTrueForEachExistingId()
+        public void GivenMultipleEntities_WhenContainsIdIsCalled_ThenReturnsTrueForEachExistingId()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -109,7 +109,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_WithMultipleEntities_ReturnsFalseForAbsentId()
+        public void GivenMultipleEntities_WhenContainsIdIsCalledForAbsentId_ThenReturnsFalse()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -121,7 +121,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_WhenEntityIsAddedRemovedAndReAdded_ReturnsTrue()
+        public void GivenEntityAddedRemovedAndReAdded_WhenContainsIdIsCalled_ThenReturnsTrue()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Remove(FirstEntityId);
@@ -135,7 +135,7 @@ namespace NuciDAL.UnitTests.Repositories
         [TestCase("angetenar")]
         [TestCase("solaire-of-astora")]
         [TestCase("ilarion-pintilie")]
-        public void ContainsId_WhenEntityIsAdded_ReturnsTrue(string entityId)
+        public void GivenEntityIsAdded_WhenContainsIdIsCalled_ThenReturnsTrue(string entityId)
         {
             repository.Add(new() { Id = entityId });
 
@@ -145,7 +145,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void ContainsId_WhenOnlyOtherEntitiesExist_ReturnsFalse()
+        public void GivenOnlyOtherEntitiesExist_WhenContainsIdIsCalled_ThenReturnsFalse()
         {
             repository.Add(new() { Id = SecondEntityId });
             repository.Add(new() { Id = ThirdEntityId });

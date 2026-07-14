@@ -24,8 +24,10 @@ namespace NuciDAL.UnitTests.Repositories
             repository = new();
         }
 
+        // -- Add ------
+
         [Test]
-        public void Add_WhenEntityIsValid_MakesEntityRetrievable()
+        public void GivenValidEntity_WhenAdded_ThenEntityIsRetrievable()
         {
             repository.Add(new()
             {
@@ -40,7 +42,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenEntityIsValid_StoredEntityHasCorrectId()
+        public void GivenValidEntity_WhenAdded_ThenStoredEntityHasCorrectId()
         {
             repository.Add(new()
             {
@@ -55,7 +57,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenEntityIsValid_StoredEntityHasCorrectName()
+        public void GivenValidEntity_WhenAdded_ThenStoredEntityHasCorrectName()
         {
             repository.Add(new()
             {
@@ -70,7 +72,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenEntityIsValid_StoredEntityHasCorrectValue()
+        public void GivenValidEntity_WhenAdded_ThenStoredEntityHasCorrectValue()
         {
             repository.Add(new()
             {
@@ -85,7 +87,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenEntityWithSameIdAlreadyExists_ThrowsEntityAlreadyExistsException()
+        public void GivenDuplicateEntityId_WhenAdded_ThenThrowsEntityAlreadyExistsException()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -95,7 +97,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenEntityWithSameIdAlreadyExists_ExceptionCarriesCorrectEntityId()
+        public void GivenDuplicateEntityId_WhenAdded_ThenExceptionCarriesCorrectEntityId()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -106,7 +108,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenEntityWithSameIdAlreadyExists_OriginalEntityRemainsUnchanged()
+        public void GivenDuplicateEntityId_WhenAdded_ThenOriginalEntityRemainsUnchanged()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -120,7 +122,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenMultipleEntitiesWithDifferentIds_AllEntitiesAreRetrievable()
+        public void GivenMultipleDistinctEntities_WhenAllAdded_ThenAllAreRetrievable()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -132,7 +134,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenMultipleEntitiesWithDifferentIds_EntitiesCountIsCorrect()
+        public void GivenMultipleDistinctEntities_WhenAllAdded_ThenEntitiesCountIsCorrect()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -142,7 +144,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenEntityIsAdded_StoredEntityIsAClone()
+        public void GivenEntity_WhenAdded_ThenStoredEntityIsAClone()
         {
             TestEntityDataObject originalEntity = new()
             {
@@ -163,7 +165,7 @@ namespace NuciDAL.UnitTests.Repositories
         [TestCase("angetenar", "Iancu Robilă", 613)]
         [TestCase("solaire-of-astora", "Vasile Ciupitu", 873)]
         [TestCase("ilarion-pintilie", "Ilarion Pintilie", 613)]
-        public void Add_WithVariousEntities_StoredEntityMatchesOriginal(
+        public void GivenVariousEntities_WhenAdded_ThenStoredEntityMatchesOriginal(
             string entityId,
             string entityName,
             int entityValue)
@@ -178,7 +180,62 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryAdd_WhenEntityIsValid_MakesEntityRetrievable()
+        public void GivenEntityWithNullName_WhenAdded_ThenStoredEntityHasNullName()
+        {
+            repository.Add(new() { Id = FirstEntityId, Name = null });
+
+            TestEntityDataObject stored = repository.Get(FirstEntityId);
+
+            Assert.That(stored.Name, Is.Null);
+        }
+
+        [Test]
+        public void GivenEntityAddedAndRemoved_WhenSameIdAddedAgain_ThenSucceeds()
+        {
+            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
+            repository.Remove(FirstEntityId);
+
+            Assert.That(
+                () => repository.Add(new() { Id = FirstEntityId, Name = SecondEntityName }),
+                Throws.Nothing);
+        }
+
+        [Test]
+        public void GivenEntityAddedAndRemoved_WhenSameIdAddedAgain_ThenNewEntityIsStored()
+        {
+            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
+            repository.Remove(FirstEntityId);
+            repository.Add(new() { Id = FirstEntityId, Name = SecondEntityName });
+
+            TestEntityDataObject stored = repository.Get(FirstEntityId);
+
+            Assert.That(stored.Name, Is.EqualTo(SecondEntityName));
+        }
+
+        [Test]
+        public void GivenEntityWithFirstValue_WhenAdded_ThenStoredValueMatchesOriginal()
+        {
+            repository.Add(new() { Id = FirstEntityId, Value = FirstEntityValue });
+
+            TestEntityDataObject stored = repository.Get(FirstEntityId);
+
+            Assert.That(stored.Value, Is.EqualTo(FirstEntityValue));
+        }
+
+        [Test]
+        public void GivenEntityWithSecondValue_WhenAdded_ThenStoredValueMatchesOriginal()
+        {
+            repository.Add(new() { Id = FirstEntityId, Value = SecondEntityValue });
+
+            TestEntityDataObject stored = repository.Get(FirstEntityId);
+
+            Assert.That(stored.Value, Is.EqualTo(SecondEntityValue));
+        }
+
+        // -- TryAdd ------
+
+        [Test]
+        public void GivenValidEntity_WhenTryAdded_ThenEntityIsRetrievable()
         {
             repository.TryAdd(new()
             {
@@ -193,7 +250,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryAdd_WhenEntityIsValid_StoredEntityHasCorrectName()
+        public void GivenValidEntity_WhenTryAdded_ThenStoredEntityHasCorrectName()
         {
             repository.TryAdd(new()
             {
@@ -208,7 +265,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryAdd_WhenEntityWithSameIdAlreadyExists_DoesNotThrow()
+        public void GivenDuplicateEntityId_WhenTryAdded_ThenDoesNotThrow()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
 
@@ -218,7 +275,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryAdd_WhenEntityWithSameIdAlreadyExists_DoesNotIncreaseEntitiesCount()
+        public void GivenDuplicateEntityId_WhenTryAdded_ThenDoesNotIncreaseEntitiesCount()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.TryAdd(new() { Id = FirstEntityId });
@@ -227,7 +284,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryAdd_WhenEntityWithSameIdAlreadyExists_DoesNotOverwriteExistingEntity()
+        public void GivenDuplicateEntityId_WhenTryAdded_ThenDoesNotOverwriteExistingEntity()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
             repository.TryAdd(new() { Id = FirstEntityId, Name = SecondEntityName });
@@ -238,7 +295,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryAdd_WhenEntityIsAdded_StoredEntityIsAClone()
+        public void GivenEntity_WhenTryAdded_ThenStoredEntityIsAClone()
         {
             TestEntityDataObject originalEntity = new()
             {
@@ -259,7 +316,7 @@ namespace NuciDAL.UnitTests.Repositories
         [TestCase("angetenar")]
         [TestCase("solaire-of-astora")]
         [TestCase("ilarion-pintilie")]
-        public void TryAdd_WithVariousEntityIds_EntityIsRetrievable(string entityId)
+        public void GivenVariousEntityIds_WhenTryAdded_ThenEntityIsRetrievable(string entityId)
         {
             repository.TryAdd(new() { Id = entityId });
 
@@ -267,7 +324,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void TryAdd_WhenAddingMultipleDistinctEntities_AllAreRetrievable()
+        public void GivenMultipleDistinctEntities_WhenAllTryAdded_ThenAllAreRetrievable()
         {
             repository.TryAdd(new() { Id = FirstEntityId });
             repository.TryAdd(new() { Id = SecondEntityId });
@@ -277,66 +334,13 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void Add_WhenEntityWithNullNameIsAdded_StoredEntityHasNullName()
-        {
-            repository.Add(new() { Id = FirstEntityId, Name = null });
-
-            TestEntityDataObject stored = repository.Get(FirstEntityId);
-
-            Assert.That(stored.Name, Is.Null);
-        }
-
-        [Test]
-        public void TryAdd_WhenEntityWithNullNameIsAdded_StoredEntityHasNullName()
+        public void GivenEntityWithNullName_WhenTryAdded_ThenStoredEntityHasNullName()
         {
             repository.TryAdd(new() { Id = FirstEntityId, Name = null });
 
             TestEntityDataObject stored = repository.Get(FirstEntityId);
 
             Assert.That(stored.Name, Is.Null);
-        }
-
-        [Test]
-        public void Add_ThenRemove_ThenAddSameId_Succeeds()
-        {
-            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
-            repository.Remove(FirstEntityId);
-
-            Assert.That(
-                () => repository.Add(new() { Id = FirstEntityId, Name = SecondEntityName }),
-                Throws.Nothing);
-        }
-
-        [Test]
-        public void Add_ThenRemove_ThenAddSameId_NewEntityIsStored()
-        {
-            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
-            repository.Remove(FirstEntityId);
-            repository.Add(new() { Id = FirstEntityId, Name = SecondEntityName });
-
-            TestEntityDataObject stored = repository.Get(FirstEntityId);
-
-            Assert.That(stored.Name, Is.EqualTo(SecondEntityName));
-        }
-
-        [Test]
-        public void Add_WhenFirstEntityAddedRetrievedEntityValueMatches()
-        {
-            repository.Add(new() { Id = FirstEntityId, Value = FirstEntityValue });
-
-            TestEntityDataObject stored = repository.Get(FirstEntityId);
-
-            Assert.That(stored.Value, Is.EqualTo(FirstEntityValue));
-        }
-
-        [Test]
-        public void Add_WhenSecondEntityAddedRetrievedEntityValueMatches()
-        {
-            repository.Add(new() { Id = FirstEntityId, Value = SecondEntityValue });
-
-            TestEntityDataObject stored = repository.Get(FirstEntityId);
-
-            Assert.That(stored.Value, Is.EqualTo(SecondEntityValue));
         }
     }
 }

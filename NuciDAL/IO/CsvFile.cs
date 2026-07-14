@@ -16,21 +16,22 @@ namespace NuciDAL.IO
     /// <param name="filePath">File path.</param>
     public class CsvFile<TDataObject>(string filePath, char fieldSeparator) where TDataObject : new()
     {
-        const char CommentCharacter = '#';
-
         /// <summary>
         /// Gets the name of the file.
         /// </summary>
         /// <value>The name of the file.</value>
-        public string FilePath { get; private set; } = filePath;
+        public string FilePath { get; } = filePath;
 
-        public char FieldSeparator { get; private set; } = fieldSeparator;
+        /// <summary>
+        /// Gets the field separator character.
+        /// </summary>
+        public char FieldSeparator { get; } = fieldSeparator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CsvFile"/> class.
         /// </summary>
         /// <param name="filePath">File path.</param>
-        public CsvFile(string filePath) : this(filePath, ',') { }
+        public CsvFile(string filePath) : this(filePath, DefaultFieldSeparator) { }
 
         /// <summary>
         /// Loads the entities.
@@ -43,9 +44,10 @@ namespace NuciDAL.IO
                 return [];
             }
 
-            IList<TDataObject> entities = [];
+            List<TDataObject> entities = [];
 
             int lineNumber = 0;
+
             try
             {
                 foreach (string line in File.ReadAllLines(FilePath))
@@ -63,7 +65,8 @@ namespace NuciDAL.IO
             }
             catch (Exception ex)
             {
-                throw new SerializationException($"Failed while parsing line {lineNumber}: {ex.Message}", ex);
+                throw new SerializationException(
+                    $"Failed while parsing line {lineNumber}: {ex.Message}", ex);
             }
 
             return entities;
@@ -76,31 +79,31 @@ namespace NuciDAL.IO
         public void SaveEntities(IEnumerable<TDataObject> entities)
         {
             IEnumerable<string> lines = entities.Select(entity => BuildLine(entity));
+
             File.WriteAllLines(FilePath, lines);
         }
 
-        TDataObject ReadLine(string line)
+        private static char CommentCharacter => '#';
+
+        private static char DefaultFieldSeparator => ',';
+
+        private TDataObject ReadLine(string line)
         {
             TDataObject entity = new();
-            Type type = entity.GetType();
             string[] fields = line.Split(FieldSeparator);
+            PropertyInfo[] reorderedProperties = GetReorderedProperties(entity.GetType());
 
-            // TODO: This shifting is VERY HACKY and should be fixed soon
-            PropertyInfo[] properties2 = type.GetProperties();
-            PropertyInfo[] properties = new PropertyInfo[properties2.Length];
-
-            Array.Copy(properties2, 0, properties, 1, properties.Length - 1);
-            properties[0] = properties2[properties.Length - 1];
-
-            if (fields.Length < properties.Length ||
-                fields.Length != properties.Length && !string.IsNullOrWhiteSpace(fields[fields.Length - 1]))
+            if (fields.Length < reorderedProperties.Length ||
+                fields.Length != reorderedProperties.Length &&
+                !string.IsNullOrWhiteSpace(fields[^1]))
             {
-                throw new SerializationException($"Wrong number of CSV fields ({fields.Length}/{properties.Length})");
+                throw new SerializationException(
+                    $"Wrong number of CSV fields ({fields.Length}/{reorderedProperties.Length})");
             }
 
-            for (int i = 0; i < properties.Length; i++)
+            for (int i = 0; i < reorderedProperties.Length; i++)
             {
-                PropertyInfo property = properties[i];
+                PropertyInfo property = reorderedProperties[i];
                 object value = Convert.ChangeType(fields[i], property.PropertyType);
                 property.SetValue(entity, value, null);
             }
@@ -108,33 +111,38 @@ namespace NuciDAL.IO
             return entity;
         }
 
-        string BuildLine(TDataObject entity)
+        private string BuildLine(TDataObject entity)
         {
-            Type type = entity.GetType();
-            string line = string.Empty;
+            PropertyInfo[] reorderedProperties = GetReorderedProperties(entity.GetType());
 
-            // TODO: This shifting is VERY HACKY and should be fixed soon
-            PropertyInfo[] properties2 = type.GetProperties();
-            PropertyInfo[] properties = new PropertyInfo[properties2.Length];
+            IEnumerable<string> fieldValues = reorderedProperties
+                .Select(property => GetPropertyFieldValue(entity, property));
 
-            Array.Copy(properties2, 0, properties, 1, properties.Length - 1);
-            properties[0] = properties2[properties.Length - 1];
+            return string.Join(FieldSeparator, fieldValues);
+        }
 
-            foreach (PropertyInfo property in properties)
+        private static string GetPropertyFieldValue(TDataObject entity, PropertyInfo property)
+        {
+            object value = property.GetValue(entity);
+
+            if (value is null)
             {
-                object propertyValue = property.GetValue(entity);
-
-                if (propertyValue is null)
-                {
-                    line += FieldSeparator;
-                }
-                else
-                {
-                    line += propertyValue.ToString() + FieldSeparator;
-                }
+                return string.Empty;
             }
 
-            return line.Substring(0, line.Length - 1);
+            return value.ToString();
+        }
+
+        // TODO: This shifting is VERY HACKY and should be fixed soon.
+        private static PropertyInfo[] GetReorderedProperties(Type entityType)
+        {
+            PropertyInfo[] allProperties = entityType.GetProperties();
+            PropertyInfo[] reorderedProperties = new PropertyInfo[allProperties.Length];
+
+            Array.Copy(allProperties, 0, reorderedProperties, 1, reorderedProperties.Length - 1);
+            reorderedProperties[0] = allProperties[^1];
+
+            return reorderedProperties;
         }
     }
 }

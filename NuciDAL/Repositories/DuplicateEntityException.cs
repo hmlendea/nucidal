@@ -16,7 +16,6 @@ namespace NuciDAL.Repositories
         public DuplicateEntityException(EntityBase entity)
             : base(entity, $"The {entity.Id} {entity.GetType().Name} entity is duplicated.")
         {
-            
         }
         
         /// <summary>
@@ -27,7 +26,6 @@ namespace NuciDAL.Repositories
         public DuplicateEntityException(string entityId, Type entityType)
             : base(entityId, entityType, $"The {entityId} {entityType.Name} entity is duplicated.")
         {
-            
         }
 
         /// <summary>
@@ -38,7 +36,6 @@ namespace NuciDAL.Repositories
         public DuplicateEntityException(string entityId, string entityType)
             : base(entityId, entityType, $"The {entityId} {entityType} entity is duplicated.")
         {
-            
         }
 
         /// <summary>
@@ -49,7 +46,6 @@ namespace NuciDAL.Repositories
         public DuplicateEntityException(EntityBase entity, Exception innerException)
             : base(entity, $"The {entity.Id} {entity.GetType().Name} entity is duplicated.", innerException)
         {
-            
         }
 
         /// <summary>
@@ -61,7 +57,6 @@ namespace NuciDAL.Repositories
         public DuplicateEntityException(string entityId, Type entityType, Exception innerException)
             : base(entityId, entityType, $"The {entityId} {entityType.Name} entity is duplicated.", innerException)
         {
-            
         }
 
         /// <summary>
@@ -73,7 +68,6 @@ namespace NuciDAL.Repositories
         public DuplicateEntityException(string entityId, string entityType, Exception innerException)
             : base(entityId, entityType, $"The {entityId} {entityType} entity is duplicated.", innerException)
         {
-            
         }
     }
 }

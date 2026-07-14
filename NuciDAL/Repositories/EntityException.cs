@@ -5,7 +5,7 @@ using NuciDAL.DataObjects;
 namespace NuciDAL.Repositories
 {
     /// <summary>
-    /// Duplicate entity exception.
+    /// Entity exception.
     /// </summary>
     public abstract class EntityException : Exception
     {

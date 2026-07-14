@@ -13,17 +13,11 @@ namespace NuciDAL.IO
     /// <param name="fileName">File name.</param>
     public class JsonFileCollection<T>(string fileName)
     {
-        readonly JsonSerializerOptions options = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true
-        };
-
         /// <summary>
         /// Gets the name of the file.
         /// </summary>
         /// <value>The name of the file.</value>
-        public string FileName { get; private set; } = fileName;
+        public string FileName { get; } = fileName;
 
         /// <summary>
         /// Loads the entities from the JSON file.
@@ -31,17 +25,10 @@ namespace NuciDAL.IO
         /// <returns>The entities.</returns>
         public IEnumerable<T> LoadEntities()
         {
-            IEnumerable<T> entities = null;
+            using FileStream fileStream = new(FileName, FileMode.Open, FileAccess.Read);
+            using StreamReader streamReader = new(fileStream);
 
-            using (FileStream fs = new(FileName, FileMode.Open, FileAccess.Read))
-            {
-                using StreamReader sr = new(fs);
-                string json = sr.ReadToEnd();
-
-                entities = JsonSerializer.Deserialize<IEnumerable<T>>(json, options);
-            }
-
-            return entities;
+            return JsonSerializer.Deserialize<IEnumerable<T>>(streamReader.ReadToEnd(), options);
         }
 
         /// <summary>
@@ -52,10 +39,16 @@ namespace NuciDAL.IO
         {
             string json = JsonSerializer.Serialize(entities, options);
 
-            using FileStream fs = new(FileName, FileMode.Create, FileAccess.Write);
-            using StreamWriter sw = new(fs);
+            using FileStream fileStream = new(FileName, FileMode.Create, FileAccess.Write);
+            using StreamWriter streamWriter = new(fileStream);
 
-            sw.Write(json);
+            streamWriter.Write(json);
         }
+
+        private readonly JsonSerializerOptions options = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
     }
 }

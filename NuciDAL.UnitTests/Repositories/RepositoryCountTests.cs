@@ -20,14 +20,16 @@ namespace NuciDAL.UnitTests.Repositories
             repository = new();
         }
 
-        [Test]
-        public void EntitiesCount_WhenRepositoryIsEmpty_ReturnsZero()
-        {
-            Assert.That(repository.EntitiesCount, Is.EqualTo(0));
-        }
+        // -- EntitiesCount ------
 
         [Test]
-        public void EntitiesCount_WhenOneEntityIsAdded_ReturnsOne()
+        public void GivenEmptyRepository_WhenEntitiesCountIsRead_ThenReturnsZero()
+            => Assert.That(
+                repository.EntitiesCount,
+                Is.EqualTo(0));
+
+        [Test]
+        public void GivenOneAddedEntity_WhenEntitiesCountIsRead_ThenReturnsOne()
         {
             repository.Add(new() { Id = FirstEntityId });
 
@@ -35,7 +37,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void EntitiesCount_WhenTwoEntitiesAreAdded_ReturnsTwo()
+        public void GivenTwoAddedEntities_WhenEntitiesCountIsRead_ThenReturnsTwo()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -44,7 +46,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void EntitiesCount_WhenThreeEntitiesAreAdded_ReturnsThree()
+        public void GivenThreeAddedEntities_WhenEntitiesCountIsRead_ThenReturnsThree()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -54,7 +56,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void EntitiesCount_AfterRemovingOneOfTwoEntities_ReturnsOne()
+        public void GivenTwoEntitiesAndOneRemoved_WhenEntitiesCountIsRead_ThenReturnsOne()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -65,7 +67,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void EntitiesCount_AfterRemovingAllEntities_ReturnsZero()
+        public void GivenAllEntitiesRemoved_WhenEntitiesCountIsRead_ThenReturnsZero()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Add(new() { Id = SecondEntityId });
@@ -77,7 +79,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void EntitiesCount_AfterAddingAndRemovingTheSameEntity_ReturnsZero()
+        public void GivenEntityAddedAndRemoved_WhenEntitiesCountIsRead_ThenReturnsZero()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.Remove(FirstEntityId);
@@ -86,7 +88,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void EntitiesCount_WhenEntityIsAddedViaTryAdd_CountIncreases()
+        public void GivenEntityAddedViaTryAdd_WhenEntitiesCountIsRead_ThenReturnsOne()
         {
             repository.TryAdd(new() { Id = FirstEntityId });
 
@@ -94,7 +96,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void EntitiesCount_WhenDuplicateIsAddedViaTryAdd_CountDoesNotIncrease()
+        public void GivenDuplicateEntityAddedViaTryAdd_WhenEntitiesCountIsRead_ThenCountIsOne()
         {
             repository.Add(new() { Id = FirstEntityId });
             repository.TryAdd(new() { Id = FirstEntityId });
