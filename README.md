@@ -26,6 +26,7 @@ NuciDAL is a lightweight data access layer helper library for .NET. It provides 
   - [Release](#release)
   - [Dependencies](#dependencies)
 - [Project Structure](#project-structure)
+- [Architecture](#architecture)
 - [Contributing](#contributing)
 - [Supporting the Project](#supporting-the-project)
 - [License](#license)
@@ -156,6 +157,10 @@ The key directories inside `NuciDAL/` are:
 | `DataObjects/` | Base entity types, including generic and string-keyed entity foundations |
 | `IO/` | File helpers for CSV, JSON, XML, and Windows-1252 encoded content |
 | `Repositories/` | Repository interfaces, in-memory implementation, file-backed repositories, and domain exceptions |
+
+## 🏗️ Architecture
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for a structural synopsis and component interactions.
 
 ## 🤝 Contributing
 
