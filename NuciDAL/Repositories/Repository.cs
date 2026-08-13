@@ -130,6 +130,14 @@ namespace NuciDAL.Repositories
             => [.. Entities.Values.Select(CloneEntity)];
 
         /// <summary>
+        /// Finds entities matching the specified predicate using lazy evaluation.
+        /// </summary>
+        /// <returns>An enumerable of matching entities, evaluated lazily using LINQ-to-Objects.</returns>
+        /// <param name="predicate">Predicate used to filter entities.</param>
+        public virtual IEnumerable<TDataObject> Find(Func<TDataObject, bool> predicate)
+            => GetAll().Where(predicate).AsEnumerable();
+
+        /// <summary>
         /// Updates the specified entity's fields.
         /// </summary>
         /// <param name="entity">Entity.</param>
