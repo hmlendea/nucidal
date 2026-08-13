@@ -5,19 +5,18 @@
 
 # NuciDAL
 
-NuciDAL is a lightweight Data Access Layer helper library for .NET. It provides generic repository interfaces with both in-memory and file-backed implementations (JSON, XML, CSV), enabling seamless data persistence whilst maintaining type safety and a consistent API across storage backends. Ideal for applications requiring flexible data access patterns without the complexity of full-featured ORMs.
+A lightweight Data Access Layer helper library for .NET. It provides generic repository interfaces with both in-memory and file-backed implementations (JSON, XML, CSV), enabling seamless data persistence whilst maintaining type safety and a consistent API across storage backends. Ideal for applications requiring flexible data access patterns without the complexity of full-featured ORMs.
 
 ## 📑 Table of Contents
 
-- [Capabilities](#-capabilities)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Exception Model](#exception-model)
-- [Development](#-development)
-- [Project Structure](#-project-structure)
-- [Contributing](#-contributing)
-- [Supporting the Project](#-supporting-the-project)
-- [License](#-license)
+- [Capabilities](#capabilities)
+- [Usage](#usage)
+- [Installation](#installation)
+- [Development](#development)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [Supporting the Project](#supporting-the-project)
+- [License](#license)
 
 ## ✨ Capabilities
 
@@ -27,23 +26,8 @@ NuciDAL is a lightweight Data Access Layer helper library for .NET. It provides 
 - Consistent exception model for common data operations
 - Explicit persistence via `SaveChanges()` on file repositories
 - `Try*` variants for all mutating and lookup operations to avoid exception-based control flow
-- Entities are cloned on store and retrieval, preventing unintended mutation of internal state
+- Entities are cloned on storage and retrieval, preventing unintended mutation of internal state
 - Flexible querying with `Find(predicate)` supporting LINQ composition and lazy evaluation
-
-## 📦 Installation
-
-[![Get it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciDAL)
-
-### CLI Installation
-
-```bash
-dotnet add package NuciDAL
-```
-
-Or, via the `Package Manager Console`:
-```powershell
-Install-Package NuciDAL
-```
 
 ## 🚀 Usage
 
@@ -105,15 +89,95 @@ users.SaveChanges();
 
 You can replace `JsonRepository<T>` with `XmlRepository<T>` or `CsvRepository<T>` without changing any other repository usage. Ensure the target file exists and is provisioned correctly before the repository loads it.
 
-### API Documentation
+## 📦 Installation
 
-#### Main Interfaces
+[![Obtain it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciDAL)
 
-**`IRepository<TKey, TDataObject>`** – Core repository interface for in-memory entity storage and retrieval.
+### CLI Installation
 
-**`IFileRepository<TKey, TDataObject>`** – Extends `IRepository<TKey, TDataObject>` with file persistence (`SaveChanges()`).
+```bash
+dotnet add package NuciDAL
+```
 
-#### Repository Methods
+Or, via the `Package Manager Console`:
+
+```powershell
+Install-Package NuciDAL
+```
+
+## 🛠️ Development
+
+### Requirements
+
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+
+### Setup
+
+All NuGet dependencies are restored automatically by `dotnet restore`.
+
+### Build
+
+```bash
+dotnet build NuciDAL
+```
+
+### Run
+
+```bash
+dotnet run --project NuciDAL
+```
+
+### Test
+
+```bash
+dotnet test NuciDAL.slnx
+```
+
+### Release
+
+```bash
+dotnet pack NuciDAL -c Release
+```
+
+## 🗂️ Project Structure
+
+The solution contains the subsequent projects:
+- **NuciDAL**: Core library implementation with interfaces and repository classes.
+- **NuciDAL.UnitTests**: Comprehensive unit tests for all repository functionality.
+
+The key directories inside `NuciDAL/` are:
+
+| Directory | Purpose |
+|-----------|---------|
+| `DataObjects/` | Base entity classes and data object definitions |
+| `IO/` | File-backed repository implementations for CSV, JSON, XML, and Windows-1252 encoded files |
+| `Repositories/` | Core repository interfaces and in-memory implementation |
+
+## 🤝 Contributing
+
+You are welcome to submit any suggestion, feedback, or modification to this project.
+
+When doing so, please:
+- Maintain cross-platform compatibility
+- Maintain the existing public contract intact unless a breaking change is intentional
+- Maintain the pull requests as focused and consistent with the existing code style
+- Maintain your branch up-to-date with `master`
+- Revise the documentation when behaviour changes
+- Properly test all changes, including edge cases and error conditions
+- Add unit tests for any new or changed functionality
+
+## 💝 Supporting the Project
+
+Discovered a problem or have a suggestion? [Open an issue](https://github.com/hmlendea/nucidal/issues)!
+
+If you find this project useful, consider [funding it](https://hmlendea.go.ro/funding) or starring ⭐️ it on GitHub!
+
+[![Donate](https://raw.githubusercontent.com/hmlendea/readme-assets/master/donate_generic.png)](https://hmlendea.go.ro/funding)
+
+## 📄 License
+
+This project is being distributed under the `GNU General Public License v3 or later`.
+See [LICENSE](./LICENSE) for further information.
 
 `IRepository<TKey, TDataObject>` exposes:
 
@@ -162,6 +226,21 @@ The throwing variants use explicit exceptions:
 | `EntityAlreadyExistsException` | `Add` is called with an id that already exists |
 | `EntityNotFoundException` | `Get`, `GetFirst`, `Update`, or `Remove` cannot find the requested entity |
 | `DuplicateEntityException` | Duplicate ids are encountered while loading file data |
+
+## 📦 Installation
+
+[![Obtain it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciDAL)
+
+### CLI Installation
+
+```bash
+dotnet add package NuciDAL
+```
+
+Or, via the `Package Manager Console`:
+```powershell
+Install-Package NuciDAL
+```
 
 ## 🛠️ Development
 
