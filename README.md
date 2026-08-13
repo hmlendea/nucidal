@@ -5,14 +5,26 @@
 
 # NuciDAL
 
-A lightweight Data Access Layer helper library for .NET. It provides generic repository interfaces with both in-memory and file-backed implementations (JSON, XML, CSV), enabling seamless data persistence whilst maintaining type safety and a consistent API across storage backends. Ideal for applications requiring flexible data access patterns without the complexity of full-featured ORMs.
+NuciDAL is a lightweight data access layer helper library for .NET. It provides generic repository abstractions with both in-memory and file-backed implementations, so applications can persist strongly typed entities through a consistent API without adopting a full ORM.
 
 ## 📑 Table of Contents
 
 - [Capabilities](#capabilities)
 - [Usage](#usage)
+  - [Quick Start](#quick-start)
+    - [1. Define an Entity](#1-define-an-entity)
+    - [2. Use an In-Memory Repository](#2-use-an-in-memory-repository)
+    - [3. Use a File-Backed Repository](#3-use-a-file-backed-repository)
 - [Installation](#installation)
+  - [CLI Installation](#cli-installation)
 - [Development](#development)
+  - [Requirements](#requirements)
+  - [Setup](#setup)
+  - [Build](#build)
+  - [Run](#run)
+  - [Test](#test)
+  - [Release](#release)
+  - [Dependencies](#dependencies)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
 - [Supporting the Project](#supporting-the-project)
@@ -20,14 +32,13 @@ A lightweight Data Access Layer helper library for .NET. It provides generic rep
 
 ## ✨ Capabilities
 
-- Generic repository interfaces with in-memory and file-backed implementations
-- Strongly typed entities based on `EntityBase<TKey>` with a string-keyed shorthand
-- File-backed repositories for JSON, XML, and CSV storage
-- Consistent exception model for common data operations
-- Explicit persistence via `SaveChanges()` on file repositories
-- `Try*` variants for all mutating and lookup operations to avoid exception-based control flow
-- Entities are cloned on storage and retrieval, preventing unintended mutation of internal state
-- Flexible querying with `Find(predicate)` supporting LINQ composition and lazy evaluation
+- Generic repository interfaces for keyed entities and string-keyed entities
+- In-memory and file-backed repositories with JSON, XML, and CSV persistence
+- Explicit persistence for file repositories via `SaveChanges()`
+- `Try*` variants for lookup and mutation operations when exception-driven flow is undesirable
+- Predicate-based querying through `Find(...)`, with standard LINQ composition
+- Entity cloning on storage and retrieval to reduce unintended mutation of repository state
+- A compact exception model for duplicate and missing entities
 
 ## 🚀 Usage
 
@@ -41,40 +52,31 @@ using NuciDAL.DataObjects;
 public class User : EntityBase
 {
     public string Name { get; set; }
+
     public int Age { get; set; }
 }
 ```
 
-#### 2. In-Memory Repository
+#### 2. Use an In-Memory Repository
 
 ```csharp
+using System.Collections.Generic;
+
 using NuciDAL.Repositories;
 
 IRepository<User> users = new Repository<User>();
 
 users.Add(new User { Id = "u1", Name = "Alice", Age = 31 });
 users.Add(new User { Id = "u2", Name = "Bob", Age = 24 });
-users.Add(new User { Id = "u3", Name = "Carol", Age = 17 });
 
-// Lookup operations
 User byId = users.Get("u1");
 User firstAdult = users.GetFirst(user => user.Age >= 18);
-User maybeTeen = users.TryGetFirst(user => user.Age < 18);
-
-// Query with Find and LINQ
 IEnumerable<User> adults = users.Find(user => user.Age >= 18);
-var adultNames = users
-    .Find(user => user.Age >= 18)
-    .Select(user => user.Name)
-    .OrderBy(name => name)
-    .ToList();
-
-// Other operations
 bool exists = users.ContainsId("u2");
 int total = users.EntitiesCount;
 ```
 
-#### 3. File-Backed Repository
+#### 3. Use a File-Backed Repository
 
 ```csharp
 using NuciDAL.Repositories;
@@ -87,7 +89,7 @@ users.TryUpdate(new User { Id = "u3", Name = "Caroline", Age = 29 });
 users.SaveChanges();
 ```
 
-You can replace `JsonRepository<T>` with `XmlRepository<T>` or `CsvRepository<T>` without changing any other repository usage. Ensure the target file exists and is provisioned correctly before the repository loads it.
+You can replace `JsonRepository<T>` with `XmlRepository<T>` or `CsvRepository<T>` without changing the surrounding repository usage.
 
 ## 📦 Installation
 
@@ -100,7 +102,6 @@ dotnet add package NuciDAL
 ```
 
 Or, via the `Package Manager Console`:
-
 ```powershell
 Install-Package NuciDAL
 ```
@@ -118,14 +119,12 @@ All NuGet dependencies are restored automatically by `dotnet restore`.
 ### Build
 
 ```bash
-dotnet build NuciDAL
+dotnet build NuciDAL/NuciDAL.csproj
 ```
 
 ### Run
 
-```bash
-dotnet run --project NuciDAL
-```
+NuciDAL is a library and does not include a standalone executable. Reference it from a consuming project to exercise it at runtime.
 
 ### Test
 
@@ -136,22 +135,27 @@ dotnet test NuciDAL.slnx
 ### Release
 
 ```bash
-dotnet pack NuciDAL -c Release
+dotnet pack NuciDAL/NuciDAL.csproj -c Release
 ```
+
+### Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `NuciExtensions` | Entity cloning and collection utility extensions used by the core library |
 
 ## 🗂️ Project Structure
 
 The solution contains the subsequent projects:
-- **NuciDAL**: Core library implementation with interfaces and repository classes.
-- **NuciDAL.UnitTests**: Comprehensive unit tests for all repository functionality.
+- `NuciDAL`: Core library with entity bases, repository abstractions, and file-backed persistence implementations
+- `NuciDAL.UnitTests`: NUnit test project covering repository and entity behaviour
 
 The key directories inside `NuciDAL/` are:
-
 | Directory | Purpose |
 |-----------|---------|
-| `DataObjects/` | Base entity classes and data object definitions |
-| `IO/` | File-backed repository implementations for CSV, JSON, XML, and Windows-1252 encoded files |
-| `Repositories/` | Core repository interfaces and in-memory implementation |
+| `DataObjects/` | Base entity types, including generic and string-keyed entity foundations |
+| `IO/` | File helpers for CSV, JSON, XML, and Windows-1252 encoded content |
+| `Repositories/` | Repository interfaces, in-memory implementation, file-backed repositories, and domain exceptions |
 
 ## 🤝 Contributing
 
@@ -178,137 +182,3 @@ If you find this project useful, consider [funding it](https://hmlendea.go.ro/fu
 
 This project is being distributed under the `GNU General Public License v3 or later`.
 See [LICENSE](./LICENSE) for further information.
-
-`IRepository<TKey, TDataObject>` exposes:
-
-- **Read:** `Get(id)`, `TryGet(id)`, `GetFirst(predicate)`, `TryGetFirst(predicate)`, `GetRandom()`, `GetAll()`, `Find(predicate)`, `ContainsId(id)`, `EntitiesCount`
-- **Write:** `Add(entity)`, `TryAdd(entity)`, `Update(entity)`, `TryUpdate(entity)`, `Remove(id|entity)`, `TryRemove(id|entity)`
-
-`IFileRepository<TKey, TDataObject>` extends this with `SaveChanges()`.
-
-#### Usage Examples
-
-The `Find(predicate)` method returns `IEnumerable<T>` with lazy evaluation, allowing you to compose queries using standard LINQ operators without materialising results until enumeration:
-
-```csharp
-// Find all active users (lazy evaluation)
-IEnumerable<User> activeUsers = users.Find(u => u.IsActive);
-
-// Combine with LINQ operators
-var result = users
-    .Find(u => u.Age >= 18)
-    .Where(u => u.Name.Contains("A"))
-    .OrderBy(u => u.Name)
-    .Take(10)
-    .ToList();
-
-// Use aggregation
-int count = users.Find(u => u.Age > 21).Count();
-decimal avgAge = users.Find(u => u.IsActive).Average(u => u.Age);
-
-// Chain multiple operations
-var names = users
-    .Find(u => true)
-    .Select(u => u.Name)
-    .Distinct()
-    .OrderBy(n => n)
-    .ToList();
-```
-
-The predicate is used to create a snapshot of matching entities at the time `Find()` is called. Subsequent LINQ operations are evaluated lazily upon enumeration.
-
-### Exception Model
-
-The throwing variants use explicit exceptions:
-
-| Exception | Thrown when |
-|-----------|-------------|
-| `EntityAlreadyExistsException` | `Add` is called with an id that already exists |
-| `EntityNotFoundException` | `Get`, `GetFirst`, `Update`, or `Remove` cannot find the requested entity |
-| `DuplicateEntityException` | Duplicate ids are encountered while loading file data |
-
-## 📦 Installation
-
-[![Obtain it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciDAL)
-
-### CLI Installation
-
-```bash
-dotnet add package NuciDAL
-```
-
-Or, via the `Package Manager Console`:
-```powershell
-Install-Package NuciDAL
-```
-
-## 🛠️ Development
-
-### Requirements
-
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-
-All NuGet dependencies are restored automatically by `dotnet restore`.
-
-### Build
-
-```bash
-dotnet build NuciDAL
-```
-
-### Test
-
-```bash
-dotnet test NuciDAL.slnx
-```
-
-### Release
-
-```bash
-dotnet pack NuciDAL -c Release
-```
-
-## 🗂️ Project Structure
-
-The solution contains the following projects:
-
-- `NuciDAL`: The main library
-- `NuciDAL.UnitTests`: Unit tests
-
-Key directories inside `NuciDAL/`:
-
-| Directory | Purpose |
-|-----------|---------|
-| `DataObjects/` | Base entity classes (`EntityBase`, `EntityBase<TKey>`) |
-| `IO/` | Low-level file helpers for JSON, XML, CSV, and Windows-1252 encodings |
-| `Repositories/` | Repository interfaces and concrete implementations |
-
-### Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| `NuciExtensions` | Entity cloning and collection utilities |
-
-## 🤝 Contributing
-
-You are welcome to submit any suggestion, feedback, or modification to this project.
-
-When doing so, please:
-
-- Maintain cross-platform compatibility
-- Maintain the existing public contract intact unless a breaking change is intentional
-- Maintain the pull requests as focused and consistent with the existing code style
-- Maintain your branch up-to-date with `master`
-- Revise the documentation when the behaviour changes
-- Properly test all changes, including edge cases and error conditions
-- Add unit tests for any new or changed functionality
-
-## 💝 Supporting the Project
-
-Discovered a problem or have a suggestion? [Open an issue](https://github.com/hmlendea/nucidal/issues)!
-
-If you find this project useful, consider [funding it](https://hmlendea.go.ro/funding) or starring ⭐️ it on GitHub!
-
-## 🔒 License
-
-Licensed under the GNU General Public License v3.0 or later. See [LICENSE](./LICENSE) for details.
