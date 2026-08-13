@@ -76,6 +76,14 @@ namespace NuciDAL.Repositories
             base.ContainsId(id));
 
         /// <summary>
+        /// Finds entities matching the specified predicate using lazy evaluation.
+        /// </summary>
+        /// <returns>An enumerable of matching entities, evaluated lazily using LINQ-to-Objects.</returns>
+        /// <param name="predicate">Predicate used to filter entities.</param>
+        public override IEnumerable<TDataObject> Find(Func<TDataObject, bool> predicate) => ExecuteReadOperation(() =>
+            base.Find(predicate));
+
+        /// <summary>
         /// Gets the entity with the specified identifier.
         /// </summary>
         /// <returns>The entity.</returns>
