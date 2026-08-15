@@ -1,6 +1,6 @@
 # NuciDAL Architecture
 
-This document describes the verified current architecture of the NuciDAL .NET library. It covers the public repository and file I/O boundaries in this repository; consuming applications, their domain models beyond the required entity contract, and their deployment architecture remain external to this scope.
+This document describes the verified current architecture of the NuciDAL .NET library. It covers the public repository, dependency injection, and file I/O boundaries in this repository; consuming applications, their domain models beyond the required entity contract, and their deployment architecture remain external to this scope.
 
 ## 📑 Table of Contents
 
@@ -13,6 +13,7 @@ This document describes the verified current architecture of the NuciDAL .NET li
 - [Architectural Areas](#architectural-areas)
   - [Data Objects](#data-objects)
   - [Repository Contracts and Implementations](#repository-contracts-and-implementations)
+    - [Dependency Injection](#dependency-injection)
   - [File I/O](#file-io)
   - [Verification](#verification)
 - [Data Architecture](#data-architecture)
@@ -38,26 +39,28 @@ This document describes the verified current architecture of the NuciDAL .NET li
   - [Entity and Key Types](#entity-and-key-types)
   - [Repository Implementations](#repository-implementations)
   - [File Formats](#file-formats)
+    - [Repository Registrations](#repository-registrations)
 - [Architecture Decisions](#architecture-decisions)
 - [Source Map](#source-map)
 - [Related Documentation](#related-documentation)
 
 ## 🎯 Purpose
 
-NuciDAL supplies generic repository contracts, an in-memory implementation, and JSON, XML, and CSV file-backed implementations for entities identified by generic keys. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 3.2.0 and does not propose a target architecture.
+NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 3.2.0 and does not propose a target architecture.
 
 ## 🌐 System Context
 
-NuciDAL is an embeddable .NET 10 class library. A consuming .NET process constructs repository or standalone I/O types, supplies entity types and file paths, invokes synchronous operations, and owns each instance's lifetime. The library has no executable entry point, remote service, database, authentication system, or configuration provider. File-backed types exchange plaintext serialised data with the local filesystem, while repository cloning and selected collection operations depend upon `NuciExtensions`.
+NuciDAL is an embeddable .NET 10 class library. A consuming .NET process constructs repository or standalone I/O types directly, or registers a string-keyed repository through `IServiceCollection`. The consumer supplies entity types and file paths, invokes synchronous operations, and owns direct instances or the service provider that owns registered singletons. The library has no executable entry point, remote service, database, authentication system, or owned configuration source. File-backed types exchange plaintext serialised data with the local filesystem, while repository cloning and selected collection operations depend upon `NuciExtensions`.
 
 ```mermaid
 flowchart LR
     Consumer["Consuming .NET process"]
     FileSystem[("Local filesystem")]
     Extensions["NuciExtensions 5.3.1"]
+    DependencyInjection["Microsoft DI abstractions 10.0.0"]
 
     subgraph NuciDALBoundary["NuciDAL library"]
-        PublicApi["Repository and I/O APIs"]
+        PublicApi["Repository, registration, and I/O APIs"]
     end
 
     Consumer -->|"Entity types, paths, and method calls"| PublicApi
@@ -65,25 +68,32 @@ flowchart LR
     PublicApi -->|"Read and replace serialised files"| FileSystem
     FileSystem -->|"JSON, XML, CSV, or object data"| PublicApi
     PublicApi -->|"Cloning and collection extensions"| Extensions
+    PublicApi -->|"IServiceCollection registration contract"| DependencyInjection
 ```
 
 The principal external boundaries are:
-- **Consuming .NET process:** Selects concrete implementations, defines entity shapes, supplies paths and predicates, owns repository lifetimes, and decides when to persist file-backed mutations.
+- **Consuming .NET process:** Selects concrete implementations, defines entity shapes, supplies paths and predicates, owns direct instances or the DI service provider, and decides when to persist file-backed mutations.
 - **Local filesystem:** Stores JSON, XML, CSV, standalone object, or Windows-1252 text outputs. The host owns path validation, permissions, confidentiality, backup, and coordination with other processes.
 - **NuciExtensions 5.3.1:** Supplies JSON round-trip cloning and collection utility extensions used inside repository operations; its runtime assembly is part of the library's dependency closure.
+- **Microsoft dependency injection abstractions 10.0.0:** Supplies `IServiceCollection`, singleton registration extensions, and service descriptors without supplying or owning the consuming application's container.
 
 Entity values and file contents traverse a trust boundary into reflection, conversion, and serialisation APIs without domain validation. NuciDAL neither classifies sensitive data nor protects it at rest.
 
 ## 🏗️ Architectural Style
 
-The implementation combines the Repository pattern with generic contracts, inheritance-based specialisation, and Template Method hooks for file formats. `Repository<TKey, TDataObject>` owns all query and mutation semantics. `FileRepository<TKey, TDataObject>` inherits those semantics and adds one-time hydration plus explicit persistence, while JSON, XML, and CSV repositories implement only the two format-specific load and save hooks. Clone-on-ingress and clone-on-egress isolate stored entities from references retained by consumers.
+The implementation combines the Repository pattern with generic contracts, inheritance-based specialisation, Template Method hooks for file formats, and a composition adapter for Microsoft dependency injection. `Repository<TKey, TDataObject>` owns all query and mutation semantics. `FileRepository<TKey, TDataObject>` inherits those semantics and adds one-time hydration plus explicit persistence, while JSON, XML, and CSV repositories implement only the two format-specific load and save hooks. `RepositoryServiceCollectionExtensions` binds `IRepository<TDataObject>` to `Repository<TDataObject>` and `IFileRepository<TDataObject>` to a selected JSON, XML, or CSV implementation. Every binding is a singleton, and file paths are acquired only upon service resolution. Clone-on-ingress and clone-on-egress isolate stored entities from references retained by consumers.
 
 All production types compile into one assembly. The areas described below are namespace and responsibility boundaries rather than separately deployed layers.
 
 ```mermaid
 flowchart TB
     Consumer["Consumer"] --> Contracts["IRepository<TKey, TDataObject>"]
+    Consumer --> Registration["Repository service extensions"]
     FileContract["IFileRepository<TKey, TDataObject>"] -->|"extends"| Contracts
+    Registration -->|"registers"| Contracts
+    Registration -->|"constructs"| MemoryRepository
+    Registration -->|"registers"| FileContract
+    Registration -->|"constructs"| FormatRepositories
     MemoryRepository["Repository<TKey, TDataObject>"] -.->|"implements"| Contracts
     FileRepository["FileRepository<TKey, TDataObject>"] -->|"inherits"| MemoryRepository
     FileRepository -.->|"implements"| FileContract
@@ -99,13 +109,22 @@ The principal architecture boundaries are:
 - **Repository state and semantics:** `Repository` owns keyed storage, clone isolation, query snapshots, mutation conduct, and entity exceptions.
 - **File lifecycle:** `FileRepository` owns lazy hydration, duplicate detection during hydration, and explicit save orchestration.
 - **Format adapters:** Concrete file repositories and I/O helpers own serialisation, parsing, and filesystem access.
+- **Dependency injection composition:** `RepositoryServiceCollectionExtensions` owns singleton bindings for the string-keyed in-memory and file-backed implementations, with deferred store-path invocation for file repositories.
 - **Entity model:** `EntityBase<TKey>` supplies identity plus reflection-based value equality and hashing; consumers own derived domain properties.
 
 ## 🔄 Runtime Flow
 
 ```mermaid
 flowchart TD
-    Construct["Consumer constructs a repository"] --> Kind{"File-backed?"}
+    Acquire["Consumer selects repository acquisition"] --> Registered{"Use DI registration?"}
+    Registered -->|"No"| Construct["Consumer constructs a repository"]
+    Registered -->|"Yes"| Register["Register repository singleton"]
+    Register --> Resolve["First repository resolution"]
+    Resolve --> RegisteredFile{"File-backed registration?"}
+    RegisteredFile -->|"No"| Construct
+    RegisteredFile -->|"Yes"| Path["Invoke store-path function"]
+    Path --> Construct
+    Construct --> Kind{"File-backed?"}
     Kind -->|"No"| Ready["Create empty ConcurrentDictionary"]
     Kind -->|"Yes"| Deferred["Create empty dictionary with unloaded state"]
     Deferred --> FirstCall["First public repository operation"]
@@ -125,7 +144,7 @@ flowchart TD
 ```
 
 The principal runtime sequence is:
-1. The consuming process constructs an in-memory or file-backed repository; construction itself performs no file I/O.
+1. The consuming process constructs a repository directly or registers a string-keyed in-memory, JSON, XML, or CSV repository as a singleton. A file repository's registered store-path function executes upon the first service resolution, and repository construction itself performs no file I/O.
 2. An in-memory repository starts with an empty `ConcurrentDictionary<TKey, TDataObject>`. A file repository defers hydration until its first repository operation, including `SaveChanges()`.
 3. File hydration executes once per successfully loaded instance under `SyncRoot`. The helper deserialises the complete collection, and `FileRepository` rejects repeated keys with `DuplicateEntityException`.
 4. Repository queries and mutations execute synchronously upon in-memory state. Entities entering through `Add` or `Update`, and entities exiting through query methods, pass through a JSON round-trip clone.
@@ -142,6 +161,7 @@ The principal runtime sequence is:
 | `Repository<TKey, TDataObject>` | Own clone-isolated entities, keyed operations, snapshots, and mutation locking | `ConcurrentDictionary`, LINQ, `NuciExtensions` | One independent state aggregate per repository instance |
 | `FileRepository<TKey, TDataObject>` | Coordinate lazy hydration, duplicate-key validation, and complete-file persistence | `Repository`, format hooks, filesystem exceptions | One loaded-state cache per file repository instance |
 | `JsonRepository`, `XmlRepository`, and `CsvRepository` | Bind file lifecycle hooks to the corresponding collection helper | `FileRepository`, I/O helpers | Each instance owns one helper configured with its constructor path |
+| `RepositoryServiceCollectionExtensions` | Register the in-memory repository or a deferred-path JSON, XML, or CSV repository through its public contract | Microsoft DI abstractions, repository contracts and implementations | Singleton per service registration; the consumer owns provider disposal |
 | Collection and object I/O helpers | Read and write JSON, XML, or CSV representations | .NET serialisation, reflection, conversion, and filesystem APIs | Stateless apart from path, type, options, or separator configuration |
 | Repository exceptions | Communicate duplicate, existing, or missing entity conditions with entity identifier and type context | `System.Exception` | Allocated per failed operation |
 | `Windows1252File` | Write text with Windows-1252 encoding, synchronously or asynchronously | .NET encoding and filesystem APIs | Static utility; no repository association |
@@ -179,6 +199,21 @@ Boundary rules:
 - File repositories reuse base query and mutation semantics rather than duplicating them.
 - Concrete format repositories implement `FetchEntitiesFromFile()` and `PerformFileSave()` only.
 
+### Dependency Injection
+
+Paths:
+- [NuciDAL/DependencyInjection](NuciDAL/DependencyInjection)
+
+Responsibilities:
+- Register `Repository<TDataObject>` as `IRepository<TDataObject>` for string-keyed entities.
+- Register `JsonRepository<TDataObject>`, `XmlRepository<TDataObject>`, or `CsvRepository<TDataObject>` as `IFileRepository<TDataObject>`.
+- Bind file repository construction to a consumer-supplied store-path function.
+
+Boundary rules:
+- Every registration is singleton-scoped and the consuming service provider owns the repository lifetime.
+- File store-path functions are retained during registration and invoked when their singleton is first resolved.
+- The adapter depends upon Microsoft DI abstractions but does not construct or own a service provider.
+
 ### File I/O
 
 Paths:
@@ -201,11 +236,12 @@ Paths:
 
 Responsibilities:
 - Verify entity equality, in-memory repository semantics, clone isolation, query snapshots, and entity exception metadata.
+- Verify in-memory, JSON, XML, and CSV repository registration, deferred path invocation, interface resolution, and singleton identity through Microsoft dependency injection.
 - Restore, compile, and execute the solution on .NET 10 for pushes and pull requests to `master`.
 
 Boundary rules:
 - Tests reference the production project directly.
-- No current test invokes a file repository, collection helper, object helper, or Windows-1252 utility.
+- Registration tests construct each repository implementation without invoking file lifecycle operations; no current test hydrates or saves through a file repository or invokes a collection, object, or Windows-1252 helper.
 
 ## 💾 Data Architecture
 
@@ -242,6 +278,8 @@ flowchart LR
 |--------------------------|-----------|----------|-------|-------------------|
 | `IRepository<TKey, TDataObject>` | Inbound | Synchronous keyed CRUD and LINQ-to-Objects predicate queries for `EntityBase<TKey>` types | Repository layer | Strict methods throw typed entity exceptions; `TryGet` variants return `null`, and `TryAdd` or `TryRemove` silently retain state when their condition is not met |
 | `IFileRepository<TKey, TDataObject>` | Inbound | All repository operations plus explicit synchronous `SaveChanges()` | File repository layer | Initial hydration failures propagate in their original form; save-hook failures are wrapped in `IOException` |
+| `AddRepository<TDataObject>` | Inbound | Registers `IRepository<TDataObject>` as a singleton backed by `Repository<TDataObject>` | Dependency injection adapter | A null service collection fails immediately; repository construction failures propagate during first resolution |
+| `AddJsonRepository`, `AddXmlRepository`, and `AddCsvRepository` | Inbound | Register `IFileRepository<TDataObject>` as a singleton backed by the selected format and a deferred `Func<string>` path | Dependency injection adapter | Null registration arguments fail immediately; path-provider and repository-construction failures propagate during first resolution |
 | JSON collection file | Bidirectional | `System.Text.Json` collection with camel-case output names and indentation | `JsonFileCollection<T>` | Missing, inaccessible, malformed, or incompatible input exceptions propagate during first access |
 | XML collection file | Bidirectional | `XmlSerializer` payload configured as `List<T>` | `XmlFileCollection<T>` | Missing, inaccessible, malformed, or incompatible input exceptions propagate during first access |
 | CSV collection file | Bidirectional | Public reflected properties separated by comma; trimmed lines commencing with `#` are comments | `CsvFile<T>` | Missing input is an empty collection; parse failures become `SerializationException` with a line number |
@@ -372,7 +410,7 @@ The library emits no logs, metrics, traces, health signals, or audit events. Ret
 
 | Configuration Area | Source | Responsibility | Override or Secret Policy |
 |--------------------|--------|----------------|---------------------------|
-| Repository file path | Concrete repository constructor | Selects the single collection file associated with an instance | No internal precedence, path normalisation, or secret source |
+| Repository file path | Concrete repository constructor or registered `Func<string>` | Selects the single collection file associated with an instance | Registered functions execute upon first singleton resolution; no internal precedence, path normalisation, or secret source |
 | CSV field separator | `CsvFile<T>` constructor | Selects the delimiter for the standalone helper | `CsvRepository` exposes only its file-name constructor and therefore uses comma |
 | JSON collection options | Private `JsonSerializerOptions` in `JsonFileCollection<T>` | Fixes camel-case property naming and indented output | No consumer override |
 | JSON object options | Private `JsonSerializerOptions` in `JsonFileObject<T>` | Adds case-insensitive input to the standalone object contract | No consumer override |
@@ -386,12 +424,15 @@ Distinct repository instances, processes, or direct helper calls have no shared 
 
 ## 🧭 Dependency Direction and Rules
 
-Consumers may depend upon public contracts or concrete repository and I/O types. Production dependencies proceed from repository implementations towards entity contracts, `NuciExtensions`, and format helpers; format helpers depend only upon .NET APIs and never upon repositories. The test project depends upon the production project, and the production project has no dependency upon tests or a consuming host.
+Consumers may depend upon public contracts, concrete repository and I/O types, or the repository service-collection extensions. Production dependencies proceed from the dependency injection adapter towards Microsoft DI abstractions and repository types, and from repository implementations towards entity contracts, `NuciExtensions`, and format helpers. Format helpers depend only upon .NET APIs and never upon repositories. The test project depends upon the production project, and the production project has no dependency upon tests or a consuming host.
 
 ```mermaid
 flowchart LR
     Consumer["Consuming application"] --> Public["Public NuciDAL API"]
+    Public --> Registration["Repository service registrations"]
     Public --> Contracts["Repository contracts and EntityBase"]
+    Registration --> Contracts
+    Registration --> DependencyInjection["Microsoft DI abstractions"]
     Implementations["Repository implementations"] --> Contracts
     FileImplementations["File repository implementations"] --> Implementations
     FileImplementations --> IO["I/O helpers"]
@@ -401,7 +442,7 @@ flowchart LR
 ```
 
 The principal dependency rules are:
-- Consumers can substitute implementations at `IRepository` or `IFileRepository` boundaries; NuciDAL contains no dependency-injection registration or composition root.
+- Consumers can substitute implementations at `IRepository` or `IFileRepository` boundaries; NuciDAL supplies optional string-keyed registrations for every built-in implementation but no composition root or service provider.
 - `Repository<TKey, TDataObject>` owns storage semantics and must remain independent of file formats.
 - `FileRepository<TKey, TDataObject>` can depend upon base repository semantics, but base repositories do not depend upon file lifecycle concerns.
 - Format repositories delegate serialisation and filesystem access to I/O helpers.
@@ -414,13 +455,15 @@ The principal dependency rules are:
 | Dependency | Responsibility | Integration Boundary | Architectural Consequence |
 |------------|----------------|----------------------|---------------------------|
 | `.NET 10.0` | Supplies the runtime, generic collections, reflection, file APIs, JSON, XML, encoding, and concurrency primitives | Entire production assembly | The NuGet package has one target framework and requires a compatible .NET 10 consumer |
+| `Microsoft.Extensions.DependencyInjection.Abstractions 10.0.0` | Supplies service collection contracts and singleton registration APIs | Dependency injection adapter | Consumers can register repository implementations without NuciDAL depending upon a concrete container implementation |
 | `NuciExtensions 5.3.1` | Supplies JSON conversion, inequality, and random collection extensions | `EntityBase` and `Repository` | Entity cloning and selected semantics are coupled to this package's extension contracts |
+| `Microsoft.Extensions.DependencyInjection 10.0.0` | Supplies the concrete service provider used for registration verification | `NuciDAL.UnitTests` only | No concrete dependency injection container enters the production package dependency closure |
 | `NUnit 4.6.1` | Supplies unit-test declarations and assertions | `NuciDAL.UnitTests` only | No production runtime dependency |
 | `.NET test toolchain` | Supplies `Microsoft.NET.Test.Sdk 18.8.0`, `NUnit3TestAdapter 6.2.0`, and `coverlet.collector 10.0.1` | Test execution and optional coverage collection | Test packages remain private to the non-packable test project |
 
 ## 🚀 Deployment and Operations
 
-The deployment unit is the `NuciDAL` NuGet library, currently version 3.2.0 and targeted exclusively at `net10.0`. It executes within the consuming process and creates no service, worker, port, or background thread. A consumer can construct multiple repository instances, each with independent memory and lazy-load state.
+The deployment unit is the `NuciDAL` NuGet library, currently version 3.2.0 and targeted exclusively at `net10.0`. It executes within the consuming process and creates no service, worker, port, or background thread. A consumer can construct multiple repository instances with independent memory and lazy-load state, or own one repository singleton per service registration through its service provider.
 
 File-backed deployment requires a path accessible to the host process. JSON and XML files must exist and be readable before the first repository operation; CSV can commence from an absent file. The parent directory must exist for save operations. The caller owns final `SaveChanges()` timing because repository disposal and process shutdown do not persist pending mutations automatically.
 
@@ -439,9 +482,10 @@ File-backed deployment requires a path accessible to the host process. JSON and 
 | Contract | Owner | Invariant | Verification | Change Policy |
 |----------|-------|-----------|--------------|---------------|
 | Repository public API | Repository contracts and public implementations | Generic constraints, method signatures, strict versus `Try*` semantics, and clone-isolated results remain consumer-visible | In-memory repository unit tests and compilation of consumers | Treat signature or semantic modifications as compatibility-sensitive public API changes |
+| Repository dependency injection registrations | `RepositoryServiceCollectionExtensions` | Each public contract resolves to its selected singleton implementation, and file repository path functions execute only upon first resolution | Dedicated registration and resolution unit tests | Preserve public signatures, service contracts, deferred path evaluation, and singleton lifetime |
 | Entity identity | `EntityBase<TKey>` and repository state | `Id` supplies the dictionary key; derived types expose serialisable public properties | Entity and repository unit tests | Key equality or identity semantic modifications require consumer and persisted-data evaluation |
 | Entity equality and hashing | `EntityBase<TKey>` | Runtime types must correspond and every public instance property participates | `EntityBaseTests` | Public property modifications can alter equality and hash results |
-| File lifecycle | `FileRepository<TKey, TDataObject>` | Construction is I/O-free, first use hydrates once, mutations remain in memory, and `SaveChanges()` emits the complete state | Source inspection; no current file-repository integration tests | Preserve ordering or document and test an intentional lifecycle migration |
+| File lifecycle | `FileRepository<TKey, TDataObject>` | Construction is I/O-free, first use hydrates once, mutations remain in memory, and `SaveChanges()` emits the complete state | Source inspection and DI construction tests; no current hydration or persistence integration tests | Preserve ordering or document and test an intentional lifecycle migration |
 | Entity exceptions | Repository layer | Duplicate, existing, and missing conditions expose typed exceptions with identifier and type metadata | Dedicated exception tests and repository tests | Preserve types and metadata when revising messages or translation boundaries |
 | JSON collection | `JsonFileCollection<T>` | Collection payload, camel-case output property names, and indented output | No current persistence tests | Format modifications require round-trip fixtures or a migration strategy |
 | XML collection | `XmlFileCollection<T>` | `XmlSerializer` representation configured for `List<T>` | No current persistence tests | CLR type or serializer-shape modifications require persisted-file compatibility evaluation |
@@ -450,9 +494,9 @@ File-backed deployment requires a path accessible to the host process. JSON and 
 
 ## ✅ Testing and Verification
 
-The `NuciDAL.UnitTests` NUnit project verifies reflection-based entity equality and hashes, repository add/get/find/update/remove/count/contains operations, clone isolation, snapshot conduct, integer-key entity equality, and entity exception constructors and metadata. CI restores, compiles, and tests the solution on Ubuntu with .NET 10 for pushes and pull requests to `master`.
+The `NuciDAL.UnitTests` NUnit project verifies reflection-based entity equality and hashes, repository add/get/find/update/remove/count/contains operations, clone isolation, snapshot conduct, integer-key entity equality, entity exception constructors and metadata, and dependency injection registration for every built-in repository implementation. Registration tests use a concrete Microsoft service provider to verify deferred path invocation, interface resolution, and singleton identity. CI restores, compiles, and tests the solution on Ubuntu with .NET 10 for pushes and pull requests to `master`.
 
-Material gaps remain. No current automated test exercises `FileRepository`, JSON/XML/CSV collection or object helpers, `SaveChanges()`, missing or malformed files, duplicate keys during hydration, filesystem failures, Windows-1252 encoding, concurrent operations, cross-instance access, or package consumption. Repository operations with a non-string key are not covered even though integer-key entity equality is covered. There are no benchmarks or explicit capacity checks.
+Material gaps remain. No current automated test exercises file hydration, JSON/XML/CSV collection or object helpers, `SaveChanges()`, missing or malformed files, duplicate keys during hydration, filesystem failures, Windows-1252 encoding, concurrent operations, cross-instance access, or package consumption. Repository operations with a non-string key are not covered even though integer-key entity equality is covered. There are no benchmarks or explicit capacity checks.
 
 Execute the principal automated verification with:
 
@@ -462,7 +506,8 @@ dotnet test NuciDAL.slnx
 
 ## ⚠️ Design Constraints
 
-- **Embeddable library boundary:** NuciDAL has no host, composition root, automatic repository lifetime, or shutdown hook; each consumer must supply these concerns.
+- **Embeddable library boundary:** NuciDAL has no host, composition root, concrete service provider, or shutdown hook. Consumers own direct repository instances or the service provider that owns registered repository singletons.
+- **Limited dependency injection adapter:** Built-in registrations cover string-keyed in-memory, JSON, XML, and CSV repositories and always use singleton lifetime. CSV entities must also provide a public parameterless constructor.
 - **Complete in-memory state:** Every repository retains all entities, and collection queries and saves clone complete selections; capacity is bounded by host memory and synchronous serialisation cost.
 - **JSON-dependent cloning:** All repository entity types must round-trip through the `NuciExtensions` JSON contract even when the persistence format is XML, CSV, or memory-only.
 - **Explicit persistence:** File-backed mutation is not durable until `SaveChanges()` succeeds, and no dirty-state indicator or automatic flush exists.
@@ -488,7 +533,7 @@ The key must provide dictionary-compatible equality and hashing. Public entity p
 ### Repository Implementations
 
 1. Implement `IRepository<TKey, TDataObject>` directly or inherit `Repository<TKey, TDataObject>` when its storage and clone semantics apply.
-2. Select the implementation in the consuming application's composition root; NuciDAL performs no registration.
+2. Select the implementation in the consuming application's composition root; use a built-in registration when its string-keyed singleton contract applies.
 3. Add contract tests for strict and `Try*` methods, clone isolation, query snapshots, and concurrency relevant to the implementation.
 
 A substitute exposed as `IRepository` must preserve the consumer-visible identity and failure semantics upon which its caller relies. Persistence-specific implementations exposed as `IFileRepository` must additionally define explicit save conduct.
@@ -501,6 +546,15 @@ A substitute exposed as `IRepository` must preserve the consumer-visible identit
 
 The format adapter must return entities with unique keys, accept complete cloned snapshots during save, and preserve the base class ordering of lazy hydration before repository operations. Any retry, atomicity, or remote-resource semantics remain the adapter's responsibility unless the base contract is intentionally revised.
 
+### Repository Registrations
+
+1. Derive the entity from the string-keyed `EntityBase` convenience type.
+2. Invoke `AddRepository<TDataObject>()` for `IRepository<TDataObject>`, or select `AddJsonRepository`, `AddXmlRepository`, or `AddCsvRepository` for `IFileRepository<TDataObject>`.
+3. Supply a deferred store-path function for a file repository and resolve the public contract through the consumer-owned service provider.
+4. Verify service lifetime and file-path timing when revising registration semantics.
+
+The adapter registers one singleton per service registration. It retains each file path function without invoking it during registration, then evaluates it when the repository is first resolved. CSV registration additionally requires `TDataObject` to provide a public parameterless constructor. Additional formats, key types, or lifetimes require consumer-owned registrations or a deliberate public API extension.
+
 ## 📝 Architecture Decisions
 
 | Decision | Rationale | Consequence | Record |
@@ -511,6 +565,7 @@ The format adapter must return entities with unique keys, accept complete cloned
 | Hydrate lazily and persist explicitly | Construction performs no I/O, and the consumer controls when complete-file writes occur | First use can fail during load, and unsaved mutations are process-local | Documented here |
 | Combine `ConcurrentDictionary` with one mutation and persistence lock | Individual reads use concurrent collection operations while compound writes and saves are serialised per instance | Cross-instance coordination and transactional snapshots are outside the implementation | Documented here |
 | Maintain separate JSON, XML, and CSV helpers | Each serializer and parser remains local to its format adapter | Persisted representations have distinct missing-file, schema, and error semantics | Documented here |
+| Depend only upon DI abstractions in production | Repository registrations participate in standard .NET composition without selecting a concrete service provider | The adapter exposes fixed singleton bindings and concrete-provider verification remains test-only | Documented here |
 
 ## 🗺️ Source Map
 
@@ -523,6 +578,7 @@ The format adapter must return entities with unique keys, accept complete cloned
 | In-memory repository | [NuciDAL/Repositories/Repository.cs](NuciDAL/Repositories/Repository.cs) |
 | File lifecycle base | [NuciDAL/Repositories/FileRepository.cs](NuciDAL/Repositories/FileRepository.cs) |
 | Format repositories | [NuciDAL/Repositories/JsonRepository.cs](NuciDAL/Repositories/JsonRepository.cs), [NuciDAL/Repositories/XmlRepository.cs](NuciDAL/Repositories/XmlRepository.cs), [NuciDAL/Repositories/CsvRepository.cs](NuciDAL/Repositories/CsvRepository.cs) |
+| Dependency injection registrations | [NuciDAL/DependencyInjection/RepositoryServiceCollectionExtensions.cs](NuciDAL/DependencyInjection/RepositoryServiceCollectionExtensions.cs) |
 | I/O helpers | [NuciDAL/IO](NuciDAL/IO) |
 | Repository exceptions | [NuciDAL/Repositories/EntityException.cs](NuciDAL/Repositories/EntityException.cs), [NuciDAL/Repositories/EntityAlreadyExistsException.cs](NuciDAL/Repositories/EntityAlreadyExistsException.cs), [NuciDAL/Repositories/EntityNotFoundException.cs](NuciDAL/Repositories/EntityNotFoundException.cs), [NuciDAL/Repositories/DuplicateEntityException.cs](NuciDAL/Repositories/DuplicateEntityException.cs) |
 | Unit tests | [NuciDAL.UnitTests](NuciDAL.UnitTests) |
