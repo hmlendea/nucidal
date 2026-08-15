@@ -14,7 +14,7 @@ namespace NuciDAL.Repositories
     /// In-memory repository.
     /// </summary>
     public class Repository<TDataObject>
-        : Repository<string, TDataObject>
+        : Repository<string, TDataObject>, IRepository<TDataObject>
         where TDataObject : EntityBase { }
 
     /// <summary>

@@ -3,7 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>NuciDAL</RootNamespace>
-    <Version>3.2.0</Version>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>true</IsPackable>
+    <Version>3.2.1</Version>
     <Description>Data access layer helpers</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2026 © Horațiu Mlendea</Copyright>
@@ -13,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
     <PackageReference Include="NuciExtensions" Version="5.3.1" />
   </ItemGroup>
 

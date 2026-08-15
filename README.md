@@ -15,6 +15,7 @@ NuciDAL is a lightweight data access layer helper library for .NET. It provides 
     - [1. Define an Entity](#1-define-an-entity)
     - [2. Use an In-Memory Repository](#2-use-an-in-memory-repository)
     - [3. Use a File-Backed Repository](#3-use-a-file-backed-repository)
+    - [4. Register Repositories](#4-register-repositories)
 - [Installation](#installation)
   - [CLI Installation](#cli-installation)
 - [Development](#development)
@@ -35,6 +36,7 @@ NuciDAL is a lightweight data access layer helper library for .NET. It provides 
 
 - Generic repository interfaces for keyed entities and string-keyed entities
 - In-memory and file-backed repositories with JSON, XML, and CSV persistence
+- Dependency injection registrations for singleton in-memory, JSON, XML, and CSV repositories
 - Explicit persistence for file repositories via `SaveChanges()`
 - `Try*` variants for lookup and mutation operations when exception-driven flow is undesirable
 - Predicate-based querying through `Find(...)`, with standard LINQ composition
@@ -92,6 +94,26 @@ users.SaveChanges();
 
 You can replace `JsonRepository<T>` with `XmlRepository<T>` or `CsvRepository<T>` without changing the surrounding repository usage.
 
+#### 4. Register Repositories
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+
+using NuciDAL.DependencyInjection;
+
+IServiceCollection services = new ServiceCollection();
+string usersStorePath = "users.json";
+
+services.AddRepository<User>();
+services.AddJsonRepository<User>(() => usersStorePath);
+```
+
+`AddRepository<TDataObject>` exposes `IRepository<TDataObject>`. The file-backed registrations expose `IFileRepository<TDataObject>`; select the format required by the application:
+
+Use `services.AddXmlRepository<User>(() => "users.xml")` for XML, or `services.AddCsvRepository<User>(() => "users.csv")` for CSV instead of the JSON registration.
+
+Every registration uses singleton lifetime. File store-path functions are evaluated when their repositories are first resolved, rather than when services are registered.
+
 ## 📦 Installation
 
 [![Obtain it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciDAL)
@@ -143,6 +165,7 @@ dotnet pack NuciDAL/NuciDAL.csproj -c Release
 
 | Package | Purpose |
 |---------|---------|
+| `Microsoft.Extensions.DependencyInjection.Abstractions` | Dependency injection contracts used by repository registrations |
 | `NuciExtensions` | Entity cloning and collection utility extensions used by the core library |
 
 ## 🗂️ Project Structure
@@ -155,6 +178,7 @@ The key directories inside `NuciDAL/` are:
 | Directory | Purpose |
 |-----------|---------|
 | `DataObjects/` | Base entity types, including generic and string-keyed entity foundations |
+| `DependencyInjection/` | Service collection registrations for repository implementations |
 | `IO/` | File helpers for CSV, JSON, XML, and Windows-1252 encoded content |
 | `Repositories/` | Repository interfaces, in-memory implementation, file-backed repositories, and domain exceptions |
 
