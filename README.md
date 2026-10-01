@@ -186,6 +186,8 @@ The key directories inside `NuciDAL/` are:
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for a structural synopsis and component interactions.
 
+Implementation navigation is available in [docs/feature-map.md](./docs/feature-map.md), [docs/code-map.md](./docs/code-map.md), and [docs/documentation-coverage.md](./docs/documentation-coverage.md).
+
 ## 🤝 Contributing
 
 You are welcome to submit any suggestion, feedback, or modification to this project.
