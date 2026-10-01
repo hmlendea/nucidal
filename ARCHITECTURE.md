@@ -584,7 +584,33 @@ The adapter registers one singleton per service registration. It retains each fi
 | Unit tests | [NuciDAL.UnitTests](NuciDAL.UnitTests) |
 | Continuous integration | [.github/workflows/dotnet.yml](.github/workflows/dotnet.yml) |
 
+## Implementation Reference
+
+| Responsibility | Location | Symbol |
+|----------------|----------|--------|
+| Entity identity and equality | [NuciDAL/DataObjects/EntityBase.cs](NuciDAL/DataObjects/EntityBase.cs) | `EntityBase<TKey>`, `EntityBase` |
+| Repository contract | [NuciDAL/Repositories/IRepository.cs](NuciDAL/Repositories/IRepository.cs) | `IRepository<TKey, TDataObject>` |
+| In-memory repository semantics | [NuciDAL/Repositories/Repository.cs](NuciDAL/Repositories/Repository.cs) | `Repository<TKey, TDataObject>` |
+| File lifecycle and persistence | [NuciDAL/Repositories/FileRepository.cs](NuciDAL/Repositories/FileRepository.cs) | `FileRepository<TKey, TDataObject>`, `LoadEntitiesIfNeeded`, `SaveChanges` |
+| Format adapters | [NuciDAL/Repositories/JsonRepository.cs](NuciDAL/Repositories/JsonRepository.cs), [XmlRepository.cs](NuciDAL/Repositories/XmlRepository.cs), [CsvRepository.cs](NuciDAL/Repositories/CsvRepository.cs) | `JsonRepository`, `XmlRepository`, `CsvRepository` |
+| File serialisation and encoding | [NuciDAL/IO](NuciDAL/IO) | `JsonFileCollection`, `XmlFileCollection`, `CsvFile`, `JsonFileObject`, `XmlFileObject`, `Windows1252File` |
+| Dependency injection composition | [NuciDAL/DependencyInjection/RepositoryServiceCollectionExtensions.cs](NuciDAL/DependencyInjection/RepositoryServiceCollectionExtensions.cs) | `AddRepository`, `AddJsonRepository`, `AddXmlRepository`, `AddCsvRepository` |
+| Repository exceptions | [NuciDAL/Repositories](NuciDAL/Repositories) | `EntityException`, `EntityAlreadyExistsException`, `EntityNotFoundException`, `DuplicateEntityException` |
+
+## Test Reference
+
+| Behaviour | Location | Test |
+|----------|----------|------|
+| Entity equality and hashing | [NuciDAL.UnitTests/DataObjects/EntityBaseTests.cs](NuciDAL.UnitTests/DataObjects/EntityBaseTests.cs) | `EntityBaseTests` |
+| In-memory repository operations | [NuciDAL.UnitTests/Repositories](NuciDAL.UnitTests/Repositories) | `RepositoryAddTests`, `RepositoryContainsTests`, `RepositoryCountTests`, `RepositoryFindTests`, `RepositoryGetTests`, `RepositoryRemoveTests`, `RepositoryUpdateTests` |
+| Repository exception metadata | [NuciDAL.UnitTests/Repositories](NuciDAL.UnitTests/Repositories) | `EntityAlreadyExistsExceptionTests`, `EntityNotFoundExceptionTests`, `DuplicateEntityExceptionTests` |
+| Dependency injection registration | [NuciDAL.UnitTests/DependencyInjection/RepositoryServiceCollectionExtensionsTests.cs](NuciDAL.UnitTests/DependencyInjection/RepositoryServiceCollectionExtensionsTests.cs) | `RepositoryServiceCollectionExtensionsTests` |
+| File hydration, persistence, and standalone I/O | [NuciDAL.UnitTests](NuciDAL.UnitTests) | No direct tests currently exist; see [documentation coverage](docs/documentation-coverage.md#missing-direct-tests) |
+
 ## 📚 Related Documentation
 
 - [README.md](README.md) describes capabilities, consumer usage, installation, development commands, package production, and the repository structure.
+- [docs/feature-map.md](docs/feature-map.md) maps each substantial capability to its implementation, composition, data, and tests.
+- [docs/code-map.md](docs/code-map.md) maps production and test source areas back to their documentation and related behaviours.
+- [docs/documentation-coverage.md](docs/documentation-coverage.md) records the bidirectional traceability audit and documented test gaps.
 - [LICENSE](LICENSE) defines the GPL-3.0-or-later distribution terms; it does not define runtime architecture.
