@@ -213,6 +213,10 @@ If you find this project useful, consider [funding it](https://hmlendea.go.ro/fu
 
 See [SECURITY.md](./SECURITY.md) for the security policy, supported versions, and vulnerability reporting procedures.
 
+## 🔐 Privacy
+
+See [PRIVACY.md](./PRIVACY.md) for the data handling description. NuciDAL is a library with no telemetry, network calls, or personal data processing.
+
 ## 📄 License
 
 This project is being distributed under the `GNU General Public License v3 or later`.
