@@ -209,6 +209,10 @@ If you find this project useful, consider [funding it](https://hmlendea.go.ro/fu
 
 [![Donate](https://raw.githubusercontent.com/hmlendea/readme-assets/master/donate_generic.png)](https://hmlendea.go.ro/funding)
 
+## 🔒 Security
+
+See [SECURITY.md](./SECURITY.md) for the security policy, supported versions, and vulnerability reporting procedures.
+
 ## 📄 License
 
 This project is being distributed under the `GNU General Public License v3 or later`.
