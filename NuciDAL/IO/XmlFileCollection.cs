@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml.Serialization;
 
 namespace NuciDAL.IO
@@ -41,11 +42,16 @@ namespace NuciDAL.IO
         {
             XmlSerializer serialiser = new(typeof(List<T>));
 
-            using StringWriter stringWriter = new();
+            AtomicFileWriter.Write(FileName, fileStream =>
+            {
+                using StreamWriter streamWriter = new(
+                    fileStream,
+                    new UTF8Encoding(false),
+                    1024,
+                    true);
 
-            serialiser.Serialize(stringWriter, entities);
-
-            File.WriteAllText(FileName, stringWriter.ToString());
+                serialiser.Serialize(streamWriter, new List<T>(entities));
+            });
         }
     }
 }
