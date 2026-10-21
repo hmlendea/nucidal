@@ -110,7 +110,7 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GivenAnXmlRepository_WhenSavingChanges_ThenAnIoExceptionWrapsTheSerialisationFailure()
+        public void GivenAnXmlRepository_WhenSavingChanges_ThenEntitiesArePersisted()
         {
             SetFilePath(RepositoryFileFormat.Xml);
             InitialiseFile(
@@ -120,12 +120,19 @@ namespace NuciDAL.UnitTests.Repositories
             IFileRepository<TestEntityDataObject> repository = CreateRepository(
                 RepositoryFileFormat.Xml,
                 filePath);
-            repository.Add(BuildEntity(SecondEntityId, SecondEntityName, SecondEntityValue));
+            TestEntityDataObject addedEntity = BuildEntity(
+                SecondEntityId,
+                SecondEntityName,
+                SecondEntityValue);
+            repository.Add(addedEntity);
 
-            IOException exception = Assert.Throws<IOException>(
-                () => repository.SaveChanges());
+            repository.SaveChanges();
+            IFileRepository<TestEntityDataObject> reopenedRepository = CreateRepository(
+                RepositoryFileFormat.Xml,
+                filePath);
 
-            Assert.That(exception.InnerException, Is.TypeOf<InvalidOperationException>());
+            Assert.That(reopenedRepository.Get(SecondEntityId), Is.EqualTo(addedEntity));
+            Assert.That(reopenedRepository.EntitiesCount, Is.EqualTo(2));
         }
 
         [TestCase(RepositoryFileFormat.Csv)]

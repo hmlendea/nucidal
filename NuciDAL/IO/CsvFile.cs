@@ -87,9 +87,12 @@ namespace NuciDAL.IO
                     1024,
                     true);
 
-                foreach (TDataObject entity in entities)
+                if (entities is not null)
                 {
-                    streamWriter.WriteLine(BuildLine(entity));
+                    foreach (TDataObject entity in entities)
+                    {
+                        streamWriter.WriteLine(BuildLine(entity));
+                    }
                 }
             });
         }

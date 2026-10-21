@@ -316,10 +316,15 @@ namespace NuciDAL.UnitTests.IO
         }
 
         [Test]
-        public void GivenANullCollection_WhenSaving_ThenAnArgumentNullExceptionIsThrown()
-            => Assert.That(
-                () => csvFile.SaveEntities(null),
-                Throws.TypeOf<ArgumentNullException>());
+        public void GivenANullCollection_WhenSavingAndLoading_ThenAnEmptyCollectionIsReturned()
+        {
+            csvFile.SaveEntities(null);
+            IEnumerable<TestEntityDataObject> loadedEntities = csvFile.LoadEntities();
+
+            Assert.That(File.Exists(filePath), Is.True);
+            Assert.That(File.ReadAllText(filePath), Is.Empty);
+            Assert.That(loadedEntities, Is.Empty);
+        }
 
         [Test]
         public void GivenACollectionContainingNull_WhenSaving_ThenANullReferenceExceptionIsThrown()

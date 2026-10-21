@@ -71,13 +71,10 @@ namespace NuciDAL.UnitTests.IO
         }
 
         [Test]
-        public void GivenANullCollection_WhenSavingAndLoading_ThenAnEmptyCollectionIsReturned()
-        {
-            xmlFileCollection.SaveEntities(null);
-            IEnumerable<TestEntityDataObject> loadedEntities = xmlFileCollection.LoadEntities();
-
-            Assert.That(loadedEntities, Is.Empty);
-        }
+        public void GivenANullCollection_WhenSaving_ThenAnArgumentNullExceptionIsThrown()
+            => Assert.That(
+                () => xmlFileCollection.SaveEntities(null),
+                Throws.TypeOf<ArgumentNullException>());
 
         [Test]
         public void GivenAnExistingFile_WhenSavingAgain_ThenThePreviousContentIsReplaced()
@@ -113,16 +110,17 @@ namespace NuciDAL.UnitTests.IO
         }
 
         [Test]
-        public void GivenAnArray_WhenSaving_ThenAnInvalidOperationExceptionIsThrown()
+        public void GivenAnArray_WhenSavingAndLoading_ThenAllEntitiesArePreserved()
         {
             TestEntityDataObject[] entities =
             [
                 BuildEntity(FirstEntityId, FirstEntityName, FirstEntityValue),
             ];
 
-            Assert.That(
-                () => xmlFileCollection.SaveEntities(entities),
-                Throws.TypeOf<InvalidOperationException>());
+            xmlFileCollection.SaveEntities(entities);
+            IEnumerable<TestEntityDataObject> loadedEntities = xmlFileCollection.LoadEntities();
+
+            Assert.That(loadedEntities, Is.EqualTo(entities));
         }
 
         [Test]

@@ -219,16 +219,17 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GivenANewEntity_WhenTryingToUpdate_ThenTheEntityIsInserted()
+        public void GivenANewEntity_WhenTryingToUpdate_ThenTheUpdateFailsWithoutInserting()
         {
             TestEntityDataObject entity = BuildEntity(
                 ThirdEntityId,
                 ThirdEntityName,
                 ThirdEntityValue);
 
-            repository.TryUpdate(entity);
+            bool wasUpdated = repository.TryUpdate(entity);
 
-            Assert.That(repository.Get(ThirdEntityId), Is.EqualTo(entity));
+            Assert.That(wasUpdated, Is.False);
+            Assert.That(repository.ContainsId(ThirdEntityId), Is.False);
         }
 
         [Test]
