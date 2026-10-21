@@ -29,8 +29,9 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to add the specified entity.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was added; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        void TryAdd(TDataObject entity);
+        bool TryAdd(TDataObject entity);
 
         /// <summary>
         /// Checks whether an entity with the specified identifier exists.
@@ -95,8 +96,15 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to update the specified entity's fields.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was updated; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        void TryUpdate(TDataObject entity);
+        bool TryUpdate(TDataObject entity);
+
+        /// <summary>
+        /// Inserts the specified entity or replaces the existing entity with the same identifier.
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        void Upsert(TDataObject entity);
 
         /// <summary>
         /// Removes the specified entity.
@@ -113,13 +121,15 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to remove the specified entity.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        void TryRemove(TDataObject entity);
+        bool TryRemove(TDataObject entity);
 
         /// <summary>
         /// Tries to remove the entity with the specified identifier.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="id">Identifier.</param>
-        void TryRemove(TKey id);
+        bool TryRemove(TKey id);
     }
 }

@@ -240,7 +240,7 @@ namespace NuciDAL.UnitTests.Repositories
                 Value = FirstEntityValue,
             });
 
-            repository.TryUpdate(new()
+            bool updated = repository.TryUpdate(new()
             {
                 Id = FirstEntityId,
                 Name = SecondEntityName,
@@ -249,6 +249,7 @@ namespace NuciDAL.UnitTests.Repositories
 
             TestEntityDataObject stored = repository.Get(FirstEntityId);
 
+            Assert.That(updated, Is.True);
             Assert.That(stored.Name, Is.EqualTo(SecondEntityName));
         }
 
@@ -281,22 +282,23 @@ namespace NuciDAL.UnitTests.Repositories
                 Throws.Nothing);
 
         [Test]
-        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenInsertsEntity()
+        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenReturnsFalseAndDoesNotInsertEntity()
         {
-            repository.TryUpdate(new()
+            bool updated = repository.TryUpdate(new()
             {
                 Id = AbsentEntityId,
                 Name = FirstEntityName,
                 Value = FirstEntityValue,
             });
 
-            Assert.That(repository.ContainsId(AbsentEntityId), Is.True);
+            Assert.That(updated, Is.False);
+            Assert.That(repository.ContainsId(AbsentEntityId), Is.False);
         }
 
         [Test]
-        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenInsertedEntityHasCorrectName()
+        public void GivenAbsentEntity_WhenUpsertIsCalled_ThenInsertsEntityWithCorrectName()
         {
-            repository.TryUpdate(new()
+            repository.Upsert(new()
             {
                 Id = AbsentEntityId,
                 Name = FirstEntityName,
@@ -309,10 +311,32 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
-        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenEntitiesCountIncreases()
+        public void GivenAbsentEntity_WhenTryUpdateIsCalled_ThenEntitiesCountDoesNotChange()
         {
-            repository.TryUpdate(new() { Id = AbsentEntityId, Name = FirstEntityName });
+            bool updated = repository.TryUpdate(new() { Id = AbsentEntityId, Name = FirstEntityName });
 
+            Assert.That(updated, Is.False);
+            Assert.That(repository.EntitiesCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void GivenAbsentEntity_WhenUpsertIsCalled_ThenEntitiesCountIncreases()
+        {
+            repository.Upsert(new() { Id = AbsentEntityId, Name = FirstEntityName });
+
+            Assert.That(repository.EntitiesCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GivenEntityExists_WhenUpsertIsCalled_ThenReplacesExistingEntity()
+        {
+            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
+
+            repository.Upsert(new() { Id = FirstEntityId, Name = SecondEntityName });
+
+            TestEntityDataObject stored = repository.Get(FirstEntityId);
+
+            Assert.That(stored.Name, Is.EqualTo(SecondEntityName));
             Assert.That(repository.EntitiesCount, Is.EqualTo(1));
         }
 

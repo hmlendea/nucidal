@@ -63,8 +63,9 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to add the specified entity.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was added; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public override void TryAdd(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override bool TryAdd(TDataObject entity) => ExecuteWriteOperation(() =>
             base.TryAdd(entity));
 
         /// <summary>
@@ -123,9 +124,17 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to update the specified entity's fields.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was updated; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public override void TryUpdate(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override bool TryUpdate(TDataObject entity) => ExecuteWriteOperation(() =>
             base.TryUpdate(entity));
+
+        /// <summary>
+        /// Inserts the specified entity or replaces the existing entity with the same identifier.
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        public override void Upsert(TDataObject entity) => ExecuteWriteOperation(() =>
+            base.Upsert(entity));
 
         /// <summary>
         /// Removes the entity with the specified identifier.
@@ -144,15 +153,17 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to remove the specified entity.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public override void TryRemove(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override bool TryRemove(TDataObject entity) => ExecuteWriteOperation(() =>
             base.TryRemove(entity));
 
         /// <summary>
         /// Tries to remove the entity with the specified identifier.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="id">Identifier.</param>
-        public override void TryRemove(TKey id) => ExecuteWriteOperation(() =>
+        public override bool TryRemove(TKey id) => ExecuteWriteOperation(() =>
             base.TryRemove(id));
 
         /// <summary>
@@ -215,6 +226,13 @@ namespace NuciDAL.Repositories
             LoadEntitiesIfNeeded();
 
             action();
+        }
+
+        private TResult ExecuteWriteOperation<TResult>(Func<TResult> action)
+        {
+            LoadEntitiesIfNeeded();
+
+            return action();
         }
 
         private TResult ExecuteReadOperation<TResult>(Func<TResult> action)

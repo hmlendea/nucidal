@@ -191,8 +191,9 @@ namespace NuciDAL.UnitTests.Repositories
             TestEntityDataObject entity = new() { Id = FirstEntityId };
 
             repository.Add(entity);
-            repository.TryRemove(entity);
+            bool removed = repository.TryRemove(entity);
 
+            Assert.That(removed, Is.True);
             Assert.That(repository.EntitiesCount, Is.EqualTo(0));
         }
 
@@ -212,7 +213,7 @@ namespace NuciDAL.UnitTests.Repositories
         {
             TestEntityDataObject entity = new() { Id = AbsentEntityId };
 
-            Assert.That(() => repository.TryRemove(entity), Throws.Nothing);
+            Assert.That(repository.TryRemove(entity), Is.False);
         }
 
         [Test]
@@ -253,8 +254,9 @@ namespace NuciDAL.UnitTests.Repositories
         {
             repository.Add(new() { Id = FirstEntityId });
 
-            repository.TryRemove(FirstEntityId);
+            bool removed = repository.TryRemove(FirstEntityId);
 
+            Assert.That(removed, Is.True);
             Assert.That(repository.EntitiesCount, Is.EqualTo(0));
         }
 
@@ -270,9 +272,7 @@ namespace NuciDAL.UnitTests.Repositories
 
         [Test]
         public void GivenAbsentEntityId_WhenTryRemoveByIdIsCalled_ThenDoesNotThrow()
-            => Assert.That(
-                () => repository.TryRemove(AbsentEntityId),
-                Throws.Nothing);
+            => Assert.That(repository.TryRemove(AbsentEntityId), Is.False);
 
         [Test]
         public void GivenEmptyRepository_WhenTryRemoveByIdIsCalled_ThenDoesNotThrow()

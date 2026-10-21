@@ -237,7 +237,7 @@ namespace NuciDAL.UnitTests.Repositories
         [Test]
         public void GivenValidEntity_WhenTryAdded_ThenEntityIsRetrievable()
         {
-            repository.TryAdd(new()
+            bool added = repository.TryAdd(new()
             {
                 Id = FirstEntityId,
                 Name = FirstEntityName,
@@ -246,6 +246,7 @@ namespace NuciDAL.UnitTests.Repositories
 
             TestEntityDataObject retrievedEntity = repository.Get(FirstEntityId);
 
+            Assert.That(added, Is.True);
             Assert.That(retrievedEntity, Is.Not.Null);
         }
 
@@ -272,6 +273,19 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(
                 () => repository.TryAdd(new() { Id = FirstEntityId, Name = SecondEntityName }),
                 Throws.Nothing);
+        }
+
+        [Test]
+        public void GivenDuplicateEntityId_WhenTryAdded_ThenReturnsFalseAndPreservesExistingEntity()
+        {
+            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
+
+            bool added = repository.TryAdd(new() { Id = FirstEntityId, Name = SecondEntityName });
+
+            TestEntityDataObject storedEntity = repository.Get(FirstEntityId);
+
+            Assert.That(added, Is.False);
+            Assert.That(storedEntity.Name, Is.EqualTo(FirstEntityName));
         }
 
         [Test]
