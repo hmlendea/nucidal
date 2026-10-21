@@ -12,7 +12,11 @@ namespace NuciDAL.IO
     {
         private static readonly Encoding windows1252Encoding;
 
-        static Windows1252File() => windows1252Encoding = Encoding.GetEncoding("windows-1252");
+        static Windows1252File()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            windows1252Encoding = Encoding.GetEncoding("windows-1252");
+        }
 
         /// <summary>
         /// Writes all text to the specified file using Windows-1252 encoding.
