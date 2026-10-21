@@ -37,12 +37,9 @@ namespace NuciDAL.IO
         /// <param name="entities">Entities.</param>
         public void SaveEntities(IEnumerable<T> entities)
         {
-            string json = JsonSerializer.Serialize(entities, options);
-
-            using FileStream fileStream = new(FileName, FileMode.Create, FileAccess.Write);
-            using StreamWriter streamWriter = new(fileStream);
-
-            streamWriter.Write(json);
+            AtomicFileWriter.Write(
+                FileName,
+                fileStream => JsonSerializer.Serialize(fileStream, entities, options));
         }
 
         private readonly JsonSerializerOptions options = new()

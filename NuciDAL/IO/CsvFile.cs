@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace NuciDAL.IO
 {
@@ -78,9 +79,19 @@ namespace NuciDAL.IO
         /// <param name="entities">Entities.</param>
         public void SaveEntities(IEnumerable<TDataObject> entities)
         {
-            IEnumerable<string> lines = entities.Select(entity => BuildLine(entity));
+            AtomicFileWriter.Write(FilePath, fileStream =>
+            {
+                using StreamWriter streamWriter = new(
+                    fileStream,
+                    new UTF8Encoding(false),
+                    1024,
+                    true);
 
-            File.WriteAllLines(FilePath, lines);
+                foreach (TDataObject entity in entities)
+                {
+                    streamWriter.WriteLine(BuildLine(entity));
+                }
+            });
         }
 
         private static char CommentCharacter => '#';

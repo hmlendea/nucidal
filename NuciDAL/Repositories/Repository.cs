@@ -14,7 +14,7 @@ namespace NuciDAL.Repositories
     /// In-memory repository.
     /// </summary>
     public class Repository<TDataObject>
-        : Repository<string, TDataObject>
+        : Repository<string, TDataObject>, IRepository<TDataObject>
         where TDataObject : EntityBase { }
 
     /// <summary>
@@ -53,12 +53,13 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to add the specified entity.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was added; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public virtual void TryAdd(TDataObject entity) => ExecuteWrite(() =>
+        public virtual bool TryAdd(TDataObject entity) => ExecuteWrite(() =>
         {
             TDataObject entityClone = CloneEntity(entity);
 
-            Entities.TryAdd(entityClone.Id, entityClone);
+            return Entities.TryAdd(entityClone.Id, entityClone);
         });
 
         /// <summary>
@@ -158,8 +159,25 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to update the specified entity's fields.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was updated; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public virtual void TryUpdate(TDataObject entity) => ExecuteWrite(() =>
+        public virtual bool TryUpdate(TDataObject entity) => ExecuteWrite(() =>
+        {
+            TDataObject entityClone = CloneEntity(entity);
+
+            if (!Entities.TryGetValue(entityClone.Id, out TDataObject existingEntity))
+            {
+                return false;
+            }
+
+            return Entities.TryUpdate(entityClone.Id, entityClone, existingEntity);
+        });
+
+        /// <summary>
+        /// Inserts the specified entity or replaces the existing entity with the same identifier.
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        public virtual void Upsert(TDataObject entity) => ExecuteWrite(() =>
         {
             TDataObject entityClone = CloneEntity(entity);
 
@@ -193,15 +211,17 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Tries to remove the specified entity.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public virtual void TryRemove(TDataObject entity) => ExecuteWrite(() =>
+        public virtual bool TryRemove(TDataObject entity) => ExecuteWrite(() =>
             Entities.TryRemove(entity.Id, out _));
 
         /// <summary>
         /// Tries to remove the entity with the specified identifier.
         /// </summary>
+        /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="id">Identifier.</param>
-        public virtual void TryRemove(TKey id) => ExecuteWrite(() =>
+        public virtual bool TryRemove(TKey id) => ExecuteWrite(() =>
             Entities.TryRemove(id, out _));
 
         /// <summary>
@@ -225,6 +245,14 @@ namespace NuciDAL.Repositories
             lock (SyncRoot)
             {
                 action();
+            }
+        }
+
+        private TResult ExecuteWrite<TResult>(Func<TResult> action)
+        {
+            lock (SyncRoot)
+            {
+                return action();
             }
         }
 
