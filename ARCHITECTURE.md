@@ -269,7 +269,7 @@ flowchart LR
 | Repository state | Repository instance | `ConcurrentDictionary<TKey, TDataObject>` in process memory | Independent per instance; retained until removal or instance disposal by the consumer |
 | JSON collection | `JsonFileCollection<T>` | Indented JSON array with camel-case property names | Loaded once by a repository; complete file replaced on save |
 | XML collection | `XmlFileCollection<T>` | `XmlSerializer` representation configured for `List<T>` | Loaded once by a repository; complete file replaced on save |
-| CSV collection | `CsvFile<T>` | Delimiter-separated reflected public property values, comma-delimited through `CsvRepository` | Missing file produces an empty collection; complete file replaced on save |
+| CSV collections | `CsvFile<T>` | Delimiter-separated reflected public property values, comma-delimited through `CsvRepository` | Missing file produces an empty collection; complete file replaced on save |
 | Standalone JSON or XML object | `JsonFileObject<T>` or `XmlFileObject<T>` | One serialised object at a caller-supplied path | Direct read or write per call; outside repository state |
 
 ## 🔌 Interfaces and Integrations
@@ -383,12 +383,12 @@ Hydration occurs before the save exception wrapper. A missing or malformed JSON/
 |-------------------|-------------------------|--------------------------------|
 | JSON collections | `System.Text.Json` serialised `IEnumerable<T>` with camel-case naming and indentation | The repository expects a collection payload; an absent file is not interpreted as an empty store |
 | XML collections | `XmlSerializer` configured for `List<T>` | XML element names and compatible constructors/properties derive from CLR types; an absent file is not interpreted as an empty store |
-| CSV collections | One entity per line, `Split(FieldSeparator)` parsing, `Convert.ChangeType`, and no quoting or escaping | `CsvRepository` uses comma; `CsvFile<T>` can receive another separator. Reflection returns the columns, then the final reflected property is shifted to the first position |
+| CSV collections | One entity per line, `Split(FieldSeparator)` parsing, `Convert.ChangeType`, and no quoting or escaping | `CsvRepository` uses comma; `CsvFile<T>` can receive another separator. The `Id` property is always column 0; remaining properties are ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`). The previous hacky reordering was removed. |
 | JSON objects | One generic object with camel-case, case-insensitive input, and indented output | This helper is independent of `JsonRepository`, which uses separate collection options |
 | XML objects | One generic object through `XmlSerializer(typeof(T))` | This helper is independent of `XmlRepository`, which configures a collection serializer |
 | Windows-1252 text | Complete text encoded and written as bytes | Runtime availability of the named code page is not configured by this library |
 
-CSV comments are accepted only while loading and are not preserved by save. Because fields are neither quoted nor escaped, values containing the separator or line terminators do not round-trip as one field. Adding, eliminating, or reordering public entity properties can alter the persisted column contract.
+CSV comments are accepted only while loading and are not preserved by save. Because fields are neither quoted nor escaped, values containing the separator or line terminators do not round-trip as one field. Adding, eliminating, or reordering public entity properties can alter the persisted column contract. The `[CsvColumn(Order)]` attribute provides explicit column ordering when needed.
 
 ## 🧵 Cross-Cutting Concerns
 
@@ -489,7 +489,7 @@ File-backed deployment requires a path accessible to the host process. JSON and 
 | Entity exceptions | Repository layer | Duplicate, existing, and missing conditions expose typed exceptions with identifier and type metadata | Dedicated exception tests and repository tests | Preserve types and metadata when revising messages or translation boundaries |
 | JSON collection | `JsonFileCollection<T>` | Collection payload, camel-case output property names, and indented output | No current persistence tests | Format modifications require round-trip fixtures or a migration strategy |
 | XML collection | `XmlFileCollection<T>` | `XmlSerializer` representation configured for `List<T>` | No current persistence tests | CLR type or serializer-shape modifications require persisted-file compatibility evaluation |
-| CSV collection | `CsvFile<T>` | Separator-based unescaped fields in reflected property order with the final property shifted first | No current persistence tests | Property or ordering modifications can be data-breaking and require explicit migration |
+| CSV collection | `CsvFile<T>` | Separator-based unescaped fields in `[CsvColumn(Order)]` attribute order when present, otherwise declaration order | No current persistence tests | Property or ordering modifications can be data-breaking and require explicit migration |
 | Target framework | Project manifest | Production and test projects target `net10.0` | Solution compilation in CI | Framework modifications alter consumer compatibility and require package validation |
 
 ## ✅ Testing and Verification

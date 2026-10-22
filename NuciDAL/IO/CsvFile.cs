@@ -105,19 +105,19 @@ namespace NuciDAL.IO
         {
             TDataObject entity = new();
             string[] fields = line.Split(FieldSeparator);
-            PropertyInfo[] reorderedProperties = GetReorderedProperties(entity.GetType());
+            PropertyInfo[] properties = GetOrderedProperties(entity.GetType());
 
-            if (fields.Length < reorderedProperties.Length ||
-                fields.Length != reorderedProperties.Length &&
+            if (fields.Length < properties.Length ||
+                fields.Length != properties.Length &&
                 !string.IsNullOrWhiteSpace(fields[^1]))
             {
                 throw new SerializationException(
-                    $"Wrong number of CSV fields ({fields.Length}/{reorderedProperties.Length})");
+                    $"Wrong number of CSV fields ({fields.Length}/{properties.Length})");
             }
 
-            for (int i = 0; i < reorderedProperties.Length; i++)
+            for (int i = 0; i < properties.Length; i++)
             {
-                PropertyInfo property = reorderedProperties[i];
+                PropertyInfo property = properties[i];
                 object value = Convert.ChangeType(fields[i], property.PropertyType);
                 property.SetValue(entity, value, null);
             }
@@ -127,9 +127,9 @@ namespace NuciDAL.IO
 
         private string BuildLine(TDataObject entity)
         {
-            PropertyInfo[] reorderedProperties = GetReorderedProperties(entity.GetType());
+            PropertyInfo[] properties = GetOrderedProperties(entity.GetType());
 
-            IEnumerable<string> fieldValues = reorderedProperties
+            IEnumerable<string> fieldValues = properties
                 .Select(property => GetPropertyFieldValue(entity, property));
 
             return string.Join(FieldSeparator, fieldValues);
@@ -147,16 +147,20 @@ namespace NuciDAL.IO
             return value.ToString();
         }
 
-        // TODO: This shifting is VERY HACKY and should be fixed soon.
-        private static PropertyInfo[] GetReorderedProperties(Type entityType)
+        private static PropertyInfo[] GetOrderedProperties(Type entityType)
         {
-            PropertyInfo[] allProperties = entityType.GetProperties();
-            PropertyInfo[] reorderedProperties = new PropertyInfo[allProperties.Length];
+            PropertyInfo[] allProperties = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            Array.Copy(allProperties, 0, reorderedProperties, 1, reorderedProperties.Length - 1);
-            reorderedProperties[0] = allProperties[^1];
-
-            return reorderedProperties;
+            return allProperties
+                .Select(p => new
+                {
+                    Property = p,
+                    Order = p.Name == "Id" ? -1 : (p.GetCustomAttribute<CsvColumnAttribute>()?.Order ?? int.MaxValue)
+                })
+                .OrderBy(x => x.Order)
+                .ThenBy(x => x.Property.MetadataToken)
+                .Select(x => x.Property)
+                .ToArray();
         }
     }
 }

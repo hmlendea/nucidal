@@ -69,7 +69,7 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | Principal implementation | [`JsonFileCollection.cs`](../NuciDAL/IO/JsonFileCollection.cs): `JsonFileCollection<T>.LoadEntities` and `SaveEntities`; [`XmlFileCollection.cs`](../NuciDAL/IO/XmlFileCollection.cs): `XmlFileCollection<T>.LoadEntities` and `SaveEntities`; [`CsvFile.cs`](../NuciDAL/IO/CsvFile.cs): `CsvFile<TDataObject>.LoadEntities` and `SaveEntities`. |
 | Supporting implementation | [`JsonFileObject.cs`](../NuciDAL/IO/JsonFileObject.cs): `JsonFileObject<T>.Read` and `Write`; [`XmlFileObject.cs`](../NuciDAL/IO/XmlFileObject.cs): `XmlFileObject<T>.Read` and `Write`; [`Windows1252File.cs`](../NuciDAL/IO/Windows1252File.cs): `WriteAllText` and `WriteAllTextAsync`. |
 | Configuration | File path is constructor input; CSV field separator is constructor input with comma default; JSON uses camelCase and indented output; XML uses `XmlSerializer`; CSV treats `#` lines as comments. |
-| Algorithm | CSV reflection property ordering is implemented by `CsvFile<TDataObject>.GetReorderedProperties`; parsing reports line context through `SerializationException`. |
+| Algorithm | CSV reflection property ordering is implemented by `CsvFile<TDataObject>.GetOrderedProperties`; the `Id` property is always column 0; remaining properties are ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`). The previous `VERY HACKY` reordering was removed; parsing reports line context through `SerializationException`. |
 | Tests | No direct tests for these helpers. Repository and DI tests only cover the surrounding API. |
 | Coverage gap | Empty files, comments, field-count mismatch, null values, conversion errors, malformed JSON/XML, encoding, and file I/O failures lack direct tests. |
 
@@ -129,7 +129,7 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 ### CSV Property Ordering
 
 - **Inputs:** reflected public entity properties.
-- **Output:** reordered property array used for CSV header/value processing.
-- **Implementation:** `CsvFile<TDataObject>.GetReorderedProperties` in [`CsvFile.cs`](../NuciDAL/IO/CsvFile.cs).
-- **Assumption:** the final reflected property is moved to the first position; the implementation contains a known `VERY HACKY` note.
-- **Tests:** none; this is a documented test gap.
+- **Output:** ordered property array used for CSV header/value processing.
+- **Implementation:** `CsvFile<TDataObject>.GetOrderedProperties` in [`CsvFile.cs`](../NuciDAL/IO/CsvFile.cs).
+- **Assumption:** properties are ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`). The previous `VERY HACKY` reordering was removed.
+- **Tests:** covered by [`CsvFileTests.cs`](../NuciDAL.UnitTests/IO/CsvFileTests.cs) with attributed test entities.

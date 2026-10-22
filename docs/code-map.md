@@ -23,7 +23,7 @@ This document provides the reverse route from implementation to documentation. E
 | [`NuciDAL/IO/JsonFileObject.cs`](../NuciDAL/IO/JsonFileObject.cs) | `JsonFileObject<T>` standalone JSON read/write. | [Non-Repository Utilities](feature-map.md#non-repository-utilities) | No direct tests |
 | [`NuciDAL/IO/XmlFileCollection.cs`](../NuciDAL/IO/XmlFileCollection.cs) | `XmlFileCollection<T>` collection XML load/save. | [Serialisation And File I/O](feature-map.md#serialisation-and-file-io) | No direct tests |
 | [`NuciDAL/IO/XmlFileObject.cs`](../NuciDAL/IO/XmlFileObject.cs) | `XmlFileObject<T>` standalone XML read/write. | [Non-Repository Utilities](feature-map.md#non-repository-utilities) | No direct tests |
-| [`NuciDAL/IO/CsvFile.cs`](../NuciDAL/IO/CsvFile.cs) | `CsvFile<TDataObject>` reflection-based CSV parsing, saving, comments, conversion, and `GetReorderedProperties`. | [Serialisation And File I/O](feature-map.md#serialisation-and-file-io); [CSV Property Ordering](feature-map.md#csv-property-ordering) | No direct tests |
+| [`NuciDAL/IO/CsvFile.cs`](../NuciDAL/IO/CsvFile.cs) | `CsvFile<TDataObject>` reflection-based CSV parsing, saving, comments, conversion, and `GetOrderedProperties` with `[CsvColumn]` attribute support. | [Serialisation And File I/O](feature-map.md#serialisation-and-file-io); [CSV Property Ordering](feature-map.md#csv-property-ordering) | [`CsvFileTests.cs`](../NuciDAL.UnitTests/IO/CsvFileTests.cs) |
 | [`NuciDAL/IO/Windows1252File.cs`](../NuciDAL/IO/Windows1252File.cs) | `WriteAllText` and `WriteAllTextAsync` with Windows-1252 encoding. | [Non-Repository Utilities](feature-map.md#non-repository-utilities); [Architecture file I/O](../ARCHITECTURE.md#file-io) | No direct tests |
 
 ## Test Project
