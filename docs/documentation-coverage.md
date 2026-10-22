@@ -60,7 +60,7 @@ The repository has one packable library project and one NUnit test project. Ther
 | Lazy hydration | File path -> populated dictionary | Double-check lock; one successful load; duplicate identifier rejects | [`FileRepository.cs`](../NuciDAL/Repositories/FileRepository.cs), `LoadEntitiesIfNeeded` | No direct algorithm test |
 | Duplicate detection | Loaded entity sequence -> dictionary or `DuplicateEntityException` | `TryAdd` failure identifies repeated key | [`FileRepository.cs`](../NuciDAL/Repositories/FileRepository.cs) | Exception construction tests; no file-load integration test |
 | Predicate snapshot | Repository state and predicate -> enumerable result | Snapshot is materialised before later repository mutations | [`Repository.cs`](../NuciDAL/Repositories/Repository.cs), `Find` | [`RepositoryFindTests.cs`](../NuciDAL.UnitTests/Repositories/RepositoryFindTests.cs) |
-| CSV property reordering | Reflected properties -> reordered array | Final reflected property is moved to the first position; implementation carries a known hack | [`CsvFile.cs`](../NuciDAL/IO/CsvFile.cs), `GetReorderedProperties` | None |
+| CSV property ordering | Reflected properties -> ordered array | The `Id` property is always column 0; remaining properties ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`) | [`CsvFile.cs`](../NuciDAL/IO/CsvFile.cs), `GetOrderedProperties` | [`CsvFileTests.cs`](../NuciDAL.UnitTests/IO/CsvFileTests.cs) |
 
 ## Test And Operational Coverage
 
