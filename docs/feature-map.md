@@ -70,8 +70,8 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | Supporting implementation | [`JsonFileObject.cs`](../NuciDAL/IO/JsonFileObject.cs): `JsonFileObject<T>.Read` and `Write`; [`XmlFileObject.cs`](../NuciDAL/IO/XmlFileObject.cs): `XmlFileObject<T>.Read` and `Write`; [`Windows1252File.cs`](../NuciDAL/IO/Windows1252File.cs): `WriteAllText` and `WriteAllTextAsync`. |
 | Configuration | File path is constructor input; CSV field separator is constructor input with comma default; JSON uses camelCase and indented output; XML uses `XmlSerializer`; CSV treats `#` lines as comments. |
 | Algorithm | CSV reflection property ordering is implemented by `CsvFile<TDataObject>.GetOrderedProperties`; the `Id` property is always column 0; remaining properties are ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`). The previous `VERY HACKY` reordering was removed; parsing reports line context through `SerializationException`. |
-| Tests | No direct tests for these helpers. Repository and DI tests only cover the surrounding API. |
-| Coverage gap | Empty files, comments, field-count mismatch, null values, conversion errors, malformed JSON/XML, encoding, and file I/O failures lack direct tests. |
+| Tests | [`JsonFileCollectionTests.cs`](../NuciDAL.UnitTests/IO/JsonFileCollectionTests.cs), [`XmlFileCollectionTests.cs`](../NuciDAL.UnitTests/IO/XmlFileCollectionTests.cs), [`XmlFileObjectTests.cs`](../NuciDAL.UnitTests/IO/XmlFileObjectTests.cs), [`Windows1252FileTests.cs`](../NuciDAL.UnitTests/IO/Windows1252FileTests.cs). |
+| Coverage gap | Empty files, comments, field-count mismatch, null values, conversion errors, malformed JSON/XML, encoding, and file I/O failures lack direct tests. CSV collection I/O lacks direct tests. |
 
 ## Dependency Injection Composition
 

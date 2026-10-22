@@ -472,7 +472,7 @@ File-backed deployment requires a path accessible to the host process. JSON and 
 | Process topology | In-process library within one consumer | Availability, startup, shutdown, and recovery inherit the host's topology |
 | Persistent state | Optional single JSON, XML, or CSV file per concrete repository instance | Host owns paths, permissions, backup, and external access coordination |
 | State loading | Complete lazy hydration cached for the instance lifetime | First use incurs I/O; external modifications are not observed afterwards |
-| State saving | Synchronous complete-file create or replacement | Cost increases with collection size; interruption can leave an incomplete file because no atomic exchange or journal exists |
+| State saving | Synchronous complete-file create or replacement (JSON uses atomic write via temporary file) | Cost increases with collection size; interruption can leave an incomplete file for CSV/XML because no atomic exchange or journal exists |
 | Scaling | Complete per-instance in-memory copy with no cross-instance coordination | Horizontal or multi-process use can produce stale reads and last-writer replacement |
 | Recovery | In-memory state remains after a save exception, but no automatic retry or rollback exists | Caller decides whether and when to retry and must verify file integrity after partial I/O failure |
 | Packaging | `dotnet pack` produces one .NET 10 NuGet package | Consumers targeting earlier frameworks cannot reference this release directly |
@@ -513,7 +513,7 @@ dotnet test NuciDAL.slnx
 - **Explicit persistence:** File-backed mutation is not durable until `SaveChanges()` succeeds, and no dirty-state indicator or automatic flush exists.
 - **One-time hydration:** A file repository does not observe later external file modifications and offers no public reload operation.
 - **Format asymmetry:** Missing JSON and XML files fail on first use, while a missing CSV file represents an empty collection.
-- **Non-atomic complete-file save:** Saves have no temporary-file exchange, transaction, journal, backup, or multi-file coordination.
+- **Non-atomic complete-file save (CSV, XML):** CSV and XML saves have no temporary-file exchange, transaction, journal, backup, or multi-file coordination. JSON saves use `AtomicFileWriter` for atomic replacement.
 - **CSV schema fragility:** Reflection order, property additions, delimiters, line terminators, and conversion compatibility affect round trips; quoting and escaping are absent.
 - **Partial duplicate hydration:** If duplicate identifiers are discovered after earlier entities were inserted, the load fails with partial in-memory state. A subsequent attempt observes non-empty protected state and marks it loaded without rereading the file.
 - **Per-instance synchronisation:** In-process coordination applies only to one repository instance; multiple instances or processes can overwrite divergent file snapshots.
