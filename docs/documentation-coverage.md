@@ -13,7 +13,7 @@ The repository has one packable library project and one NUnit test project. Ther
 | Clone isolation | [Feature map](feature-map.md#clone-isolation), [Architecture data architecture](../ARCHITECTURE.md#data-architecture) | [`Repository.cs`](../NuciDAL/Repositories/Repository.cs), `CloneEntity` | Add, get, and update clone tests | Direct in-memory coverage; file lifecycle gap remains |
 | File repository lifecycle | [Feature map](feature-map.md#file-persistence), [Architecture lifecycle](../ARCHITECTURE.md#file-repository-lifecycle) | [`FileRepository.cs`](../NuciDAL/Repositories/FileRepository.cs), `JsonRepository`, `XmlRepository`, `CsvRepository` | No direct hydration or save tests | Documented implementation, missing direct tests |
 | JSON, XML, and CSV collection I/O | [Feature map](feature-map.md#serialisation-and-file-io), [Architecture format semantics](../ARCHITECTURE.md#file-format-semantics) | [`JsonFileCollection.cs`](../NuciDAL/IO/JsonFileCollection.cs), [`XmlFileCollection.cs`](../NuciDAL/IO/XmlFileCollection.cs), [`CsvFile.cs`](../NuciDAL/IO/CsvFile.cs) | None | Documented implementation, missing direct tests |
-| Standalone object I/O and Windows-1252 output | [Feature map](feature-map.md#non-repository-utilities) | [`JsonFileObject.cs`](../NuciDAL/IO/JsonFileObject.cs), [`XmlFileObject.cs`](../NuciDAL/IO/XmlFileObject.cs), [`Windows1252File.cs`](../NuciDAL/IO/Windows1252File.cs) | None | Documented implementation, missing direct tests |
+| Standalone object I/O and Windows-1252 output | [Feature map](feature-map.md#non-repository-utilities) | [`JsonFileObject.cs`](../NuciDAL/IO/JsonFileObject.cs), [`XmlFileObject.cs`](../NuciDAL/IO/XmlFileObject.cs), [`Windows1252File.cs`](../NuciDAL/IO/Windows1252File.cs) | [`JsonFileObjectTests.cs`](../NuciDAL.UnitTests/IO/JsonFileObjectTests.cs) | JSON direct unit coverage; XML and Windows-1252 missing |
 | Dependency injection composition | [Feature map](feature-map.md#dependency-injection-composition), [Architecture DI](../ARCHITECTURE.md#dependency-injection) | [`RepositoryServiceCollectionExtensions.cs`](../NuciDAL/DependencyInjection/RepositoryServiceCollectionExtensions.cs), `AddRepository`, `AddJsonRepository`, `AddXmlRepository`, `AddCsvRepository` | [`RepositoryServiceCollectionExtensionsTests.cs`](../NuciDAL.UnitTests/DependencyInjection/RepositoryServiceCollectionExtensionsTests.cs) | Direct unit coverage |
 | Exception model | [Feature map](feature-map.md#exception-model), [Architecture error handling](../ARCHITECTURE.md#error-handling) | [`EntityException.cs`](../NuciDAL/Repositories/EntityException.cs), typed exception files | Three typed exception test classes plus repository failure tests | Direct unit coverage |
 | Packaging and CI | [Code map](code-map.md#configuration-packaging-and-operations), [README development](../README.md#development) | [`NuciDAL.csproj`](../NuciDAL/NuciDAL.csproj), [`NuciDAL.UnitTests.csproj`](../NuciDAL.UnitTests/NuciDAL.UnitTests.csproj), [`dotnet.yml`](../.github/workflows/dotnet.yml) | CI executes restore, build, and test commands | Configuration and operational references present |
@@ -74,13 +74,13 @@ The repository has one packable library project and one NUnit test project. Ther
 
 ### Missing Direct Tests
 
-- JSON, XML, and CSV file loading and saving through both helpers and repositories.
+- XML and CSV file loading and saving through both helpers and repositories.
 - `IFileRepository.SaveChanges()` observable file replacement.
 - Duplicate identifiers encountered during actual file hydration.
 - Malformed JSON/XML/CSV, CSV comments, empty files, field-count errors, null values, conversion errors, missing paths, permissions, and encoding failures.
 - Concurrent repository operations, `SyncRoot`, and the double-check locking procedure.
 - Generic non-string key repository operations despite the `IntKeyEntityDataObject` stub.
-- Standalone JSON/XML object helpers and Windows-1252 synchronous/asynchronous output.
+- Standalone XML object helpers and Windows-1252 synchronous/asynchronous output.
 - Failure while invoking a deferred DI store-path provider.
 
 ### Operational Boundaries
