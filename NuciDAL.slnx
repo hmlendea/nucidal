@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="NuciDAL/NuciDAL.csproj" />
+  <Project Path="NuciDAL.ArchitectureTests/NuciDAL.ArchitectureTests.csproj" />
   <Project Path="NuciDAL.UnitTests/NuciDAL.UnitTests.csproj" />
 </Solution>
