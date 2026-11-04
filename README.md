@@ -1,7 +1,8 @@
 [![Donate](https://img.shields.io/badge/-%E2%99%A5%20Donate-%23ff69b4)](https://hmlendea.go.ro/funding)
 [![Latest Release](https://img.shields.io/github/v/release/hmlendea/nucidal)](https://github.com/hmlendea/nucidal/releases/latest)
 [![Build Status](https://github.com/hmlendea/nucidal/actions/workflows/dotnet.yml/badge.svg)](https://github.com/hmlendea/nucidal/actions/workflows/dotnet.yml)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://gnu.org/licenses/gpl-3.0)
+[![NuGet](https://img.shields.io/nuget/v/NuciDAL)](https://nuget.org/packages/NuciDAL)
+[![License](https://img.shields.io/github/license/hmlendea/nucidal)](https://github.com/hmlendea/nucidal/blob/master/LICENSE)
 
 # NuciDAL
 
@@ -17,7 +18,9 @@ NuciDAL is a lightweight data access layer helper library for .NET. It provides 
     - [3. Use a File-Backed Repository](#3-use-a-file-backed-repository)
     - [4. Register Repositories](#4-register-repositories)
 - [Installation](#installation)
-  - [CLI Installation](#cli-installation)
+  - [Package Manager Installation](#package-manager-installation)
+- [Extensibility](#extensibility)
+- [Privacy and Data](#privacy-and-data)
 - [Development](#development)
   - [Requirements](#requirements)
   - [Setup](#setup)
@@ -26,10 +29,17 @@ NuciDAL is a lightweight data access layer helper library for .NET. It provides 
   - [Test](#test)
   - [Release](#release)
   - [Dependencies](#dependencies)
+- [GitHub Actions](#github-actions)
 - [Project Structure](#project-structure)
+  - [Projects and Packages](#projects-and-packages)
+  - [Directories](#directories)
 - [Architecture](#architecture)
+- [Documentation](#documentation)
+- [Data Formats and Protocols](#data-formats-and-protocols)
 - [Contributing](#contributing)
-- [Supporting the Project](#supporting-the-project)
+- [Code of Conduct](#code-of-conduct)
+- [Project Engagement](#project-engagement)
+- [Security](#security)
 - [License](#license)
 
 ## ✨ Capabilities
@@ -118,7 +128,7 @@ Every registration uses singleton lifetime. File store-path functions are evalua
 
 [![Obtain it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciDAL)
 
-### CLI Installation
+### Package Manager Installation
 
 ```bash
 dotnet add package NuciDAL
@@ -128,6 +138,23 @@ Or, via the `Package Manager Console`:
 ```powershell
 Install-Package NuciDAL
 ```
+
+## 🧱 Extensibility
+
+NuciDAL exposes the following public extension points:
+
+| Extension Point | Contract | Purpose |
+|-----------------|----------|---------|
+| Entity and Key Types | `EntityBase<TKey>` / `EntityBase` | Define custom entity types with any key type |
+| Repository Implementations | `IRepository<TKey, TDataObject>` / `IFileRepository<TKey, TDataObject>` | Implement custom repository backends |
+| File Formats | `FileRepository<TKey, TDataObject>` | Add new serialisation formats by implementing `LoadCore` and `SaveCore` |
+| Repository Registrations | `RepositoryServiceCollectionExtensions` | Register custom repository implementations in DI |
+
+## 🛡️ Privacy and Data
+
+NuciDAL is a .NET library providing generic repository abstractions and file-backed persistence (JSON, XML, CSV). The library itself does not collect, process, transmit, or store personal data. All data handling occurs in the consuming application, which is outside the scope of this document.
+
+For the detailed description of how the application handles privacy and personal data, see the [Privacy Statement](./PRIVACY.md).
 
 ## 🛠️ Development
 
@@ -157,36 +184,77 @@ dotnet test NuciDAL.slnx
 
 ### Release
 
+The repository includes `release.sh`, which delegates to the upstream deployment script used by the project maintainer.
+
 ```bash
-dotnet pack NuciDAL/NuciDAL.csproj -c Release
+bash ./release.sh 4.1.0
 ```
+
+This script downloads and executes an external release helper from `https://raw.githubusercontent.com/hmlendea/deployment-scripts/master/release/dotnet/10.0.sh`.
+
+**Note:** Piping into `bash` is an intensely controversial topic. Please review any external scripts before running them in your environment!
 
 ### Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `Microsoft.Extensions.DependencyInjection.Abstractions` | Dependency injection contracts used by repository registrations |
-| `NuciExtensions` | Entity cloning and collection utility extensions used by the core library |
+| Package | Version | Scope | Purpose |
+|---------|---------|-------|---------|
+| `Microsoft.Extensions.DependencyInjection.Abstractions` | 10.0.13 | Runtime | Dependency injection contracts used by repository registrations |
+| `NuciExtensions` | 6.0.1 | Runtime | Entity cloning and collection utility extensions used by the core library |
+| `coverlet.collector` | 10.1.0 | Development | Code coverage collection for tests |
+| `Microsoft.Extensions.DependencyInjection` | 10.0.13 | Development | DI container for test scenarios |
+| `Microsoft.NET.Test.Sdk` | 18.11.0 | Development | Test platform SDK |
+| `NUnit` | 5.0.0 | Development | Unit testing framework |
+| `NUnit3TestAdapter` | 6.3.1 | Development | NUnit test adapter for test platform |
+
+## ⚙️ GitHub Actions
+
+| Workflow | Purpose | What it does |
+|----------|---------|--------------|
+| [ dotnet.yml ](https://github.com/hmlendea/nucidal/blob/master/.github/workflows/dotnet.yml) | Continuous integration | Restores, builds, and tests the solution on every push and pull request to master |
+| [ github-release.yml ](https://github.com/hmlendea/nucidal/blob/master/.github/workflows/github-release.yml) | GitHub Release | Creates a GitHub Release with packaged artefacts when a version tag is pushed |
+| [ nuget-release.yml ](https://github.com/hmlendea/nucidal/blob/master/.github/workflows/nuget-release.yml) | NuGet Release | Publishes the NuGet package to NuGet.org when a version tag is pushed |
 
 ## 🗂️ Project Structure
 
-The solution contains the subsequent projects:
-- `NuciDAL`: Core library with entity bases, repository abstractions, and file-backed persistence implementations
-- `NuciDAL.UnitTests`: NUnit test project covering repository and entity behaviour
+### Projects and Packages
 
-The key directories inside `NuciDAL/` are:
+| Project | Type | Purpose |
+|---------|------|---------|
+| `NuciDAL/NuciDAL.csproj` | Library | Core library with entity bases, repository abstractions, and file-backed persistence implementations |
+| `NuciDAL.UnitTests/NuciDAL.UnitTests.csproj` | Test | NUnit test project covering repository and entity behaviour |
+
+### Directories
+
 | Directory | Purpose |
 |-----------|---------|
-| `DataObjects/` | Base entity types, including generic and string-keyed entity foundations |
-| `DependencyInjection/` | Service collection registrations for repository implementations |
-| `IO/` | File helpers for CSV, JSON, XML, and Windows-1252 encoded content |
-| `Repositories/` | Repository interfaces, in-memory implementation, file-backed repositories, and domain exceptions |
+| `NuciDAL/DataObjects/` | Base entity types, including generic and string-keyed entity foundations |
+| `NuciDAL/DependencyInjection/` | Service collection registrations for repository implementations |
+| `NuciDAL/IO/` | File helpers for CSV, JSON, XML, and Windows-1252 encoded content |
+| `NuciDAL/Repositories/` | Repository interfaces, in-memory implementation, file-backed repositories, and domain exceptions |
+| `docs/` | Architecture, feature map, code map, and documentation coverage reports |
 
 ## 🏗️ Architecture
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for a structural synopsis and component interactions.
+NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 3.2.0 and does not propose a target architecture.
 
-Implementation navigation is available in [docs/feature-map.md](./docs/feature-map.md), [docs/code-map.md](./docs/code-map.md), and [docs/documentation-coverage.md](./docs/documentation-coverage.md).
+See the [Architecture Documentation](./ARCHITECTURE.md) for the system context, principal components, runtime flows, ownership boundaries, dependencies, constraints, and extension points.
+
+## 📚 Documentation
+
+| Resource | Description |
+|----------|-------------|
+| [Architecture Documentation](./ARCHITECTURE.md) | System context, components, runtime flows, boundaries, dependencies, constraints, and extension points |
+| [Feature Map](./docs/feature-map.md) | Mapping of user-facing capabilities to implementation locations |
+| [Code Map](./docs/code-map.md) | Navigation index for implementation files |
+| [Documentation Coverage](./docs/documentation-coverage.md) | XML documentation coverage report |
+
+## 🧾 Data Formats and Protocols
+
+| Format or Protocol | Specification | Purpose |
+|--------------------|---------------|---------|
+| JSON | RFC 8259 | Entity serialisation for `JsonRepository<T>` |
+| XML | W3C XML 1.0 | Entity serialisation for `XmlRepository<T>` |
+| CSV | RFC 4180 | Entity serialisation for `CsvRepository<T>` |
 
 ## 🤝 Contributing
 
@@ -208,7 +276,7 @@ See the [Contributing Guidelines](./CONTRIBUTING.md) for details on how to repor
 
 See the [Code of Conduct](./CODE_OF_CONDUCT.md) for the standards of conduct expected in all project spaces.
 
-## 💝 Supporting the Project
+## 💝 Project Engagement
 
 Discovered a problem or have a suggestion? [Open an issue](https://github.com/hmlendea/nucidal/issues)!
 
@@ -218,13 +286,11 @@ If you find this project useful, consider [funding it](https://hmlendea.go.ro/fu
 
 ## 🔒 Security
 
-See [SECURITY.md](./SECURITY.md) for the security policy, supported versions, and vulnerability reporting procedures.
+NuciDAL follows coordinated disclosure for security vulnerabilities. Supported versions receive security maintenance via NuGet.org and GitHub Releases.
 
-## 🔐 Privacy
-
-See [PRIVACY.md](./PRIVACY.md) for the data handling description. NuciDAL is a library with no telemetry, network calls, or personal data processing.
+For information on reporting security vulnerabilities, see the [Security Policy](./SECURITY.md).
 
 ## 📄 License
 
 This project is being distributed under the `GNU General Public License v3 or later`.
-See [LICENSE](./LICENSE) for further information.
+See [LICENSE](./LICENSE) for additional information.
