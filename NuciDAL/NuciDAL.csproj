@@ -5,6 +5,7 @@
     <RootNamespace>NuciDAL</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
     <Version>4.1.1</Version>
     <Description>Data access layer helpers</Description>
