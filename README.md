@@ -194,12 +194,9 @@ You are welcome to submit any suggestion, feedback, or modification to this proj
 
 When doing so, please:
 - Maintain cross-platform compatibility
-- Maintain the existing public contract intact unless a breaking change is intentional
-- Maintain the pull requests as focused and consistent with the existing code style
-- Maintain your branch up-to-date with `master`
-- Revise the documentation when behaviour changes
-- Properly test all changes, including edge cases and error conditions
-- Add unit tests for any new or changed functionality
+- Preserve the existing public contract unless a breaking change is intentional
+- Submit focused pull requests that conform to the existing code style
+- Maintain your branch synchronised with `master`
 
 ## 💝 Supporting the Project
 
