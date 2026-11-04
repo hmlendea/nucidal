@@ -197,6 +197,16 @@ When doing so, please:
 - Preserve the existing public contract unless a breaking change is intentional
 - Submit focused pull requests that conform to the existing code style
 - Maintain your branch synchronised with `master`
+- Revise the documentation when functionality changes
+- Properly test all modifications, including edge cases and error conditions
+- Include tests for additional or modified functionality
+- Raise a new [issue](https://github.com/hmlendea/nucidal/issues) for problems or suggestions
+
+See the [Contributing Guidelines](./CONTRIBUTING.md) for details on how to report issues, suggest enhancements, and submit changes.
+
+## 📜 Code of Conduct
+
+See the [Code of Conduct](./CODE_OF_CONDUCT.md) for the standards of conduct expected in all project spaces.
 
 ## 💝 Supporting the Project
 
