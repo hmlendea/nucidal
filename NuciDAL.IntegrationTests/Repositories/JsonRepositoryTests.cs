@@ -86,6 +86,49 @@ namespace NuciDAL.IntegrationTests.Repositories
             Assert.That(reopenedRepository.ContainsId(SecondEntityId), Is.False);
         }
 
+        [Test]
+        public void GivenAMissingJsonFile_WhenConstructingRepository_ThenFileNotFoundExceptionIsThrownOnHydration()
+        {
+            JsonRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<FileNotFoundException>());
+        }
+
+        [Test]
+        public void GivenAnEmptyJsonFile_WhenConstructingRepository_ThenJsonExceptionIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, string.Empty);
+            JsonRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<System.Text.Json.JsonException>());
+        }
+
+        [Test]
+        public void GivenMalformedJsonFile_WhenConstructingRepository_ThenJsonExceptionIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, "{ \"id\": ");
+            JsonRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<System.Text.Json.JsonException>());
+        }
+
+        [Test]
+        public void GivenJsonObjectInsteadOfArray_WhenConstructingRepository_ThenJsonExceptionIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, "{ \"id\": \"angetenar\" }");
+            JsonRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<System.Text.Json.JsonException>());
+        }
+
         private static TestEntityDataObject BuildEntity(
             string entityId,
             string entityName,

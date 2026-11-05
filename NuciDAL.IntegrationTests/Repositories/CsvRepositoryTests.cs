@@ -86,6 +86,58 @@ namespace NuciDAL.IntegrationTests.Repositories
             Assert.That(reopenedRepository.ContainsId(SecondEntityId), Is.False);
         }
 
+        [Test]
+        public void GivenAMissingCsvFile_WhenConstructingRepository_ThenEmptyCollectionIsReturnedOnHydration()
+        {
+            CsvRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(repository.GetAll(), Is.Empty);
+            Assert.That(repository.EntitiesCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void GivenAnEmptyCsvFile_WhenConstructingRepository_ThenEmptyCollectionIsReturnedOnHydration()
+        {
+            File.WriteAllText(filePath, string.Empty);
+            CsvRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(repository.GetAll(), Is.Empty);
+            Assert.That(repository.EntitiesCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void GivenMalformedCsvFile_WhenConstructingRepository_ThenSerializationExceptionIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, "id,name,value\nangetenar,Vasile Ciupitu,not-an-integer");
+            CsvRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<System.Runtime.Serialization.SerializationException>());
+        }
+
+        [Test]
+        public void GivenCsvWithTooFewFields_WhenConstructingRepository_ThenSerializationExceptionIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, "id,name\nangetenar,Vasile Ciupitu");
+            CsvRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<System.Runtime.Serialization.SerializationException>());
+        }
+
+        [Test]
+        public void GivenCsvWithTooManyFields_WhenConstructingRepository_ThenSerializationExceptionIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, "id,name,value,extra\nangetenar,Vasile Ciupitu,613,extra");
+            CsvRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<System.Runtime.Serialization.SerializationException>());
+        }
+
         private static TestEntityDataObject BuildEntity(
             string entityId,
             string entityName,

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -84,6 +85,50 @@ namespace NuciDAL.IntegrationTests.Repositories
             Assert.That(reopenedRepository.Get(FirstEntityId), Is.EqualTo(updatedEntity));
             Assert.That(reopenedRepository.Get(ThirdEntityId), Is.EqualTo(addedEntity));
             Assert.That(reopenedRepository.ContainsId(SecondEntityId), Is.False);
+        }
+
+        [Test]
+        public void GivenAMissingXmlFile_WhenConstructingRepository_ThenFileNotFoundExceptionIsThrownOnHydration()
+        {
+            XmlRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<FileNotFoundException>());
+        }
+
+        [Test]
+        public void GivenAnEmptyXmlFile_WhenConstructingRepository_ThenInvalidOperationExceptionIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, string.Empty);
+            XmlRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<InvalidOperationException>());
+        }
+
+        [Test]
+        public void GivenMalformedXmlFile_WhenConstructingRepository_ThenInvalidOperationExceptionWithXmlCauseIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, "<ArrayOfTestEntityDataObject>");
+            XmlRepository<TestEntityDataObject> repository = new(filePath);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => repository.GetAll());
+
+            Assert.That(exception.InnerException, Is.TypeOf<System.Xml.XmlException>());
+        }
+
+        [Test]
+        public void GivenIncorrectXmlRoot_WhenConstructingRepository_ThenInvalidOperationExceptionIsThrownOnHydration()
+        {
+            File.WriteAllText(filePath, "<TestEntityDataObject />");
+            XmlRepository<TestEntityDataObject> repository = new(filePath);
+
+            Assert.That(
+                () => repository.GetAll(),
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         private static TestEntityDataObject BuildEntity(
