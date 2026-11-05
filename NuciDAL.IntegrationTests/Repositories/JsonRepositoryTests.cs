@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using NUnit.Framework;
 
@@ -84,6 +85,25 @@ namespace NuciDAL.IntegrationTests.Repositories
             Assert.That(reopenedRepository.Get(FirstEntityId), Is.EqualTo(updatedEntity));
             Assert.That(reopenedRepository.Get(ThirdEntityId), Is.EqualTo(addedEntity));
             Assert.That(reopenedRepository.ContainsId(SecondEntityId), Is.False);
+        }
+
+        [Test]
+        public async Task GivenStoredJsonEntities_WhenReadingConcurrentRepositoryInstances_ThenEachInstanceHydratesTheCompleteCollection()
+        {
+            TestEntityDataObject[] expectedEntities =
+            [
+                BuildEntity(FirstEntityId, FirstEntityName, FirstEntityValue),
+                BuildEntity(SecondEntityId, SecondEntityName, SecondEntityValue),
+            ];
+            new JsonFileCollection<TestEntityDataObject>(filePath).SaveEntities(expectedEntities);
+            Task<TestEntityDataObject[]>[] readOperations = Enumerable.Range(0, 4)
+                .Select(_ => Task.Run(() => new JsonRepository<TestEntityDataObject>(filePath).GetAll().ToArray()))
+                .ToArray();
+
+            TestEntityDataObject[][] actualEntityCollections = await Task.WhenAll(readOperations);
+
+            Assert.That(actualEntityCollections, Has.Length.EqualTo(readOperations.Length));
+            Assert.That(actualEntityCollections, Has.All.EquivalentTo(expectedEntities));
         }
 
         [Test]
