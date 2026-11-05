@@ -27,12 +27,21 @@ namespace NuciDAL.IO
 
                 File.Move(temporaryFilePath, fullFilePath, true);
             }
-            finally
+            catch
             {
-                if (File.Exists(temporaryFilePath))
+                try
                 {
-                    File.Delete(temporaryFilePath);
+                    if (File.Exists(temporaryFilePath))
+                    {
+                        File.Delete(temporaryFilePath);
+                    }
                 }
+                catch
+                {
+                    // Ignore cleanup failures to preserve original exception
+                }
+
+                throw;
             }
         }
     }
