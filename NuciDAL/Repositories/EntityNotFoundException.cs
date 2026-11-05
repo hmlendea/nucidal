@@ -31,10 +31,9 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityNotFoundException"/> exception.
         /// </summary>
-        /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         public EntityNotFoundException(Type entityType)
-            : base(null, entityType, $"The requested {entityType.Name} entity can not be found.")
+            : base(string.Empty, entityType, $"The requested {entityType.Name} entity can not be found.")
         {
         }
 
