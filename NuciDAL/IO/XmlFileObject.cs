@@ -7,8 +7,7 @@ namespace NuciDAL.IO
     /// <summary>
     /// XML File Object.
     /// </summary>
-    // TODO: Create an interface.
-    public class XmlFileObject<T>
+    public class XmlFileObject<T> : IXmlFileObject<T>
     {
         /// <summary>
         /// Gets or sets the type.
