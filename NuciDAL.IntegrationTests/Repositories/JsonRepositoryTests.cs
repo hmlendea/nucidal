@@ -129,6 +129,25 @@ namespace NuciDAL.IntegrationTests.Repositories
                 Throws.TypeOf<System.Text.Json.JsonException>());
         }
 
+        [Test]
+        public void GivenDuplicateIdInJsonFile_WhenConstructingRepository_ThenDuplicateEntityExceptionIsThrownOnHydration()
+        {
+            string duplicateJson = """
+                [
+                    { "id": "angetenar", "name": "Vasile Ciupitu", "value": 613 },
+                    { "id": "angetenar", "name": "Solaire of Astora", "value": 873 }
+                ]
+                """;
+            File.WriteAllText(filePath, duplicateJson);
+            JsonRepository<TestEntityDataObject> repository = new(filePath);
+
+            DuplicateEntityException exception = Assert.Throws<DuplicateEntityException>(
+                () => repository.GetAll());
+
+            Assert.That(exception.EntityId, Is.EqualTo("angetenar"));
+            Assert.That(exception.EntityTypeName, Is.EqualTo(typeof(TestEntityDataObject).Name));
+        }
+
         private static TestEntityDataObject BuildEntity(
             string entityId,
             string entityName,

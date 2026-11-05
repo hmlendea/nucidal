@@ -138,6 +138,20 @@ namespace NuciDAL.IntegrationTests.Repositories
                 Throws.TypeOf<System.Runtime.Serialization.SerializationException>());
         }
 
+        [Test]
+        public void GivenDuplicateIdInCsvFile_WhenConstructingRepository_ThenDuplicateEntityExceptionIsThrownOnHydration()
+        {
+            string duplicateCsv = "angetenar,Vasile Ciupitu,613\nangetenar,Solaire of Astora,873";
+            File.WriteAllText(filePath, duplicateCsv);
+            CsvRepository<TestEntityDataObject> repository = new(filePath);
+
+            DuplicateEntityException exception = Assert.Throws<DuplicateEntityException>(
+                () => repository.GetAll());
+
+            Assert.That(exception.EntityId, Is.EqualTo("angetenar"));
+            Assert.That(exception.EntityTypeName, Is.EqualTo(typeof(TestEntityDataObject).Name));
+        }
+
         private static TestEntityDataObject BuildEntity(
             string entityId,
             string entityName,

@@ -131,6 +131,34 @@ namespace NuciDAL.IntegrationTests.Repositories
                 Throws.TypeOf<InvalidOperationException>());
         }
 
+        [Test]
+        public void GivenDuplicateIdInXmlFile_WhenConstructingRepository_ThenDuplicateEntityExceptionIsThrownOnHydration()
+        {
+            string duplicateXml = """
+                <?xml version="1.0" encoding="utf-8"?>
+                <ArrayOfTestEntityDataObject>
+                    <TestEntityDataObject>
+                        <Id>angetenar</Id>
+                        <Name>Vasile Ciupitu</Name>
+                        <Value>613</Value>
+                    </TestEntityDataObject>
+                    <TestEntityDataObject>
+                        <Id>angetenar</Id>
+                        <Name>Solaire of Astora</Name>
+                        <Value>873</Value>
+                    </TestEntityDataObject>
+                </ArrayOfTestEntityDataObject>
+                """;
+            File.WriteAllText(filePath, duplicateXml);
+            XmlRepository<TestEntityDataObject> repository = new(filePath);
+
+            DuplicateEntityException exception = Assert.Throws<DuplicateEntityException>(
+                () => repository.GetAll());
+
+            Assert.That(exception.EntityId, Is.EqualTo("angetenar"));
+            Assert.That(exception.EntityTypeName, Is.EqualTo(typeof(TestEntityDataObject).Name));
+        }
+
         private static TestEntityDataObject BuildEntity(
             string entityId,
             string entityName,
