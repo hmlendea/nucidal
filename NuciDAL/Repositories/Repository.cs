@@ -98,7 +98,16 @@ namespace NuciDAL.Repositories
         /// <returns>The first matching entity.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
         public TDataObject GetFirst(Func<TDataObject, bool> predicate)
-            => TryGetFirst(predicate) ?? throw new EntityNotFoundException(typeof(TDataObject));
+        {
+            TDataObject entity = TryGetFirst(predicate);
+
+            if (entity is null)
+            {
+                throw new EntityNotFoundException(string.Empty, typeof(TDataObject));
+            }
+
+            return entity;
+        }
 
         /// <summary>
         /// Tries to get the entity with the specified identifier.

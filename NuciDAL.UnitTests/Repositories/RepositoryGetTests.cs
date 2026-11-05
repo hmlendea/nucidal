@@ -347,10 +347,30 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
+        public void GivenNoMatchingEntity_WhenGetFirstIsCalled_ThenExceptionCarriesEmptyEntityId()
+        {
+            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
+
+            EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
+                () => repository.GetFirst(entity => string.Equals(entity.Name, SecondEntityName)));
+
+            Assert.That(exception.EntityId, Is.EqualTo(string.Empty));
+        }
+
+        [Test]
         public void GivenEmptyRepository_WhenGetFirstIsCalled_ThenThrowsEntityNotFoundException()
             => Assert.That(
                 () => repository.GetFirst(entity => entity.Value == FirstEntityValue),
                 Throws.TypeOf<EntityNotFoundException>());
+
+        [Test]
+        public void GivenEmptyRepository_WhenGetFirstIsCalled_ThenExceptionCarriesEmptyEntityId()
+        {
+            EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
+                () => repository.GetFirst(entity => entity.Value == FirstEntityValue));
+
+            Assert.That(exception.EntityId, Is.EqualTo(string.Empty));
+        }
 
         // -- TryGetFirst ------
 
