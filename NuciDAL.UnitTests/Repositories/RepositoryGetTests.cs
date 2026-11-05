@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -610,6 +611,25 @@ namespace NuciDAL.UnitTests.Repositories
             TestEntityDataObject result = repository.GetRandom();
 
             Assert.That(result.Value, Is.EqualTo(FirstEntityValue));
+        }
+
+        // -- CloneEntity ------
+
+        [Test]
+        public void GivenNullEntity_WhenCloneEntityIsCalled_ThenThrowsArgumentNullException()
+        {
+            Repository<string, TestEntityDataObject> testRepository = new();
+
+            System.Reflection.MethodInfo cloneMethod = typeof(Repository<string, TestEntityDataObject>)
+                .GetMethod("CloneEntity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            Assert.That(cloneMethod, Is.Not.Null, "CloneEntity method should exist");
+
+            Assert.That(
+                () => cloneMethod.Invoke(testRepository, [null]),
+                Throws.TypeOf<System.Reflection.TargetInvocationException>()
+                    .With.InnerException.TypeOf<ArgumentNullException>()
+                    .And.InnerException.Property("ParamName").EqualTo("entity"));
         }
     }
 }
