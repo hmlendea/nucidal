@@ -98,7 +98,16 @@ namespace NuciDAL.Repositories
         /// <returns>The first matching entity.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
         public TDataObject GetFirst(Func<TDataObject, bool> predicate)
-            => TryGetFirst(predicate) ?? throw new EntityNotFoundException(typeof(TDataObject));
+        {
+            TDataObject entity = TryGetFirst(predicate);
+
+            if (entity is null)
+            {
+                throw new EntityNotFoundException(string.Empty, typeof(TDataObject));
+            }
+
+            return entity;
+        }
 
         /// <summary>
         /// Tries to get the entity with the specified identifier.
@@ -121,7 +130,16 @@ namespace NuciDAL.Repositories
         /// <returns>The first matching entity if it exists, null otherwise.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
         public TDataObject TryGetFirst(Func<TDataObject, bool> predicate)
-            => CloneEntity(GetAll().FirstOrDefault(predicate));
+        {
+            TDataObject entity = GetAll().FirstOrDefault(predicate);
+
+            if (entity is null)
+            {
+                return null;
+            }
+
+            return CloneEntity(entity);
+        }
 
         /// <summary>
         /// Gets all the entities.
@@ -260,7 +278,7 @@ namespace NuciDAL.Repositories
         {
             if (entity is null)
             {
-                return null;
+                throw new ArgumentNullException(nameof(entity));
             }
 
             return entity.ToJson().FromJson<TDataObject>();

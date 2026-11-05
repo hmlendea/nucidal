@@ -104,11 +104,11 @@ namespace NuciDAL.UnitTests.Repositories
         // -- Constructor(Type) ------
 
         [Test]
-        public void GivenTypeOnlyArgument_WhenConstructed_ThenEntityIdIsNull()
+        public void GivenTypeOnlyArgument_WhenConstructed_ThenEntityIdIsEmpty()
         {
             EntityNotFoundException exception = new(typeof(TestEntityDataObject));
 
-            Assert.That(exception.EntityId, Is.Null);
+            Assert.That(exception.EntityId, Is.EqualTo(string.Empty));
         }
 
         [Test]

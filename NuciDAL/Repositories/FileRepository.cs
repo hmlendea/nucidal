@@ -187,6 +187,8 @@ namespace NuciDAL.Repositories
             {
                 if (!Entities.TryAdd(entity.Id, entity))
                 {
+                    Entities.Clear();
+
                     throw new DuplicateEntityException(
                         entity.Id.ToString(),
                         entity.GetType());

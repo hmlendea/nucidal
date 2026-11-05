@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -347,10 +348,30 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
+        public void GivenNoMatchingEntity_WhenGetFirstIsCalled_ThenExceptionCarriesEmptyEntityId()
+        {
+            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
+
+            EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
+                () => repository.GetFirst(entity => string.Equals(entity.Name, SecondEntityName)));
+
+            Assert.That(exception.EntityId, Is.EqualTo(string.Empty));
+        }
+
+        [Test]
         public void GivenEmptyRepository_WhenGetFirstIsCalled_ThenThrowsEntityNotFoundException()
             => Assert.That(
                 () => repository.GetFirst(entity => entity.Value == FirstEntityValue),
                 Throws.TypeOf<EntityNotFoundException>());
+
+        [Test]
+        public void GivenEmptyRepository_WhenGetFirstIsCalled_ThenExceptionCarriesEmptyEntityId()
+        {
+            EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
+                () => repository.GetFirst(entity => entity.Value == FirstEntityValue));
+
+            Assert.That(exception.EntityId, Is.EqualTo(string.Empty));
+        }
 
         // -- TryGetFirst ------
 
@@ -590,6 +611,25 @@ namespace NuciDAL.UnitTests.Repositories
             TestEntityDataObject result = repository.GetRandom();
 
             Assert.That(result.Value, Is.EqualTo(FirstEntityValue));
+        }
+
+        // -- CloneEntity ------
+
+        [Test]
+        public void GivenNullEntity_WhenCloneEntityIsCalled_ThenThrowsArgumentNullException()
+        {
+            Repository<string, TestEntityDataObject> testRepository = new();
+
+            System.Reflection.MethodInfo cloneMethod = typeof(Repository<string, TestEntityDataObject>)
+                .GetMethod("CloneEntity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            Assert.That(cloneMethod, Is.Not.Null, "CloneEntity method should exist");
+
+            Assert.That(
+                () => cloneMethod.Invoke(testRepository, [null]),
+                Throws.TypeOf<System.Reflection.TargetInvocationException>()
+                    .With.InnerException.TypeOf<ArgumentNullException>()
+                    .And.InnerException.Property("ParamName").EqualTo("entity"));
         }
     }
 }
