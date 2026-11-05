@@ -46,7 +46,7 @@ This document describes the verified current architecture of the NuciDAL .NET li
 
 ## 🎯 Purpose
 
-NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 3.2.0 and does not propose a target architecture.
+NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 4.2.0 and does not propose a target architecture.
 
 ## 🌐 System Context
 
@@ -56,8 +56,8 @@ NuciDAL is an embeddable .NET 10 class library. A consuming .NET process constru
 flowchart LR
     Consumer["Consuming .NET process"]
     FileSystem[("Local filesystem")]
-    Extensions["NuciExtensions 5.3.1"]
-    DependencyInjection["Microsoft DI abstractions 10.0.0"]
+    Extensions["NuciExtensions 6.0.2"]
+    DependencyInjection["Microsoft DI abstractions 10.0.14"]
 
     subgraph NuciDALBoundary["NuciDAL library"]
         PublicApi["Repository, registration, and I/O APIs"]
@@ -74,8 +74,8 @@ flowchart LR
 The principal external boundaries are:
 - **Consuming .NET process:** Selects concrete implementations, defines entity shapes, supplies paths and predicates, owns direct instances or the DI service provider, and decides when to persist file-backed mutations.
 - **Local filesystem:** Stores JSON, XML, CSV, standalone object, or Windows-1252 text outputs. The host owns path validation, permissions, confidentiality, backup, and coordination with other processes.
-- **NuciExtensions 5.3.1:** Supplies JSON round-trip cloning and collection utility extensions used inside repository operations; its runtime assembly is part of the library's dependency closure.
-- **Microsoft dependency injection abstractions 10.0.0:** Supplies `IServiceCollection`, singleton registration extensions, and service descriptors without supplying or owning the consuming application's container.
+- **NuciExtensions 6.0.2:** Supplies JSON round-trip cloning and collection utility extensions used inside repository operations; its runtime assembly is part of the library's dependency closure.
+- **Microsoft dependency injection abstractions 10.0.14:** Supplies `IServiceCollection`, singleton registration extensions, and service descriptors without supplying or owning the consuming application's container.
 
 Entity values and file contents traverse a trust boundary into reflection, conversion, and serialisation APIs without domain validation. NuciDAL neither classifies sensitive data nor protects it at rest.
 
@@ -455,15 +455,15 @@ The principal dependency rules are:
 | Dependency | Responsibility | Integration Boundary | Architectural Consequence |
 |------------|----------------|----------------------|---------------------------|
 | `.NET 10.0` | Supplies the runtime, generic collections, reflection, file APIs, JSON, XML, encoding, and concurrency primitives | Entire production assembly | The NuGet package has one target framework and requires a compatible .NET 10 consumer |
-| `Microsoft.Extensions.DependencyInjection.Abstractions 10.0.0` | Supplies service collection contracts and singleton registration APIs | Dependency injection adapter | Consumers can register repository implementations without NuciDAL depending upon a concrete container implementation |
-| `NuciExtensions 5.3.1` | Supplies JSON conversion, inequality, and random collection extensions | `EntityBase` and `Repository` | Entity cloning and selected semantics are coupled to this package's extension contracts |
-| `Microsoft.Extensions.DependencyInjection 10.0.0` | Supplies the concrete service provider used for registration verification | `NuciDAL.UnitTests` only | No concrete dependency injection container enters the production package dependency closure |
-| `NUnit 4.6.1` | Supplies unit-test declarations and assertions | `NuciDAL.UnitTests` only | No production runtime dependency |
-| `.NET test toolchain` | Supplies `Microsoft.NET.Test.Sdk 18.8.0`, `NUnit3TestAdapter 6.2.0`, and `coverlet.collector 10.0.1` | Test execution and optional coverage collection | Test packages remain private to the non-packable test project |
+| `Microsoft.Extensions.DependencyInjection.Abstractions 10.0.14` | Supplies service collection contracts and singleton registration APIs | Dependency injection adapter | Consumers can register repository implementations without NuciDAL depending upon a concrete container implementation |
+| `NuciExtensions 6.0.2` | Supplies JSON conversion, inequality, and random collection extensions | `EntityBase` and `Repository` | Entity cloning and selected semantics are coupled to this package's extension contracts |
+| `Microsoft.Extensions.DependencyInjection 10.0.14` | Supplies the concrete service provider used for registration verification | `NuciDAL.UnitTests` only | No concrete dependency injection container enters the production package dependency closure |
+| `NUnit 5.0.0` | Supplies unit-test declarations and assertions | `NuciDAL.UnitTests` only | No production runtime dependency |
+| `.NET test toolchain` | Supplies `Microsoft.NET.Test.Sdk 18.11.0`, `NUnit3TestAdapter 6.3.1`, and `coverlet.collector 10.1.0` | Test execution and optional coverage collection | Test packages remain private to the non-packable test project |
 
 ## 🚀 Deployment and Operations
 
-The deployment unit is the `NuciDAL` NuGet library, currently version 3.2.0 and targeted exclusively at `net10.0`. It executes within the consuming process and creates no service, worker, port, or background thread. A consumer can construct multiple repository instances with independent memory and lazy-load state, or own one repository singleton per service registration through its service provider.
+The deployment unit is the `NuciDAL` NuGet library, currently version 4.2.0 and targeted exclusively at `net10.0`. It executes within the consuming process and creates no service, worker, port, or background thread. A consumer can construct multiple repository instances with independent memory and lazy-load state, or own one repository singleton per service registration through its service provider.
 
 File-backed deployment requires a path accessible to the host process. JSON and XML files must exist and be readable before the first repository operation; CSV can commence from an absent file. The parent directory must exist for save operations. The caller owns final `SaveChanges()` timing because repository disposal and process shutdown do not persist pending mutations automatically.
 

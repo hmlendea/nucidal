@@ -45,7 +45,7 @@ This document provides the reverse route from implementation to documentation. E
 
 | Location | Responsibility | Documentation |
 | --- | --- | --- |
-| [`NuciDAL/NuciDAL.csproj`](../NuciDAL/NuciDAL.csproj) | .NET 10 target, package version `3.2.1`, packability, package dependencies, repository metadata, and GPL expression. | [Architecture external dependencies](../ARCHITECTURE.md#external-dependencies); [README dependencies](../README.md#dependencies) |
+| [`NuciDAL/NuciDAL.csproj`](../NuciDAL/NuciDAL.csproj) | .NET 10 target, package version `4.2.0`, packability, package dependencies, repository metadata, and GPL expression. | [Architecture external dependencies](../ARCHITECTURE.md#external-dependencies); [README dependencies](../README.md#dependencies) |
 | [`NuciDAL.UnitTests/NuciDAL.UnitTests.csproj`](../NuciDAL.UnitTests/NuciDAL.UnitTests.csproj) | NUnit, test SDK, DI implementation, and coverlet test dependencies. | [Documentation coverage](documentation-coverage.md#test-and-operational-coverage) |
 | [`NuciDAL.slnx`](../NuciDAL.slnx) | Solution composition for library and unit-test projects. | [README project structure](../README.md#project-structure) |
 | [`.github/workflows/dotnet.yml`](../.github/workflows/dotnet.yml) | CI restore, build, and test workflow for pushes and pull requests to `master`. | [Architecture verification](../ARCHITECTURE.md#verification); [Documentation coverage](documentation-coverage.md#test-and-operational-coverage) |
