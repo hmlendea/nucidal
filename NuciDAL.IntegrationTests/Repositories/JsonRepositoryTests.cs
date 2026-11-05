@@ -87,6 +87,20 @@ namespace NuciDAL.IntegrationTests.Repositories
         }
 
         [Test]
+        public void GivenADeletedJsonRepositoryDirectory_WhenSavingChanges_ThenIOExceptionWithDirectoryCauseIsThrown()
+        {
+            new JsonFileCollection<TestEntityDataObject>(filePath).SaveEntities(
+                [BuildEntity(FirstEntityId, FirstEntityName, FirstEntityValue)]);
+            JsonRepository<TestEntityDataObject> repository = new(filePath);
+            repository.GetAll();
+            Directory.Delete(temporaryDirectoryPath, true);
+
+            IOException exception = Assert.Throws<IOException>(() => repository.SaveChanges());
+
+            Assert.That(exception.InnerException, Is.TypeOf<DirectoryNotFoundException>());
+        }
+
+        [Test]
         public void GivenAMissingJsonFile_WhenConstructingRepository_ThenFileNotFoundExceptionIsThrownOnHydration()
         {
             JsonRepository<TestEntityDataObject> repository = new(filePath);

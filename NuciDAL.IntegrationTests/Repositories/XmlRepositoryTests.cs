@@ -88,6 +88,20 @@ namespace NuciDAL.IntegrationTests.Repositories
         }
 
         [Test]
+        public void GivenADeletedXmlRepositoryDirectory_WhenSavingChanges_ThenIOExceptionWithDirectoryCauseIsThrown()
+        {
+            new XmlFileCollection<TestEntityDataObject>(filePath).SaveEntities(
+                [BuildEntity(FirstEntityId, FirstEntityName, FirstEntityValue)]);
+            XmlRepository<TestEntityDataObject> repository = new(filePath);
+            repository.GetAll();
+            Directory.Delete(temporaryDirectoryPath, true);
+
+            IOException exception = Assert.Throws<IOException>(() => repository.SaveChanges());
+
+            Assert.That(exception.InnerException, Is.TypeOf<DirectoryNotFoundException>());
+        }
+
+        [Test]
         public void GivenAMissingXmlFile_WhenConstructingRepository_ThenFileNotFoundExceptionIsThrownOnHydration()
         {
             XmlRepository<TestEntityDataObject> repository = new(filePath);

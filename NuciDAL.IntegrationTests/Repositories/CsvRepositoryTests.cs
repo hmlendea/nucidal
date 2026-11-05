@@ -87,6 +87,20 @@ namespace NuciDAL.IntegrationTests.Repositories
         }
 
         [Test]
+        public void GivenADeletedCsvRepositoryDirectory_WhenSavingChanges_ThenIOExceptionWithDirectoryCauseIsThrown()
+        {
+            new CsvFile<TestEntityDataObject>(filePath).SaveEntities(
+                [BuildEntity(FirstEntityId, FirstEntityName, FirstEntityValue)]);
+            CsvRepository<TestEntityDataObject> repository = new(filePath);
+            repository.GetAll();
+            Directory.Delete(temporaryDirectoryPath, true);
+
+            IOException exception = Assert.Throws<IOException>(() => repository.SaveChanges());
+
+            Assert.That(exception.InnerException, Is.TypeOf<DirectoryNotFoundException>());
+        }
+
+        [Test]
         public void GivenAMissingCsvFile_WhenConstructingRepository_ThenEmptyCollectionIsReturnedOnHydration()
         {
             CsvRepository<TestEntityDataObject> repository = new(filePath);
