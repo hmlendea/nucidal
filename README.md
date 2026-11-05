@@ -198,10 +198,10 @@ This script downloads and executes an external release helper from `https://raw.
 
 | Package | Version | Scope | Purpose |
 |---------|---------|-------|---------|
-| `Microsoft.Extensions.DependencyInjection.Abstractions` | 10.0.13 | Runtime | Dependency injection contracts used by repository registrations |
-| `NuciExtensions` | 6.0.1 | Runtime | Entity cloning and collection utility extensions used by the core library |
+| `Microsoft.Extensions.DependencyInjection.Abstractions` | 10.0.14 | Runtime | Dependency injection contracts used by repository registrations |
+| `NuciExtensions` | 6.0.2 | Runtime | Entity cloning and collection utility extensions used by the core library |
 | `coverlet.collector` | 10.1.0 | Development | Code coverage collection for tests |
-| `Microsoft.Extensions.DependencyInjection` | 10.0.13 | Development | DI container for test scenarios |
+| `Microsoft.Extensions.DependencyInjection` | 10.0.14 | Development | DI container for test scenarios |
 | `Microsoft.NET.Test.Sdk` | 18.11.0 | Development | Test platform SDK |
 | `NUnit` | 5.0.0 | Development | Unit testing framework |
 | `NUnit3TestAdapter` | 6.3.1 | Development | NUnit test adapter for test platform |
@@ -235,7 +235,7 @@ This script downloads and executes an external release helper from `https://raw.
 
 ## 🏗️ Architecture
 
-NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 3.2.0 and does not propose a target architecture.
+NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 4.2.0 and does not propose a target architecture.
 
 See the [Architecture Documentation](./ARCHITECTURE.md) for the system context, principal components, runtime flows, ownership boundaries, dependencies, constraints, and extension points.
 
