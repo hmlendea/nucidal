@@ -182,8 +182,68 @@ namespace NuciDAL.IntegrationTests.Repositories
             Assert.That(exception.EntityTypeName, Is.EqualTo(typeof(TestEntityDataObject).Name));
         }
 
+        [Test]
+        public void GivenStoredJsonEntitiesWithIntegerKey_WhenReadingTheRepository_ThenEntitiesAreHydratedFromTheFile()
+        {
+            List<IntKeyEntityDataObject> expectedEntities =
+            [
+                BuildIntegerKeyEntity(1, FirstEntityName, FirstEntityValue),
+                BuildIntegerKeyEntity(2, SecondEntityName, SecondEntityValue),
+            ];
+            new JsonFileCollection<IntKeyEntityDataObject>(filePath).SaveEntities(expectedEntities);
+            JsonRepository<int, IntKeyEntityDataObject> repository = new(filePath);
+
+            IEnumerable<IntKeyEntityDataObject> actualEntities = repository.GetAll();
+
+            Assert.That(actualEntities, Is.EquivalentTo(expectedEntities));
+            Assert.That(repository.EntitiesCount, Is.EqualTo(expectedEntities.Count));
+        }
+
+        [Test]
+        public void GivenHydratedJsonRepositoryWithIntegerKey_WhenMutatingAndSaving_ThenChangesSurviveAReopen()
+        {
+            List<IntKeyEntityDataObject> initialEntities =
+            [
+                BuildIntegerKeyEntity(1, FirstEntityName, FirstEntityValue),
+                BuildIntegerKeyEntity(2, SecondEntityName, SecondEntityValue),
+            ];
+            new JsonFileCollection<IntKeyEntityDataObject>(filePath).SaveEntities(initialEntities);
+            JsonRepository<int, IntKeyEntityDataObject> repository = new(filePath);
+            IntKeyEntityDataObject updatedEntity = BuildIntegerKeyEntity(
+                1,
+                ThirdEntityName,
+                ThirdEntityValue);
+            IntKeyEntityDataObject addedEntity = BuildIntegerKeyEntity(
+                3,
+                FirstEntityName,
+                FirstEntityValue);
+
+            repository.Update(updatedEntity);
+            repository.Add(addedEntity);
+            repository.Remove(2);
+            repository.SaveChanges();
+            JsonRepository<int, IntKeyEntityDataObject> reopenedRepository = new(filePath);
+            IntKeyEntityDataObject[] persistedEntities = reopenedRepository.GetAll().ToArray();
+
+            Assert.That(persistedEntities, Has.Length.EqualTo(2));
+            Assert.That(reopenedRepository.Get(1), Is.EqualTo(updatedEntity));
+            Assert.That(reopenedRepository.Get(3), Is.EqualTo(addedEntity));
+            Assert.That(reopenedRepository.ContainsId(2), Is.False);
+        }
+
         private static TestEntityDataObject BuildEntity(
             string entityId,
+            string entityName,
+            int entityValue)
+            => new()
+            {
+                Id = entityId,
+                Name = entityName,
+                Value = entityValue,
+            };
+
+        private static IntKeyEntityDataObject BuildIntegerKeyEntity(
+            int entityId,
             string entityName,
             int entityValue)
             => new()
