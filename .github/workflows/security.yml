@@ -13,7 +13,7 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     permissions:
-      security-events: read
+      security-events: write
       contents: read
 
     steps:
