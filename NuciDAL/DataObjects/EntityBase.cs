@@ -14,16 +14,23 @@ namespace NuciDAL.DataObjects
     /// Base class for entities with a generic identifier.
     /// </summary>
     /// <typeparam name="TKey">The type of the identifier.</typeparam>
+    /// <remarks>
+    /// <para>
+    /// Equality and hash code are computed from all public instance properties (excluding indexers).
+    /// Mutating any public property after the instance has been used as a dictionary key or stored in a
+    /// <see cref="HashSet{T}"/> will make the instance unreachable in those collections.
+    /// </para>
+    /// <para>
+    /// The identifier must be non-null before the entity is passed to any repository operation.
+    /// Repositories reject entities with a null identifier by throwing <see cref="ArgumentNullException"/>.
+    /// </para>
+    /// </remarks>
     public class EntityBase<TKey> : IEquatable<EntityBase<TKey>>
     {
         /// <summary>
         /// Gets or sets the identifier.
         /// </summary>
         /// <value>The identifier.</value>
-        /// <remarks>
-        /// The identifier must be non-null before the entity is passed to any repository operation.
-        /// Repositories reject entities with a null identifier by throwing <see cref="ArgumentNullException"/>.
-        /// </remarks>
         public TKey Id { get; set; }
 
         /// <summary>
@@ -52,6 +59,11 @@ namespace NuciDAL.DataObjects
 
             foreach (PropertyInfo prop in props)
             {
+                if (prop.GetIndexParameters().Length > 0)
+                {
+                    continue;
+                }
+
                 object thisValue = prop.GetValue(this);
                 object otherValue = prop.GetValue(other);
 
@@ -89,6 +101,11 @@ namespace NuciDAL.DataObjects
 
             foreach (PropertyInfo prop in props)
             {
+                if (prop.GetIndexParameters().Length > 0)
+                {
+                    continue;
+                }
+
                 object propertyValue = prop.GetValue(this);
 
                 if (propertyValue is not null)

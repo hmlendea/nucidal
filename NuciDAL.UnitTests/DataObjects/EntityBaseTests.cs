@@ -13,6 +13,85 @@ namespace NuciDAL.UnitTests.DataObjects
         private static int FirstEntityValue => 613;
         private static int SecondEntityValue => 873;
 
+        // -- Indexer exclusion ------
+
+        [Test]
+        public void GivenIndexerEntityWithIdenticalProperties_WhenEqualsIsCalled_ThenReturnsTrue()
+        {
+            IndexerEntityDataObject entity1 = new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+                Value = FirstEntityValue,
+            };
+            IndexerEntityDataObject entity2 = new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+                Value = FirstEntityValue,
+            };
+
+            bool result = entity1.Equals(entity2);
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void GivenIndexerEntityWithDifferentIndexerValues_WhenEqualsIsCalled_ThenReturnsTrue()
+        {
+            IndexerEntityDataObject entity1 = new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+                Value = FirstEntityValue,
+            };
+            IndexerEntityDataObject entity2 = new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+                Value = FirstEntityValue,
+            };
+            // Indexer values differ but should be excluded from equality
+            _ = entity1[0];
+            _ = entity2[0];
+
+            bool result = entity1.Equals(entity2);
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void GivenIndexerEntity_WhenGetHashCodeIsCalled_ThenDoesNotThrow()
+        {
+            IndexerEntityDataObject entity = new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+                Value = FirstEntityValue,
+            };
+
+            Assert.That(() => entity.GetHashCode(), Throws.Nothing);
+        }
+
+        [Test]
+        public void GivenEqualIndexerEntities_WhenGetHashCodeIsCalled_ThenReturnsSameHashCode()
+        {
+            IndexerEntityDataObject entity1 = new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+                Value = FirstEntityValue,
+            };
+            IndexerEntityDataObject entity2 = new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+                Value = FirstEntityValue,
+            };
+
+            Assert.That(entity1.GetHashCode(), Is.EqualTo(entity2.GetHashCode()));
+        }
+
         // -- Equals ------
 
         [Test]
