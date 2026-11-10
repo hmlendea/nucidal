@@ -398,7 +398,7 @@ NuciDAL performs no authentication, authorisation, path restriction, content san
 
 ### Error Handling
 
-The in-memory repository translates key-state conflicts into `EntityAlreadyExistsException` and `EntityNotFoundException`; `GetFirst` also uses `EntityNotFoundException` when no predicate match exists. `DuplicateEntityException` identifies repeated keys discovered during file hydration. All three derive from `EntityException`, which records `EntityId` and `EntityTypeName`.
+The in-memory repository translates key-state conflicts into `EntityAlreadyExistsException` and `EntityNotFoundException`; `GetFirst` also uses `EntityNotFoundException` when no predicate match exists. `GetRandom` throws `EntityNotFoundException` when the repository is empty. `DuplicateEntityException` identifies repeated keys discovered during file hydration. All three derive from `EntityException`, which records `EntityId` and `EntityTypeName`.
 
 `TryGet` and `TryGetFirst` use `null` for absence. `TryAdd` ignores duplicates, `TryRemove` ignores absent keys, and `TryUpdate` is an upsert rather than a no-op when absent.
 

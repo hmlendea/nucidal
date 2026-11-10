@@ -99,8 +99,16 @@ namespace NuciDAL.Repositories
         /// Gets a random entity.
         /// </summary>
         /// <returns>A random entity.</returns>
+        /// <exception cref="EntityNotFoundException">Thrown when the repository is empty.</exception>
         public virtual TDataObject GetRandom()
-            => CloneEntity(Entities.Values.GetRandomElement());
+        {
+            if (Entities.IsEmpty)
+            {
+                throw new EntityNotFoundException(typeof(TDataObject));
+            }
+
+            return CloneEntity(Entities.Values.GetRandomElement());
+        }
 
         /// <summary>
         /// Gets the first entity matching the specified predicate.

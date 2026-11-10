@@ -540,6 +540,21 @@ namespace NuciDAL.UnitTests.Repositories
         // -- GetRandom ------
 
         [Test]
+        public void GivenEmptyRepository_WhenGetRandomIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
+                () => repository.GetRandom(),
+                Throws.TypeOf<EntityNotFoundException>());
+
+        [Test]
+        public void GivenEmptyRepository_WhenGetRandomIsCalled_ThenExceptionCarriesCorrectEntityType()
+        {
+            EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
+                () => repository.GetRandom());
+
+            Assert.That(exception.EntityTypeName, Is.EqualTo(typeof(TestEntityDataObject).Name));
+        }
+
+        [Test]
         public void GivenRepositoryHasOneEntity_WhenGetRandomIsCalled_ThenReturnsThatEntity()
         {
             repository.Add(new()
