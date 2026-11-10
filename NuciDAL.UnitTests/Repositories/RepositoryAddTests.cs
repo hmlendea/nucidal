@@ -378,5 +378,23 @@ namespace NuciDAL.UnitTests.Repositories
                 Throws.TypeOf<ArgumentNullException>()
                     .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity"));
         }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenAdded_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Add(new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
+        }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenTryAdded_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryAdd(new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
+        }
     }
 }

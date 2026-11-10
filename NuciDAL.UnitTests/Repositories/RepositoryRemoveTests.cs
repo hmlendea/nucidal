@@ -397,5 +397,23 @@ namespace NuciDAL.UnitTests.Repositories
                 Throws.TypeOf<ArgumentNullException>()
                     .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
         }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenRemoveByEntityIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Remove((TestEntityDataObject)new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
+        }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenTryRemoveByEntityIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryRemove((TestEntityDataObject)new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
+        }
     }
 }

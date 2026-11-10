@@ -20,6 +20,10 @@ namespace NuciDAL.DataObjects
         /// Gets or sets the identifier.
         /// </summary>
         /// <value>The identifier.</value>
+        /// <remarks>
+        /// The identifier must be non-null before the entity is passed to any repository operation.
+        /// Repositories reject entities with a null identifier by throwing <see cref="ArgumentNullException"/>.
+        /// </remarks>
         public TKey Id { get; set; }
 
         /// <summary>

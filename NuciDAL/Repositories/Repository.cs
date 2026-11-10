@@ -40,7 +40,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Add(TDataObject entity) => ExecuteWrite(() =>
         {
-            ArgumentNullException.ThrowIfNull(entity);
+            ThrowIfNullEntityId(entity);
 
             TDataObject entityClone = CloneEntity(entity);
 
@@ -59,7 +59,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual bool TryAdd(TDataObject entity) => ExecuteWrite(() =>
         {
-            ArgumentNullException.ThrowIfNull(entity);
+            ThrowIfNullEntityId(entity);
 
             TDataObject entityClone = CloneEntity(entity);
 
@@ -174,7 +174,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Update(TDataObject entity) => ExecuteWrite(() =>
         {
-            ArgumentNullException.ThrowIfNull(entity);
+            ThrowIfNullEntityId(entity);
 
             TDataObject entityClone = CloneEntity(entity);
 
@@ -195,7 +195,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual bool TryUpdate(TDataObject entity) => ExecuteWrite(() =>
         {
-            ArgumentNullException.ThrowIfNull(entity);
+            ThrowIfNullEntityId(entity);
 
             TDataObject entityClone = CloneEntity(entity);
 
@@ -213,7 +213,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Upsert(TDataObject entity) => ExecuteWrite(() =>
         {
-            ArgumentNullException.ThrowIfNull(entity);
+            ThrowIfNullEntityId(entity);
 
             TDataObject entityClone = CloneEntity(entity);
 
@@ -226,7 +226,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Remove(TDataObject entity) => ExecuteWrite(() =>
         {
-            ArgumentNullException.ThrowIfNull(entity);
+            ThrowIfNullEntityId(entity);
 
             if (!Entities.TryRemove(entity.Id, out _))
             {
@@ -255,7 +255,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual bool TryRemove(TDataObject entity) => ExecuteWrite(() =>
         {
-            ArgumentNullException.ThrowIfNull(entity);
+            ThrowIfNullEntityId(entity);
 
             return Entities.TryRemove(entity.Id, out _);
         });
@@ -290,6 +290,15 @@ namespace NuciDAL.Repositories
 
         private static void ThrowIfNullId(TKey id)
             => ArgumentNullException.ThrowIfNull(id, nameof(id));
+
+        private static void ThrowIfNullEntityId(TDataObject entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+            ArgumentNullException.ThrowIfNull(entity.Id, EntityIdParameterName);
+        }
+
+        private static string EntityIdParameterName
+            => $"entity.{nameof(EntityBase<TKey>.Id)}";
 
         private void ExecuteWrite(Action action)
         {
