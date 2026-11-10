@@ -97,7 +97,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
-        public override TDataObject TryGet(TKey id) => ExecuteReadOperation(() =>
+        public override TDataObject? TryGet(TKey id) => ExecuteReadOperation(() =>
             base.TryGet(id));
 
         /// <summary>

@@ -65,14 +65,14 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
-        TDataObject TryGet(TKey id);
+        TDataObject? TryGet(TKey id);
 
         /// <summary>
         /// Tries to get the first entity matching the specified predicate.
         /// </summary>
         /// <returns>The first matching entity if it exists, null otherwise.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
-        TDataObject TryGetFirst(Func<TDataObject, bool> predicate);
+        TDataObject? TryGetFirst(Func<TDataObject, bool> predicate);
 
         /// <summary>
         /// Gets all the entities.
