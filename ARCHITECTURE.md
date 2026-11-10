@@ -400,7 +400,11 @@ NuciDAL performs no authentication, authorisation, path restriction, content san
 
 The in-memory repository translates key-state conflicts into `EntityAlreadyExistsException` and `EntityNotFoundException`; `GetFirst` also uses `EntityNotFoundException` when no predicate match exists. `DuplicateEntityException` identifies repeated keys discovered during file hydration. All three derive from `EntityException`, which records `EntityId` and `EntityTypeName`.
 
-`TryGet` and `TryGetFirst` use `null` for absence. `TryAdd` ignores duplicates, `TryRemove` ignores absent keys, and `TryUpdate` is an upsert rather than a no-op when absent. Exceptions from cloning, predicates, random selection, null values, or invalid keys are not translated. File load exceptions propagate directly. Only exceptions raised during `PerformFileSave()` are wrapped as `IOException("Cannot save the changes", innerException)`. There is no retry or degradation policy beyond CSV's missing-file-to-empty-collection rule.
+`TryGet` and `TryGetFirst` use `null` for absence. `TryAdd` ignores duplicates, `TryRemove` ignores absent keys, and `TryUpdate` is an upsert rather than a no-op when absent.
+
+All public repository operations validate their arguments before any mutation occurs. Entity-taking operations (`Add`, `TryAdd`, `Update`, `TryUpdate`, `Upsert`, `Remove(TDataObject)`, `TryRemove(TDataObject)`) throw `ArgumentNullException` with `ParamName` set to `"entity"` when the entity argument is `null`. Key-taking operations (`Get`, `TryGet`, `ContainsId`, `Remove(TKey)`, `TryRemove(TKey)`) throw `ArgumentNullException` with `ParamName` set to `"id"` when the identifier argument is `null`. These guards execute before cloning or dictionary access, ensuring no state change occurs on invalid input.
+
+Exceptions from cloning, predicates, random selection, or invalid keys are not translated. File load exceptions propagate directly. Only exceptions raised during `PerformFileSave()` are wrapped as `IOException("Cannot save the changes", innerException)`. There is no retry or degradation policy beyond CSV's missing-file-to-empty-collection rule.
 
 ### Observability
 

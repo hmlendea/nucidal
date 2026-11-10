@@ -40,6 +40,8 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Add(TDataObject entity) => ExecuteWrite(() =>
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             TDataObject entityClone = CloneEntity(entity);
 
             if (!Entities.TryAdd(entityClone.Id, entityClone))
@@ -57,6 +59,8 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual bool TryAdd(TDataObject entity) => ExecuteWrite(() =>
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             TDataObject entityClone = CloneEntity(entity);
 
             return Entities.TryAdd(entityClone.Id, entityClone);
@@ -68,7 +72,11 @@ namespace NuciDAL.Repositories
         /// <returns>A boolean representing whether an entity with the specified identifier exists.</returns>
         /// <param name="id">Identifier.</param>
         public virtual bool ContainsId(TKey id)
-            => Entities.ContainsKey(id);
+        {
+            ThrowIfNullId(id);
+
+            return Entities.ContainsKey(id);
+        }
 
         /// <summary>
         /// Gets the entity with the specified identifier.
@@ -77,6 +85,8 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public virtual TDataObject Get(TKey id)
         {
+            ThrowIfNullId(id);
+
             if (!Entities.TryGetValue(id, out TDataObject entity))
             {
                 ThrowEntityNotFoundException(id);
@@ -116,6 +126,8 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public virtual TDataObject? TryGet(TKey id)
         {
+            ThrowIfNullId(id);
+
             if (!Entities.TryGetValue(id, out TDataObject entity))
             {
                 return null;
@@ -162,6 +174,8 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Update(TDataObject entity) => ExecuteWrite(() =>
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             TDataObject entityClone = CloneEntity(entity);
 
             if (!Entities.TryGetValue(entityClone.Id, out _))
@@ -181,6 +195,8 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual bool TryUpdate(TDataObject entity) => ExecuteWrite(() =>
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             TDataObject entityClone = CloneEntity(entity);
 
             if (!Entities.TryGetValue(entityClone.Id, out TDataObject existingEntity))
@@ -197,6 +213,8 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Upsert(TDataObject entity) => ExecuteWrite(() =>
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             TDataObject entityClone = CloneEntity(entity);
 
             Entities[entityClone.Id] = entityClone;
@@ -208,6 +226,8 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Remove(TDataObject entity) => ExecuteWrite(() =>
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             if (!Entities.TryRemove(entity.Id, out _))
             {
                 ThrowEntityNotFoundException(entity.Id);
@@ -220,6 +240,8 @@ namespace NuciDAL.Repositories
         /// <param name="id">Identifier.</param>
         public virtual void Remove(TKey id) => ExecuteWrite(() =>
         {
+            ThrowIfNullId(id);
+
             if (!Entities.TryRemove(id, out _))
             {
                 ThrowEntityNotFoundException(id);
@@ -232,7 +254,11 @@ namespace NuciDAL.Repositories
         /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
         public virtual bool TryRemove(TDataObject entity) => ExecuteWrite(() =>
-            Entities.TryRemove(entity.Id, out _));
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
+            return Entities.TryRemove(entity.Id, out _);
+        });
 
         /// <summary>
         /// Tries to remove the entity with the specified identifier.
@@ -240,7 +266,11 @@ namespace NuciDAL.Repositories
         /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="id">Identifier.</param>
         public virtual bool TryRemove(TKey id) => ExecuteWrite(() =>
-            Entities.TryRemove(id, out _));
+        {
+            ThrowIfNullId(id);
+
+            return Entities.TryRemove(id, out _);
+        });
 
         /// <summary>
         /// The stored entities.
@@ -257,6 +287,9 @@ namespace NuciDAL.Repositories
             => throw new EntityNotFoundException(
                 id.ToString(),
                 typeof(TDataObject));
+
+        private static void ThrowIfNullId(TKey id)
+            => ArgumentNullException.ThrowIfNull(id, nameof(id));
 
         private void ExecuteWrite(Action action)
         {

@@ -631,5 +631,34 @@ namespace NuciDAL.UnitTests.Repositories
                     .With.InnerException.TypeOf<ArgumentNullException>()
                     .And.InnerException.Property("ParamName").EqualTo("entity"));
         }
+
+        // -- Argument Guards ------
+
+        [Test]
+        public void GivenNullId_WhenGetIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Get(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
+        }
+
+        [Test]
+        public void GivenNullId_WhenTryGetIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryGet(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
+        }
+
+        [Test]
+        public void GivenNullId_WhenContainsIdIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.ContainsId(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
+        }
     }
 }

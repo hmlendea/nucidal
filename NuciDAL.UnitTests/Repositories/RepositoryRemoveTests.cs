@@ -1,3 +1,5 @@
+using System;
+
 using NUnit.Framework;
 
 using NuciDAL.Repositories;
@@ -356,6 +358,44 @@ namespace NuciDAL.UnitTests.Repositories
             repository.Remove(ThirdEntityId);
 
             Assert.That(repository.EntitiesCount, Is.EqualTo(0));
+        }
+
+        // -- Argument Guards ------
+
+        [Test]
+        public void GivenNullEntity_WhenRemoveByEntityIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Remove((TestEntityDataObject)null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity"));
+        }
+
+        [Test]
+        public void GivenNullEntity_WhenTryRemoveByEntityIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryRemove((TestEntityDataObject)null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity"));
+        }
+
+        [Test]
+        public void GivenNullId_WhenRemoveByIdIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Remove((string)null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
+        }
+
+        [Test]
+        public void GivenNullId_WhenTryRemoveByIdIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryRemove((string)null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
         }
     }
 }
