@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Xml;
 
 using NUnit.Framework;
@@ -20,6 +21,7 @@ namespace NuciDAL.UnitTests.IO
         private static string SecondEntityName => "Solaire of Astora";
         private static string MalformedXml => "<ArrayOfTestEntityDataObject>";
         private static string IncorrectRootXml => "<TestEntityDataObject />";
+        private static string NullXml => "<ArrayOfTestEntityDataObject xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xsi:nil=\"true\" />";
         private static int FirstEntityValue => 613;
         private static int SecondEntityValue => 873;
 
@@ -75,6 +77,16 @@ namespace NuciDAL.UnitTests.IO
             => Assert.That(
                 () => xmlFileCollection.SaveEntities(null),
                 Throws.TypeOf<ArgumentNullException>());
+
+        [Test]
+        public void GivenANullXmlPayload_WhenLoading_ThenAnEmptyCollectionIsReturned()
+        {
+            File.WriteAllText(filePath, NullXml);
+
+            IEnumerable<TestEntityDataObject> loadedEntities = xmlFileCollection.LoadEntities();
+
+            Assert.That(loadedEntities, Is.Empty);
+        }
 
         [Test]
         public void GivenAnExistingFile_WhenSavingAgain_ThenThePreviousContentIsReplaced()

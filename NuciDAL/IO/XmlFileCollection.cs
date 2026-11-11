@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -24,6 +25,7 @@ namespace NuciDAL.IO
         /// Loads the entities.
         /// </summary>
         /// <returns>The entities.</returns>
+        /// <exception cref="SerializationException">Thrown when the file contains a null payload instead of a collection.</exception>
         public IEnumerable<T> LoadEntities()
         {
             XmlSerializer serialiser = new(typeof(List<T>));
@@ -31,7 +33,14 @@ namespace NuciDAL.IO
             using FileStream fileStream = new(FileName, FileMode.Open, FileAccess.Read);
             using StreamReader streamReader = new(fileStream);
 
-            return (IEnumerable<T>)serialiser.Deserialize(streamReader);
+            IEnumerable<T>? entities = (IEnumerable<T>?)serialiser.Deserialize(streamReader);
+
+            if (entities is null)
+            {
+                throw new SerializationException($"XML file '{FileName}' contains a null payload instead of a collection.");
+            }
+
+            return entities;
         }
 
         /// <summary>

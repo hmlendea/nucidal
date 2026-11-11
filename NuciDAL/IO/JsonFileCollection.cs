@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text.Json;
 
 namespace NuciDAL.IO
@@ -23,12 +24,20 @@ namespace NuciDAL.IO
         /// Loads the entities from the JSON file.
         /// </summary>
         /// <returns>The entities.</returns>
+        /// <exception cref="SerializationException">Thrown when the file contains a null payload instead of a collection.</exception>
         public IEnumerable<T> LoadEntities()
         {
             using FileStream fileStream = new(FileName, FileMode.Open, FileAccess.Read);
             using StreamReader streamReader = new(fileStream);
 
-            return JsonSerializer.Deserialize<IEnumerable<T>>(streamReader.ReadToEnd(), options);
+            IEnumerable<T>? entities = JsonSerializer.Deserialize<IEnumerable<T>>(streamReader.ReadToEnd(), options);
+
+            if (entities is null)
+            {
+                throw new SerializationException($"JSON file '{FileName}' contains a null payload instead of a collection.");
+            }
+
+            return entities;
         }
 
         /// <summary>
