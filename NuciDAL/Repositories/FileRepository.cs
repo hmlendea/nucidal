@@ -183,16 +183,23 @@ namespace NuciDAL.Repositories
         {
             IEnumerable<TDataObject> entities = FetchEntitiesFromFile();
 
+            List<TKey> insertedKeys = [];
+
             foreach (TDataObject entity in entities)
             {
                 if (!Entities.TryAdd(entity.Id, entity))
                 {
-                    Entities.Clear();
+                    foreach (TKey key in insertedKeys)
+                    {
+                        Entities.TryRemove(key, out _);
+                    }
 
                     throw new DuplicateEntityException(
                         entity.Id.ToString(),
                         entity.GetType());
                 }
+
+                insertedKeys.Add(entity.Id);
             }
         }
 
@@ -209,12 +216,6 @@ namespace NuciDAL.Repositories
             {
                 if (loadedEntities)
                 {
-                    return;
-                }
-
-                if (!Entities.IsEmpty)
-                {
-                    loadedEntities = true;
                     return;
                 }
 

@@ -329,27 +329,24 @@ sequenceDiagram
     Consumer->>FileRepository: First repository operation
     FileRepository->>FileRepository: Check volatile loadedEntities
     FileRepository->>FileRepository: Acquire SyncRoot and check again
-    alt Derived repository previously populated protected state
-        FileRepository->>FileRepository: Mark loaded without reading
-    else State is empty
-        FileRepository->>Helper: LoadEntities()
-        Helper->>FileSystem: Read complete file
-        FileSystem-->>Helper: Serialised content
-        Helper-->>FileRepository: Deserialised collection
-        loop Each entity
-            FileRepository->>State: TryAdd(entity.Id, entity)
-        end
-        alt Duplicate key
-            FileRepository-->>Consumer: DuplicateEntityException
-        else Hydration accepted
-            FileRepository->>FileRepository: Set loadedEntities = true
-        end
+    FileRepository->>Helper: LoadEntities()
+    Helper->>FileSystem: Read complete file
+    FileSystem-->>Helper: Serialised content
+    Helper-->>FileRepository: Deserialised collection
+    loop Each entity
+        FileRepository->>State: TryAdd(entity.Id, entity)
+    end
+    alt Duplicate key
+        FileRepository->>State: Remove keys inserted during this load
+        FileRepository-->>Consumer: DuplicateEntityException
+    else Hydration accepted
+        FileRepository->>FileRepository: Set loadedEntities = true
     end
     FileRepository->>State: Execute requested operation
     FileRepository-->>Consumer: Result or operation exception
 ```
 
-Every public file-repository operation reaches `LoadEntitiesIfNeeded()` directly or through a virtual query method. Construction never opens the file. Successful hydration is cached per instance. The protected non-empty-state branch supports derived repositories that populate `Entities` before first use; public `Add` cannot activate that branch because it requests hydration first.
+Every public file-repository operation reaches `LoadEntitiesIfNeeded()` directly or through a virtual query method. Construction never opens the file. Successful hydration is cached per instance. Derived repositories may populate the protected `Entities` field before first use; such pre-seeded state survives a failed hydration because only the entities inserted during the failed load are rolled back.
 
 ### Explicit File Persistence
 
@@ -519,7 +516,7 @@ dotnet test NuciDAL.slnx
 - **Format asymmetry:** Missing JSON and XML files fail on first use, while a missing CSV file represents an empty collection.
 - **Non-atomic complete-file save (CSV, XML):** CSV and XML saves have no temporary-file exchange, transaction, journal, backup, or multi-file coordination. JSON saves use `AtomicFileWriter` for atomic replacement.
 - **CSV schema fragility:** Reflection order, property additions, delimiters, line terminators, and conversion compatibility affect round trips; quoting and escaping are absent.
-- **Partial duplicate hydration:** If duplicate identifiers are discovered after earlier entities were inserted, the load fails with partial in-memory state. A subsequent attempt observes non-empty protected state and marks it loaded without rereading the file.
+- **Partial duplicate hydration:** If duplicate identifiers are discovered after earlier entities were inserted, the load fails and only the entities inserted during that load are rolled back; pre-seeded state survives. A subsequent attempt retries the read and fails again deterministically.
 - **Per-instance synchronisation:** In-process coordination applies only to one repository instance; multiple instances or processes can overwrite divergent file snapshots.
 - **Synchronous repository API:** Repository and collection I/O operations provide no asynchronous or cancellable contract.
 - **Single target framework:** The package targets only .NET 10 and provides no .NET Standard or earlier .NET asset.
