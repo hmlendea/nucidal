@@ -133,7 +133,24 @@ namespace NuciDAL.IO
             IEnumerable<string> fieldValues = properties
                 .Select(property => GetPropertyFieldValue(entity, property));
 
+            foreach (PropertyInfo property in properties)
+            {
+                string fieldValue = GetPropertyFieldValue(entity, property);
+                ValidateFieldValue(fieldValue, property.Name);
+            }
+
             return string.Join(FieldSeparator, fieldValues);
+        }
+
+        private void ValidateFieldValue(string fieldValue, string propertyName)
+        {
+            if (fieldValue.Contains(FieldSeparator) ||
+                fieldValue.Contains('\r') ||
+                fieldValue.Contains('\n'))
+            {
+                throw new SerializationException(
+                    $"CSV field for property '{propertyName}' contains unrepresentable characters (separator, CR, or LF)");
+            }
         }
 
         private static string GetPropertyFieldValue(TDataObject entity, PropertyInfo property)

@@ -322,6 +322,58 @@ namespace NuciDAL.UnitTests.IO
         }
 
         [Test]
+        public void GivenAFieldContainingTheSeparator_WhenSaving_ThenASerialisationExceptionIsThrown()
+        {
+            TestEntityDataObject entity = BuildEntity(
+                FirstEntityId,
+                FirstEntityName + DefaultFieldSeparator + SecondEntityName,
+                FirstEntityValue);
+
+            Assert.That(
+                () => csvFile.SaveEntities([entity]),
+                Throws.TypeOf<SerializationException>());
+        }
+
+        [Test]
+        public void GivenAFieldContainingCarriageReturn_WhenSaving_ThenASerialisationExceptionIsThrown()
+        {
+            TestEntityDataObject entity = BuildEntity(
+                FirstEntityId,
+                FirstEntityName + "\r" + SecondEntityName,
+                FirstEntityValue);
+
+            Assert.That(
+                () => csvFile.SaveEntities([entity]),
+                Throws.TypeOf<SerializationException>());
+        }
+
+        [Test]
+        public void GivenAFieldContainingLineFeed_WhenSaving_ThenASerialisationExceptionIsThrown()
+        {
+            TestEntityDataObject entity = BuildEntity(
+                FirstEntityId,
+                FirstEntityName + "\n" + SecondEntityName,
+                FirstEntityValue);
+
+            Assert.That(
+                () => csvFile.SaveEntities([entity]),
+                Throws.TypeOf<SerializationException>());
+        }
+
+        [Test]
+        public void GivenAFieldContainingCarriageReturnLineFeed_WhenSaving_ThenASerialisationExceptionIsThrown()
+        {
+            TestEntityDataObject entity = BuildEntity(
+                FirstEntityId,
+                FirstEntityName + "\r\n" + SecondEntityName,
+                FirstEntityValue);
+
+            Assert.That(
+                () => csvFile.SaveEntities([entity]),
+                Throws.TypeOf<SerializationException>());
+        }
+
+        [Test]
         public void GivenANullCollection_WhenSavingAndLoading_ThenAnEmptyCollectionIsReturned()
         {
             csvFile.SaveEntities(null);
