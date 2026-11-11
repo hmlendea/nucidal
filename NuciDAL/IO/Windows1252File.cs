@@ -33,7 +33,7 @@ namespace NuciDAL.IO
         {
             ArgumentNullException.ThrowIfNull(contents);
 
-            File.WriteAllBytes(path, windows1252Encoding.GetBytes(contents));
+            AtomicFileWriter.WriteBytes(path, windows1252Encoding.GetBytes(contents));
         }
 
         /// <summary>
@@ -52,10 +52,7 @@ namespace NuciDAL.IO
         {
             ArgumentNullException.ThrowIfNull(contents);
 
-            await File.WriteAllBytesAsync(
-                path,
-                windows1252Encoding.GetBytes(contents),
-                cancellationToken);
+            await AtomicFileWriter.WriteBytesAsync(path, windows1252Encoding.GetBytes(contents), cancellationToken);
         }
     }
 }

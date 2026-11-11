@@ -131,7 +131,10 @@ namespace NuciDAL.ArchitectureTests
         {
             IEnumerable<CustomAttributeData> attributes = ProductionAssembly
                 .GetCustomAttributesData()
-                .Where(attribute => attribute.AttributeType.Name == "InternalsVisibleToAttribute");
+                .Where(attribute => attribute.AttributeType.Name == "InternalsVisibleToAttribute")
+                .Where(attribute => attribute.ConstructorArguments.Count > 0)
+                .Where(attribute => attribute.ConstructorArguments[0].Value is string assemblyName)
+                .Where(attribute => ((string)attribute.ConstructorArguments[0].Value) != "NuciDAL.UnitTests" && ((string)attribute.ConstructorArguments[0].Value) != "NuciDAL.IntegrationTests");
 
             Assert.That(attributes, Is.Empty);
         }

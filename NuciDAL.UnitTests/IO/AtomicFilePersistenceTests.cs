@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using NuciDAL.IO;
 using NuciDAL.UnitTests.Stubs;
@@ -154,6 +156,122 @@ namespace NuciDAL.UnitTests.IO
             string temporaryFilePattern = $".{Path.GetFileName(filePath)}.*.tmp";
 
             Assert.That(Directory.GetFiles(directoryPath, temporaryFilePattern), Is.Empty);
+        }
+
+        [TestCase("json")]
+        [TestCase("xml")]
+        public void GivenExistingFile_WhenObjectIsWritten_ThenFileIsReplacedAndReadable(string format)
+        {
+            string filePath = GetFilePath(format);
+            TestEntityDataObject originalEntity = BuildEntity(EntityName);
+            TestEntityDataObject replacementEntity = BuildEntity(ReplacementEntityName);
+
+            WriteObject(filePath, format, originalEntity);
+            WriteObject(filePath, format, replacementEntity);
+
+            TestEntityDataObject loadedEntity = ReadObject(filePath, format);
+            Assert.That(loadedEntity.Id, Is.EqualTo(EntityId));
+            Assert.That(loadedEntity.Name, Is.EqualTo(ReplacementEntityName));
+
+            AssertTemporaryFilesAreAbsent(filePath);
+        }
+
+        [TestCase("json")]
+        [TestCase("xml")]
+        [Platform(Include = "Win")]
+        public void GivenWriteFailure_WhenObjectIsWritten_ThenOriginalFileRemainsReadable(string format)
+        {
+            string filePath = GetFilePath(format);
+            WriteObject(filePath, format, BuildEntity(EntityName));
+
+            // Make file read-only to simulate write failure
+            File.SetAttributes(filePath, FileAttributes.ReadOnly);
+
+            try
+            {
+                Assert.That(
+                    () => WriteObject(filePath, format, BuildEntity(ReplacementEntityName)),
+                    Throws.Exception);
+            }
+            finally
+            {
+                // Restore write permissions for cleanup
+                File.SetAttributes(filePath, FileAttributes.Normal);
+            }
+
+            TestEntityDataObject loadedEntity = ReadObject(filePath, format);
+            Assert.That(loadedEntity.Name, Is.EqualTo(EntityName));
+
+            AssertTemporaryFilesAreAbsent(filePath);
+        }
+
+        [Test]
+        public void GivenWindows1252Text_WhenWrittenSynchronously_ThenFileIsReplacedAtomically()
+        {
+            string filePath = Path.Combine(temporaryDirectory, "windows1252.txt");
+            string originalText = "Price: €5";
+            string replacementText = "Price: £10";
+
+            Windows1252File.WriteAllText(filePath, originalText);
+            Windows1252File.WriteAllText(filePath, replacementText);
+
+            Assert.That(
+                Encoding.GetEncoding("windows-1252").GetString(File.ReadAllBytes(filePath)),
+                Is.EqualTo(replacementText));
+
+            AssertTemporaryFilesAreAbsent(filePath);
+        }
+
+        [Test]
+        public async Task GivenWindows1252Text_WhenWrittenAsynchronously_ThenFileIsReplacedAtomically()
+        {
+            string filePath = Path.Combine(temporaryDirectory, "windows1252.txt");
+            string originalText = "Price: €5";
+            string replacementText = "Price: £10";
+
+            await Windows1252File.WriteAllTextAsync(filePath, originalText);
+            await Windows1252File.WriteAllTextAsync(filePath, replacementText);
+
+            Assert.That(
+                Encoding.GetEncoding("windows-1252").GetString(File.ReadAllBytes(filePath)),
+                Is.EqualTo(replacementText));
+
+            AssertTemporaryFilesAreAbsent(filePath);
+        }
+
+        [Test]
+        [Platform(Include = "Win")]
+        public void GivenRootRelativePath_WhenWriting_ThenThrowsArgumentException()
+        {
+            string filePath = "test.txt";
+
+            Assert.That(
+                () => AtomicFileWriter.Write(filePath, stream => { }),
+                Throws.InstanceOf<ArgumentException>()
+                    .With.Property(nameof(ArgumentException.ParamName)).EqualTo("filePath"));
+        }
+
+        private static void WriteObject(string filePath, string format, TestEntityDataObject entity)
+        {
+            switch (format)
+            {
+                case "json":
+                    new JsonFileObject<TestEntityDataObject>().Write(filePath, entity);
+                    break;
+                case "xml":
+                    new XmlFileObject<TestEntityDataObject>().Write(filePath, entity);
+                    break;
+            }
+        }
+
+        private static TestEntityDataObject ReadObject(string filePath, string format)
+        {
+            return format switch
+            {
+                "json" => new JsonFileObject<TestEntityDataObject>().Read(filePath),
+                "xml" => new XmlFileObject<TestEntityDataObject>().Read(filePath),
+                _ => throw new ArgumentException($"Unsupported file format: {format}", nameof(format)),
+            };
         }
     }
 }
