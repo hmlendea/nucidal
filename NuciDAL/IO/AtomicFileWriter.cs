@@ -9,6 +9,8 @@ namespace NuciDAL.IO
     {
         internal static void Write(string filePath, Action<Stream> writeContent)
         {
+            ArgumentNullException.ThrowIfNull(writeContent);
+
             string fullFilePath = Path.GetFullPath(filePath);
             string directoryPath = Path.GetDirectoryName(fullFilePath);
 
@@ -55,13 +57,18 @@ namespace NuciDAL.IO
 
         internal static void WriteBytes(string filePath, byte[] bytes)
         {
+            ArgumentNullException.ThrowIfNull(bytes);
+
             Write(filePath, stream => stream.Write(bytes, 0, bytes.Length));
         }
 
         internal static async Task WriteBytesAsync(string filePath, byte[] bytes, CancellationToken cancellationToken = default)
         {
+            ArgumentNullException.ThrowIfNull(bytes);
+
             string fullFilePath = Path.GetFullPath(filePath);
             string directoryPath = Path.GetDirectoryName(fullFilePath);
+
             if (string.IsNullOrEmpty(directoryPath))
             {
                 throw new ArgumentException("File path must have a directory component.", nameof(filePath));
