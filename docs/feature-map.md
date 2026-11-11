@@ -101,7 +101,7 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | --- | --- | --- |
 | Standalone JSON object I/O | [`JsonFileObject.cs`](../NuciDAL/IO/JsonFileObject.cs), `JsonFileObject<T>` implementing [`IJsonFileObject<T>`](../NuciDAL/IO/IJsonFileObject.cs) | [`JsonFileObjectTests.cs`](../NuciDAL.UnitTests/IO/JsonFileObjectTests.cs) |
 | Standalone XML object I/O | [`XmlFileObject.cs`](../NuciDAL/IO/XmlFileObject.cs), `XmlFileObject<T>` | No direct tests. |
-| Windows-1252 output | [`Windows1252File.cs`](../NuciDAL/IO/Windows1252File.cs), `WriteAllText`, `WriteAllTextAsync` | No direct tests. |
+| Windows-1252 output | [`Windows1252File.cs`](../NuciDAL/IO/Windows1252File.cs), `WriteAllText`, `WriteAllTextAsync` | [`Windows1252FileTests.cs`](../NuciDAL.UnitTests/IO/Windows1252FileTests.cs), [`Windows1252FileTests.cs`](../NuciDAL.IntegrationTests/IO/Windows1252FileTests.cs) |
 
 ## Algorithm Map
 
