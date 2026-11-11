@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Threading;
 
 using NUnit.Framework;
 
@@ -26,6 +28,10 @@ namespace NuciDAL.UnitTests.IO
         private static char CustomFieldSeparator => ';';
         private static int FirstEntityValue => 613;
         private static int SecondEntityValue => 873;
+        private static double FirstEntityDoubleValue => 61.3;
+        private static double SecondEntityDoubleValue => 87.3;
+        private static decimal FirstEntityDecimalValue => 61.3m;
+        private static decimal SecondEntityDecimalValue => 87.3m;
 
         private CsvFile<TestEntityDataObject> csvFile;
         private string filePath;
@@ -348,6 +354,98 @@ namespace NuciDAL.UnitTests.IO
             Assert.That(
                 () => missingDirectoryCsvFile.SaveEntities([]),
                 Throws.TypeOf<DirectoryNotFoundException>());
+        }
+
+        [Test]
+        public void GivenADoubleValue_WhenSavingAndLoadingUnderDifferentCultures_ThenValueIsPreserved()
+        {
+            CultureInfo originalCulture = Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("ro-RO");
+
+                CsvFile<TestEntityDataObjectWithDecimals> csvFileWithDecimals = new(filePath);
+                TestEntityDataObjectWithDecimals entity = new()
+                {
+                    Id = FirstEntityId,
+                    Name = FirstEntityName,
+                    DoubleValue = FirstEntityDoubleValue,
+                    DecimalValue = FirstEntityDecimalValue,
+                };
+
+                csvFileWithDecimals.SaveEntities([entity]);
+
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+                IEnumerable<TestEntityDataObjectWithDecimals> loadedEntities = csvFileWithDecimals.LoadEntities();
+
+                Assert.That(loadedEntities, Is.EqualTo(new[] { entity }));
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = originalCulture;
+            }
+        }
+
+        [Test]
+        public void GivenADecimalValue_WhenSavingAndLoadingUnderDifferentCultures_ThenValueIsPreserved()
+        {
+            CultureInfo originalCulture = Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("ro-RO");
+
+                CsvFile<TestEntityDataObjectWithDecimals> csvFileWithDecimals = new(filePath);
+                TestEntityDataObjectWithDecimals entity = new()
+                {
+                    Id = FirstEntityId,
+                    Name = FirstEntityName,
+                    DoubleValue = FirstEntityDoubleValue,
+                    DecimalValue = FirstEntityDecimalValue,
+                };
+
+                csvFileWithDecimals.SaveEntities([entity]);
+
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+                IEnumerable<TestEntityDataObjectWithDecimals> loadedEntities = csvFileWithDecimals.LoadEntities();
+
+                Assert.That(loadedEntities, Is.EqualTo(new[] { entity }));
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = originalCulture;
+            }
+        }
+
+        [Test]
+        public void GivenADoubleValue_WhenSavingUnderOneCultureAndLoadingUnderAnother_ThenRoundTripIsByteIdentical()
+        {
+            CultureInfo originalCulture = Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("ro-RO");
+
+                CsvFile<TestEntityDataObjectWithDecimals> csvFileWithDecimals = new(filePath);
+                TestEntityDataObjectWithDecimals entity = new()
+                {
+                    Id = FirstEntityId,
+                    Name = FirstEntityName,
+                    DoubleValue = FirstEntityDoubleValue,
+                    DecimalValue = FirstEntityDecimalValue,
+                };
+
+                csvFileWithDecimals.SaveEntities([entity]);
+                string roContent = File.ReadAllText(filePath);
+
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+                csvFileWithDecimals.SaveEntities([entity]);
+                string enContent = File.ReadAllText(filePath);
+
+                Assert.That(enContent, Is.EqualTo(roContent));
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = originalCulture;
+            }
         }
 
         private static TestEntityDataObject BuildEntity(

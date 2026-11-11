@@ -133,3 +133,11 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 - **Implementation:** `CsvFile<TDataObject>.GetOrderedProperties` in [`CsvFile.cs`](../NuciDAL/IO/CsvFile.cs).
 - **Assumption:** properties are ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`). The previous `VERY HACKY` reordering was removed.
 - **Tests:** covered by [`CsvFileTests.cs`](../NuciDAL.UnitTests/IO/CsvFileTests.cs) with attributed test entities.
+
+### CSV Culture-Invariant Serialisation
+
+- **Inputs:** CLR numeric and date/time values during save; CSV text fields during load.
+- **Output:** CSV text representation using invariant culture formatting; parsed values using invariant culture parsing.
+- **Implementation:** `CsvFile<TDataObject>.ReadLine` uses `Convert.ChangeType` with `CultureInfo.InvariantCulture`; `CsvFile<TDataObject>.GetPropertyFieldValue` uses `IFormattable.ToString(null, CultureInfo.InvariantCulture)` for formattable types.
+- **Assumption:** all CSV files are written and read using invariant culture, ensuring cross-culture compatibility.
+- **Tests:** covered by [`CsvFileTests.cs`](../NuciDAL.UnitTests/IO/CsvFileTests.cs) with `GivenADoubleValue_WhenSavingAndLoadingUnderDifferentCultures_ThenValueIsPreserved`, `GivenADecimalValue_WhenSavingAndLoadingUnderDifferentCultures_ThenValueIsPreserved`, and `GivenADoubleValue_WhenSavingUnderOneCultureAndLoadingUnderAnother_ThenRoundTripIsByteIdentical`.

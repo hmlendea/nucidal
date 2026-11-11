@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -118,7 +119,7 @@ namespace NuciDAL.IO
             for (int i = 0; i < properties.Length; i++)
             {
                 PropertyInfo property = properties[i];
-                object value = Convert.ChangeType(fields[i], property.PropertyType);
+                object value = Convert.ChangeType(fields[i], property.PropertyType, CultureInfo.InvariantCulture);
                 property.SetValue(entity, value, null);
             }
 
@@ -144,7 +145,9 @@ namespace NuciDAL.IO
                 return string.Empty;
             }
 
-            return value.ToString();
+            return value is IFormattable formattable
+                ? formattable.ToString(null, CultureInfo.InvariantCulture)
+                : value.ToString();
         }
 
         private static PropertyInfo[] GetOrderedProperties(Type entityType)
