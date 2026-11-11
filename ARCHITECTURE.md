@@ -247,7 +247,7 @@ Boundary rules:
 
 Each repository instance owns one `ConcurrentDictionary<TKey, TDataObject>` and enforces one value per key. `Add` rejects an existing key, `Update` requires an existing key, `TryUpdate` performs an upsert, and removals delete the key. The dictionary is the authoritative state for the lifetime of an in-memory instance and, after hydration, for the lifetime of a file-backed instance.
 
-Repository ingress and egress use `NuciExtensions` JSON serialisation followed by deserialisation. Consequently, callers do not receive references to stored values, but repository-compatible entity graphs must also be compatible with that cloning mechanism. `GetAll()` materialises cloned values; `Find()` applies its predicate lazily to that materialised collection, so subsequent repository mutations do not alter the returned collection.
+Repository ingress and egress use `NuciExtensions` JSON serialisation followed by deserialisation. Consequently, callers do not receive references to stored values, but repository-compatible entity graphs must also be compatible with that cloning mechanism. `GetAll()` materialises cloned values; `TryGetFirst()` snapshots stored references, applies its predicate, and clones only the first match; `Find()` materialises cloned values before applying its predicate, so subsequent repository mutations do not alter the returned collection.
 
 File repositories load a complete collection on first use and retain it indefinitely. They do not monitor external file modifications. `SaveChanges()` emits the complete current collection; there is no change set, schema version, migration mechanism, journal, or transaction across files.
 
@@ -307,14 +307,14 @@ sequenceDiagram
     else Mutation accepted
         Repository-->>Consumer: Return
     end
-    Consumer->>Repository: Get(id), GetAll(), or Find(predicate)
+    Consumer->>Repository: Get(id), TryGetFirst(predicate), GetAll(), or Find(predicate)
     Repository->>State: Read value or enumerate values
     Repository->>Extensions: Clone selected value(s)
     Extensions-->>Repository: Independent clone(s)
     Repository-->>Consumer: Entity or materialised snapshot-backed enumerable
 ```
 
-Writes execute under `SyncRoot`. `Add` and `Update` clone before validating key state; failed cloning therefore precedes repository-specific conflict translation. `TryAdd` ignores an existing key, while `TryUpdate` assigns by key and therefore inserts when absent. Reads return clones. `Find()` captures cloned values when called, then defers predicate evaluation over that captured collection.
+Writes execute under `SyncRoot`. `Add` and `Update` clone before validating key state; failed cloning therefore precedes repository-specific conflict translation. `TryAdd` ignores an existing key, while `TryUpdate` assigns by key and therefore inserts when absent. Reads return clones. `GetFirst` and `TryGetFirst` snapshot stored references, evaluate the predicate against that snapshot, and clone only the selected match, so no other entity is serialised. `Find()` captures cloned values when called, then defers predicate evaluation over that captured collection.
 
 ### Lazy File Hydration
 

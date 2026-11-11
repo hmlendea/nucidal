@@ -414,6 +414,57 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
+        public void GivenMatchingEntityExists_WhenTryGetFirstIsCalled_ThenReturnsCloneNotStoredReference()
+        {
+            repository.Add(new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+                Value = FirstEntityValue,
+            });
+
+            TestEntityDataObject result = repository.TryGetFirst(
+                entity => string.Equals(entity.Id, FirstEntityId));
+
+            result.Name = SecondEntityName;
+
+            Assert.That(result, Is.Not.SameAs(repository.TryGetFirst(
+                entity => string.Equals(entity.Id, FirstEntityId))));
+            Assert.That(repository.Get(FirstEntityId).Name, Is.EqualTo(FirstEntityName));
+        }
+
+        [Test]
+        public void GivenPredicateMutatesRepository_WhenTryGetFirstIsCalled_ThenUsesInitialSnapshot()
+        {
+            repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });
+
+            TestEntityDataObject result = repository.TryGetFirst(entity =>
+            {
+                repository.Add(new() { Id = SecondEntityId, Name = SecondEntityName });
+                return string.Equals(entity.Id, SecondEntityId);
+            });
+
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public void GivenEntityIsChangedAfterAdd_WhenTryGetFirstIsCalled_ThenPredicateSeesStoredValue()
+        {
+            TestEntityDataObject entity = new()
+            {
+                Id = FirstEntityId,
+                Name = FirstEntityName,
+            };
+            repository.Add(entity);
+            entity.Name = SecondEntityName;
+
+            TestEntityDataObject result = repository.TryGetFirst(
+                candidate => string.Equals(candidate.Name, FirstEntityName));
+
+            Assert.That(result, Is.Not.Null);
+        }
+
+        [Test]
         public void GivenNoMatchingEntity_WhenTryGetFirstIsCalled_ThenReturnsNull()
         {
             repository.Add(new() { Id = FirstEntityId, Name = FirstEntityName });

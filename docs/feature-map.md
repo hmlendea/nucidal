@@ -109,8 +109,8 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 
 - **Inputs:** consumer entity or repository entity.
 - **Output:** deserialised `TDataObject` instance with equivalent serialised values.
-- **Procedure:** `Repository.CloneEntity` calls `ToJson`, then `FromJson<TDataObject>`.
-- **Invariant:** repository state does not share the cloned entity reference with the caller.
+- **Procedure:** `Repository.CloneEntity` calls `ToJson`, then `FromJson<TDataObject>`; `TryGetFirst` snapshots stored references and clones only the selected match.
+- **Invariant:** repository state does not share the cloned entity reference with the caller, and first-match lookups do not clone non-matching entities.
 - **Callers:** repository add, update, get, find, random, and remove paths.
 - **Tests:** clone tests listed in [Clone Isolation](#clone-isolation).
 - **Complexity:** proportional to the serialised entity graph size; exact cost is delegated to `NuciExtensions` and `System.Text.Json`.

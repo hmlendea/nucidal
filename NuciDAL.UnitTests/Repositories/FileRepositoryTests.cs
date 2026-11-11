@@ -200,6 +200,27 @@ namespace NuciDAL.UnitTests.Repositories
         }
 
         [Test]
+        public void GivenAStoredEntity_WhenGettingTheFirstMatch_ThenACloneIsReturned()
+        {
+            TestEntityDataObject entity = repository.GetFirst(
+                candidate => string.Equals(candidate.Id, SecondEntityId));
+
+            Assert.That(entity, Is.Not.SameAs(
+                repository.FetchedEntities.Single(candidate => string.Equals(candidate.Id, SecondEntityId))));
+        }
+
+        [Test]
+        public void GivenAStoredEntity_WhenTryingToGetTheFirstMatch_ThenACloneIsReturned()
+        {
+            TestEntityDataObject entity = repository.TryGetFirst(
+                candidate => string.Equals(candidate.Id, SecondEntityId));
+
+            Assert.That(entity, Is.EqualTo(BuildEntity(SecondEntityId, SecondEntityName, SecondEntityValue)));
+            Assert.That(entity, Is.Not.SameAs(
+                repository.FetchedEntities.Single(candidate => string.Equals(candidate.Id, SecondEntityId))));
+        }
+
+        [Test]
         public void GivenNoMatchingEntity_WhenTryingToGetTheFirstMatch_ThenNullIsReturned()
             => Assert.That(
                 repository.TryGetFirst(

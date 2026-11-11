@@ -115,7 +115,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The first matching entity.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
-        public TDataObject GetFirst(Func<TDataObject, bool> predicate)
+        public virtual TDataObject GetFirst(Func<TDataObject, bool> predicate)
         {
             TDataObject entity = TryGetFirst(predicate);
 
@@ -149,9 +149,10 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The first matching entity if it exists, null otherwise.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
-        public TDataObject? TryGetFirst(Func<TDataObject, bool> predicate)
+        public virtual TDataObject? TryGetFirst(Func<TDataObject, bool> predicate)
         {
-            TDataObject entity = GetAll().FirstOrDefault(predicate);
+            TDataObject[] snapshot = [.. Entities.Values];
+            TDataObject entity = snapshot.FirstOrDefault(predicate);
 
             if (entity is null)
             {
