@@ -339,6 +339,9 @@ sequenceDiagram
     alt Duplicate key
         FileRepository->>State: Remove keys inserted during this load
         FileRepository-->>Consumer: DuplicateEntityException
+    else Enumeration failure
+        FileRepository->>State: Remove keys inserted during this load
+        FileRepository-->>Consumer: Original read or parse exception
     else Hydration accepted
         FileRepository->>FileRepository: Set loadedEntities = true
     end
@@ -346,7 +349,7 @@ sequenceDiagram
     FileRepository-->>Consumer: Result or operation exception
 ```
 
-Every public file-repository operation reaches `LoadEntitiesIfNeeded()` directly or through a virtual query method. Construction never opens the file. Successful hydration is cached per instance. Derived repositories may populate the protected `Entities` field before first use; such pre-seeded state survives a failed hydration because only the entities inserted during the failed load are rolled back.
+Every public file-repository operation reaches `LoadEntitiesIfNeeded()` directly or through a virtual query method. Construction never opens the file. Successful hydration is cached per instance. Derived repositories may populate the protected `Entities` field before first use; such pre-seeded state survives a failed hydration because only the entities inserted during the failed load are rolled back, and a failure raised while enumerating the source collection triggers the same rollback.
 
 ### Explicit File Persistence
 
@@ -516,7 +519,7 @@ dotnet test NuciDAL.slnx
 - **Format asymmetry:** Missing JSON and XML files fail on first use, while a missing CSV file represents an empty collection.
 - **Non-atomic complete-file save (CSV, XML):** CSV and XML saves have no temporary-file exchange, transaction, journal, backup, or multi-file coordination. JSON saves use `AtomicFileWriter` for atomic replacement.
 - **CSV schema fragility:** Reflection order, property additions, delimiters, line terminators, and conversion compatibility affect round trips; quoting and escaping are absent.
-- **Partial duplicate hydration:** If duplicate identifiers are discovered after earlier entities were inserted, the load fails and only the entities inserted during that load are rolled back; pre-seeded state survives. A subsequent attempt retries the read and fails again deterministically.
+- **Partial duplicate hydration:** If hydration fails, whether because duplicate identifiers are discovered after earlier entities were inserted or because the source collection fails while being enumerated, only the entities inserted during that load are rolled back; pre-seeded state survives. A subsequent attempt retries the read and fails again deterministically.
 - **Per-instance synchronisation:** In-process coordination applies only to one repository instance; multiple instances or processes can overwrite divergent file snapshots.
 - **Synchronous repository API:** Repository and collection I/O operations provide no asynchronous or cancellable contract.
 - **Single target framework:** The package targets only .NET 10 and provides no .NET Standard or earlier .NET asset.
