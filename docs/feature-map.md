@@ -120,11 +120,11 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 - **Inputs:** configured file path and repository instance.
 - **Output:** populated in-memory dictionary, or the original read/parse exception.
 - **Precondition:** first file-backed repository operation.
-- **Procedure:** `LoadEntitiesIfNeeded` checks `loadedEntities`, locks `SyncRoot`, checks again, fetches entities, inserts each by identifier, and marks the instance loaded.
-- **Important branches:** already loaded; duplicate identifier; read or parse failure; empty source.
-- **Invariant:** successful loading occurs once per repository instance.
+- **Procedure:** `LoadEntitiesIfNeeded` checks `loadedEntities`, locks `SyncRoot`, checks again, fetches entities, inserts each by identifier, and marks the instance loaded. Failure removes only the keys inserted by this load, so pre-seeded entities survive.
+- **Important branches:** already loaded; duplicate identifier; read, parse, or enumeration failure after partial insertion; empty source.
+- **Invariant:** successful loading occurs once per repository instance; a failed load leaves the instance unloaded and preserves entities supplied by a derived repository.
 - **Callers and consumers:** file repository public operations and `SaveChanges`; concrete format repositories provide hooks.
-- **Tests:** no direct algorithm tests; DI tests only verify construction and deferred path invocation.
+- **Tests:** [`FileRepositoryTests.cs`](../NuciDAL.UnitTests/Repositories/FileRepositoryTests.cs) covers file fetch-once semantics, duplicate rejection, rollback of inserted keys, seeded-state preservation across duplicate and mid-enumeration failures, retry behaviour, and save orchestration.
 
 ### CSV Property Ordering
 

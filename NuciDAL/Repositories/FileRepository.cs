@@ -179,20 +179,46 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Loads the stored entities into memory.
         /// </summary>
+        /// <remarks>
+        /// Only the entities inserted by this call are rolled back when it fails, so state supplied by a
+        /// derived repository through the protected <c>Entities</c> field is preserved.
+        /// </remarks>
         protected void LoadEntities()
         {
-            IEnumerable<TDataObject> entities = FetchEntitiesFromFile();
+            List<TKey> insertedKeys = [];
 
-            foreach (TDataObject entity in entities)
+            try
+            {
+                InsertFetchedEntities(insertedKeys);
+            }
+            catch
+            {
+                RollBackInsertions(insertedKeys);
+
+                throw;
+            }
+        }
+
+        private void InsertFetchedEntities(List<TKey> insertedKeys)
+        {
+            foreach (TDataObject entity in FetchEntitiesFromFile())
             {
                 if (!Entities.TryAdd(entity.Id, entity))
                 {
-                    Entities.Clear();
-
                     throw new DuplicateEntityException(
                         entity.Id.ToString(),
                         entity.GetType());
                 }
+
+                insertedKeys.Add(entity.Id);
+            }
+        }
+
+        private void RollBackInsertions(IEnumerable<TKey> insertedKeys)
+        {
+            foreach (TKey key in insertedKeys)
+            {
+                Entities.TryRemove(key, out _);
             }
         }
 
@@ -209,12 +235,6 @@ namespace NuciDAL.Repositories
             {
                 if (loadedEntities)
                 {
-                    return;
-                }
-
-                if (!Entities.IsEmpty)
-                {
-                    loadedEntities = true;
                     return;
                 }
 
