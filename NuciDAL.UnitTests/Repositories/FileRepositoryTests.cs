@@ -494,6 +494,92 @@ namespace NuciDAL.UnitTests.Repositories
             Assert.That(repository.ContainsId(ThirdEntityId), Is.True);
         }
 
+        [Test]
+        public void GivenAnEmptyFetchedCollection_WhenLoading_ThenHydrationCompletesWithoutEntities()
+        {
+            repository.FetchedEntities = [];
+
+            Assert.That(repository.EntitiesCount, Is.Zero);
+            Assert.That(repository.FetchCount, Is.EqualTo(1));
+
+            Assert.That(repository.EntitiesCount, Is.Zero);
+            Assert.That(repository.FetchCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GivenASeededEntity_WhenFetchedEntityHasANullIdentifier_ThenSeededEntityIsPreservedAndLoadIsRetried()
+        {
+            TestEntityDataObject seededEntity = BuildEntity(
+                FirstEntityId,
+                "Seeded Entity",
+                999);
+            repository.SeedEntity(seededEntity);
+
+            repository.FetchedEntities =
+            [
+                BuildEntity(null, SecondEntityName, SecondEntityValue),
+            ];
+
+            Assert.That(
+                () => _ = repository.EntitiesCount,
+                Throws.TypeOf<ArgumentNullException>());
+
+            repository.FetchedEntities =
+            [
+                BuildEntity(SecondEntityId, SecondEntityName, SecondEntityValue),
+            ];
+
+            Assert.That(repository.EntitiesCount, Is.EqualTo(2));
+            Assert.That(repository.Get(FirstEntityId), Is.EqualTo(seededEntity));
+            Assert.That(repository.ContainsId(SecondEntityId), Is.True);
+            Assert.That(repository.FetchCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void GivenASeededEntityWithTheSameIdentifierAsAFetchedEntity_WhenLoading_ThenTheConflictIsRejectedAndSeededStateIsPreserved()
+        {
+            TestEntityDataObject seededEntity = BuildEntity(
+                FirstEntityId,
+                "Seeded Entity",
+                999);
+            repository.SeedEntity(seededEntity);
+
+            repository.FetchedEntities =
+            [
+                BuildEntity(FirstEntityId, FirstEntityName, FirstEntityValue),
+            ];
+
+            Assert.That(
+                () => _ = repository.EntitiesCount,
+                Throws.TypeOf<DuplicateEntityException>());
+
+            repository.FetchedEntities =
+            [
+                BuildEntity(SecondEntityId, SecondEntityName, SecondEntityValue),
+            ];
+
+            Assert.That(repository.EntitiesCount, Is.EqualTo(2));
+            Assert.That(repository.Get(FirstEntityId), Is.EqualTo(seededEntity));
+            Assert.That(repository.FetchCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void GivenAFailedHydration_WhenSavingChanges_ThenTheLoadFailurePropagatesAndNothingIsSaved()
+        {
+            repository.FetchedEntities =
+            [
+                BuildEntity(FirstEntityId, FirstEntityName, FirstEntityValue),
+                BuildEntity(FirstEntityId, SecondEntityName, SecondEntityValue),
+            ];
+
+            Assert.That(
+                () => repository.SaveChanges(),
+                Throws.TypeOf<DuplicateEntityException>());
+
+            Assert.That(repository.SaveCount, Is.Zero);
+            Assert.That(repository.FetchCount, Is.EqualTo(1));
+        }
+
         private static IEnumerable<TestEntityDataObject> FetchThenFail(
             IEnumerable<TestEntityDataObject> fetchedEntities)
         {

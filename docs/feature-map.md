@@ -42,7 +42,7 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | Supporting implementation | `NuciExtensions` `ToJson()` and `FromJson<TDataObject>()`. |
 | Entry point | `IRepository` add, update, get, find, and remove operations. |
 | Tests | `RepositoryAddTests.GivenEntity_WhenAdded_ThenStoredEntityIsAClone`; `RepositoryGetTests.GivenEntity_WhenGetIsCalled_ThenReturnsCloneNotOriginalReference`; `RepositoryGetTests.GivenReturnedCloneIsModified_WhenGetIsCalled_ThenStoredEntityRemainsUnchanged`; `RepositoryUpdateTests.GivenEntity_WhenUpdateIsCalled_ThenStoresCloneNotReference`. |
-| Coverage gap | File-repository hydration and save clone boundaries are not directly tested. |
+| Coverage gap | File-backed format-specific clone boundaries remain covered through repository integration tests rather than the in-memory clone test classes. |
 
 ## File Persistence
 
@@ -57,8 +57,8 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | Data and serialisation | [`IFileRepository.cs`](../NuciDAL/Repositories/IFileRepository.cs): `SaveChanges`; collection helpers in [`NuciDAL/IO`](../NuciDAL/IO). |
 | Persistence | Format-specific `FetchEntitiesFromFile` and `PerformFileSave` implementations write to the configured local path. |
 | Validation and errors | `DuplicateEntityException` on duplicate identifiers during hydration; underlying parsing and filesystem exceptions remain format-specific. |
-| Tests | DI construction tests cover type and lifetime only in [`RepositoryServiceCollectionExtensionsTests.cs`](../NuciDAL.UnitTests/DependencyInjection/RepositoryServiceCollectionExtensionsTests.cs). |
-| Coverage gap | No direct tests for hydration, `SaveChanges`, malformed data, missing files, permissions, external file changes, or concurrent loading. |
+| Tests | [`FileRepositoryTests.cs`](../NuciDAL.UnitTests/Repositories/FileRepositoryTests.cs) covers hydration, duplicate rejection, inserted-key rollback, seeded-state preservation, retry, read/write wrappers, and save orchestration; JSON, XML, and CSV integration tests cover format-backed hydration and persistence. |
+| Coverage gap | Missing files, permissions, external file changes, and cross-instance concurrent loading are covered only for selected scenarios; cross-process coordination and package consumption lack direct tests. |
 
 ## Serialisation And File I/O
 
