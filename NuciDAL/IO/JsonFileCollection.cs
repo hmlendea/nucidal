@@ -28,9 +28,8 @@ namespace NuciDAL.IO
         public IEnumerable<T> LoadEntities()
         {
             using FileStream fileStream = new(FileName, FileMode.Open, FileAccess.Read);
-            using StreamReader streamReader = new(fileStream);
 
-            IEnumerable<T>? entities = JsonSerializer.Deserialize<IEnumerable<T>>(streamReader.ReadToEnd(), options);
+            IEnumerable<T>? entities = JsonSerializer.Deserialize<IEnumerable<T>>(fileStream, options);
 
             if (entities is null)
             {
