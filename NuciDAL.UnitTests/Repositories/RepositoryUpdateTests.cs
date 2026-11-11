@@ -1,3 +1,5 @@
+using System;
+
 using NUnit.Framework;
 
 using NuciDAL.Repositories;
@@ -394,6 +396,62 @@ namespace NuciDAL.UnitTests.Repositories
 
             Assert.That(stored.Name, Is.EqualTo(ThirdEntityName));
             Assert.That(stored.Value, Is.EqualTo(SecondEntityValue));
+        }
+
+        // -- Argument Guards ------
+
+        [Test]
+        public void GivenNullEntity_WhenUpdateIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Update(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity"));
+        }
+
+        [Test]
+        public void GivenNullEntity_WhenTryUpdateIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryUpdate(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity"));
+        }
+
+        [Test]
+        public void GivenNullEntity_WhenUpsertIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Upsert(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity"));
+        }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenUpdateIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Update(new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
+        }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenTryUpdateIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryUpdate(new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
+        }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenUpsertIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Upsert(new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
         }
     }
 }

@@ -1,3 +1,5 @@
+using System;
+
 using NUnit.Framework;
 
 using NuciDAL.Repositories;
@@ -355,6 +357,44 @@ namespace NuciDAL.UnitTests.Repositories
             TestEntityDataObject stored = repository.Get(FirstEntityId);
 
             Assert.That(stored.Name, Is.Null);
+        }
+
+        // -- Argument Guards ------
+
+        [Test]
+        public void GivenNullEntity_WhenAdded_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Add(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity"));
+        }
+
+        [Test]
+        public void GivenNullEntity_WhenTryAdded_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryAdd(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity"));
+        }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenAdded_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Add(new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
+        }
+
+        [Test]
+        public void GivenEntityWithNullId_WhenTryAdded_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryAdd(new() { Id = null! }),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("entity.Id"));
         }
     }
 }

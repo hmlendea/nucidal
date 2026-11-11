@@ -540,6 +540,21 @@ namespace NuciDAL.UnitTests.Repositories
         // -- GetRandom ------
 
         [Test]
+        public void GivenEmptyRepository_WhenGetRandomIsCalled_ThenThrowsEntityNotFoundException()
+            => Assert.That(
+                () => repository.GetRandom(),
+                Throws.TypeOf<EntityNotFoundException>());
+
+        [Test]
+        public void GivenEmptyRepository_WhenGetRandomIsCalled_ThenExceptionCarriesCorrectEntityType()
+        {
+            EntityNotFoundException exception = Assert.Throws<EntityNotFoundException>(
+                () => repository.GetRandom());
+
+            Assert.That(exception.EntityTypeName, Is.EqualTo(typeof(TestEntityDataObject).Name));
+        }
+
+        [Test]
         public void GivenRepositoryHasOneEntity_WhenGetRandomIsCalled_ThenReturnsThatEntity()
         {
             repository.Add(new()
@@ -630,6 +645,35 @@ namespace NuciDAL.UnitTests.Repositories
                 Throws.TypeOf<System.Reflection.TargetInvocationException>()
                     .With.InnerException.TypeOf<ArgumentNullException>()
                     .And.InnerException.Property("ParamName").EqualTo("entity"));
+        }
+
+        // -- Argument Guards ------
+
+        [Test]
+        public void GivenNullId_WhenGetIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.Get(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
+        }
+
+        [Test]
+        public void GivenNullId_WhenTryGetIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.TryGet(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
+        }
+
+        [Test]
+        public void GivenNullId_WhenContainsIdIsCalled_ThenThrowsArgumentNullException()
+        {
+            Assert.That(
+                () => repository.ContainsId(null!),
+                Throws.TypeOf<ArgumentNullException>()
+                    .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("id"));
         }
     }
 }
