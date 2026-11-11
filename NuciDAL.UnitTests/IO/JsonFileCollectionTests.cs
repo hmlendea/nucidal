@@ -72,6 +72,23 @@ namespace NuciDAL.UnitTests.IO
         }
 
         [Test]
+        public void GivenALargeCollection_WhenSavingAndLoading_ThenAllEntitiesArePreserved()
+        {
+            const int entityCount = 10_000;
+            List<TestEntityDataObject> entities = new(entityCount);
+
+            for (int index = 0; index < entityCount; index++)
+            {
+                entities.Add(BuildEntity($"entity-{index}", $"Entity {index}", index));
+            }
+
+            jsonFileCollection.SaveEntities(entities);
+            IEnumerable<TestEntityDataObject> loadedEntities = jsonFileCollection.LoadEntities();
+
+            Assert.That(loadedEntities, Is.EqualTo(entities));
+        }
+
+        [Test]
         public void GivenANullCollection_WhenSaving_ThenAnEmptyFileIsCreated()
         {
             jsonFileCollection.SaveEntities(null);

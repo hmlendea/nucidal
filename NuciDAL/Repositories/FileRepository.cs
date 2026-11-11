@@ -101,6 +101,22 @@ namespace NuciDAL.Repositories
             base.TryGet(id));
 
         /// <summary>
+        /// Gets the first entity matching the specified predicate.
+        /// </summary>
+        /// <returns>The first matching entity.</returns>
+        /// <param name="predicate">Predicate used to filter entities.</param>
+        public override TDataObject GetFirst(Func<TDataObject, bool> predicate) => ExecuteReadOperation(() =>
+            base.GetFirst(predicate));
+
+        /// <summary>
+        /// Tries to get the first entity matching the specified predicate.
+        /// </summary>
+        /// <returns>The first matching entity if it exists, null otherwise.</returns>
+        /// <param name="predicate">Predicate used to filter entities.</param>
+        public override TDataObject? TryGetFirst(Func<TDataObject, bool> predicate) => ExecuteReadOperation(() =>
+            base.TryGetFirst(predicate));
+
+        /// <summary>
         /// Gets a random entity.
         /// </summary>
         /// <returns>A random entity.</returns>

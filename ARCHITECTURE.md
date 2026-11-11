@@ -247,7 +247,7 @@ Boundary rules:
 
 Each repository instance owns one `ConcurrentDictionary<TKey, TDataObject>` and enforces one value per key. `Add` rejects an existing key, `Update` requires an existing key, `TryUpdate` performs an upsert, and removals delete the key. The dictionary is the authoritative state for the lifetime of an in-memory instance and, after hydration, for the lifetime of a file-backed instance.
 
-Repository ingress and egress use `NuciExtensions` JSON serialisation followed by deserialisation. Consequently, callers do not receive references to stored values, but repository-compatible entity graphs must also be compatible with that cloning mechanism. `GetAll()` materialises cloned values; `Find()` applies its predicate lazily to that materialised collection, so subsequent repository mutations do not alter the returned collection.
+Repository ingress and egress use `NuciExtensions` JSON serialisation followed by deserialisation. Consequently, callers do not receive references to stored values, but repository-compatible entity graphs must also be compatible with that cloning mechanism. `GetAll()` materialises cloned values; `TryGetFirst()` snapshots stored references, applies its predicate, and clones only the first match; `Find()` materialises cloned values before applying its predicate, so subsequent repository mutations do not alter the returned collection.
 
 File repositories load a complete collection on first use and retain it indefinitely. They do not monitor external file modifications. `SaveChanges()` emits the complete current collection; there is no change set, schema version, migration mechanism, journal, or transaction across files.
 
@@ -307,14 +307,14 @@ sequenceDiagram
     else Mutation accepted
         Repository-->>Consumer: Return
     end
-    Consumer->>Repository: Get(id), GetAll(), or Find(predicate)
+    Consumer->>Repository: Get(id), TryGetFirst(predicate), GetAll(), or Find(predicate)
     Repository->>State: Read value or enumerate values
     Repository->>Extensions: Clone selected value(s)
     Extensions-->>Repository: Independent clone(s)
     Repository-->>Consumer: Entity or materialised snapshot-backed enumerable
 ```
 
-Writes execute under `SyncRoot`. `Add` and `Update` clone before validating key state; failed cloning therefore precedes repository-specific conflict translation. `TryAdd` ignores an existing key, while `TryUpdate` assigns by key and therefore inserts when absent. Reads return clones. `Find()` captures cloned values when called, then defers predicate evaluation over that captured collection.
+Writes execute under `SyncRoot`. `Add` and `Update` clone before validating key state; failed cloning therefore precedes repository-specific conflict translation. `TryAdd` ignores an existing key, while `TryUpdate` assigns by key and therefore inserts when absent. Reads return clones. `GetFirst` and `TryGetFirst` snapshot stored references, evaluate the predicate against that snapshot, and clone only the selected match, so no other entity is serialised. `Find()` captures cloned values when called, then defers predicate evaluation over that captured collection.
 
 ### Lazy File Hydration
 
@@ -424,7 +424,7 @@ The library emits no logs, metrics, traces, health signals, or audit events. Ret
 
 Within one repository instance, `ConcurrentDictionary` protects individual dictionary operations and `SyncRoot` serialises writes. File hydration uses double-checked locking with a volatile flag; `SaveChanges()` holds the same lock while obtaining a cloned snapshot and writing it. Reads do not acquire that lock, so concurrent enumeration is safe at the collection level but does not constitute a transactional point-in-time view. Stored entities are replaced rather than mutated through the public API, which limits shared-object mutation after cloning.
 
-Distinct repository instances, processes, or direct helper calls have no shared synchronisation. Two instances directed to one path can retain divergent snapshots and overwrite one another. Collection I/O reads or writes complete files synchronously, and repositories retain complete datasets in memory without paging, eviction, or size limits. Streams and readers are scoped with `using`; repository types own no persistent handle and implement no disposal contract. Only `Windows1252File.WriteAllTextAsync` supplies asynchronous I/O and cancellation.
+Distinct repository instances, processes, or direct helper calls have no shared synchronisation. Two instances directed to one path can retain divergent snapshots and overwrite one another. Collection I/O reads or writes complete files synchronously, and repositories retain complete datasets in memory without paging, eviction, or size limits. `JsonFileCollection<T>.LoadEntities` deserialises directly from the file stream, so the complete file text is never buffered in memory; `XmlFileCollection<T>` and `CsvFile<T>` read through stream-based readers. Streams and readers are scoped with `using`; repository types own no persistent handle and implement no disposal contract. Only `Windows1252File.WriteAllTextAsync` supplies asynchronous I/O and cancellation.
 
 ## 🧭 Dependency Direction and Rules
 
@@ -489,7 +489,7 @@ File-backed deployment requires a path accessible to the host process. JSON and 
 | Repository dependency injection registrations | `RepositoryServiceCollectionExtensions` | Each public contract resolves to its selected singleton implementation, and file repository path functions execute only upon first resolution | Dedicated registration and resolution unit tests | Preserve public signatures, service contracts, deferred path evaluation, and singleton lifetime |
 | Entity identity | `EntityBase<TKey>` and repository state | `Id` supplies the dictionary key; derived types expose serialisable public properties | Entity and repository unit tests | Key equality or identity semantic modifications require consumer and persisted-data evaluation |
 | Entity equality and hashing | `EntityBase<TKey>` | Runtime types must correspond and every public instance property (excluding indexers) participates | `EntityBaseTests` | Public property modifications can alter equality and hash results; indexer modifications do not |
-| File lifecycle | `FileRepository<TKey, TDataObject>` | Construction is I/O-free, first use hydrates once, mutations remain in memory, and `SaveChanges()` emits the complete state | Source inspection and DI construction tests; no current hydration or persistence integration tests | Preserve ordering or document and test an intentional lifecycle migration |
+| File lifecycle | `FileRepository<TKey, TDataObject>` | Construction is I/O-free, first use hydrates once, mutations remain in memory, and `SaveChanges()` emits the complete state | `FileRepositoryTests` hydration, duplicate, rollback, retry, and save-orchestration cases; format integration tests for JSON, XML, and CSV | Preserve ordering or document and test an intentional lifecycle migration |
 | Entity exceptions | Repository layer | Duplicate, existing, and missing conditions expose typed exceptions with identifier and type metadata | Dedicated exception tests and repository tests | Preserve types and metadata when revising messages or translation boundaries |
 | JSON collection | `JsonFileCollection<T>` | Collection payload, camel-case output property names, and indented output | No current persistence tests | Format modifications require round-trip fixtures or a migration strategy |
 | XML collection | `XmlFileCollection<T>` | `XmlSerializer` representation configured for `List<T>` | No current persistence tests | CLR type or serializer-shape modifications require persisted-file compatibility evaluation |
@@ -609,7 +609,7 @@ The adapter registers one singleton per service registration. It retains each fi
 | In-memory repository operations | [NuciDAL.UnitTests/Repositories](NuciDAL.UnitTests/Repositories) | `RepositoryAddTests`, `RepositoryContainsTests`, `RepositoryCountTests`, `RepositoryFindTests`, `RepositoryGetTests`, `RepositoryRemoveTests`, `RepositoryUpdateTests` |
 | Repository exception metadata | [NuciDAL.UnitTests/Repositories](NuciDAL.UnitTests/Repositories) | `EntityAlreadyExistsExceptionTests`, `EntityNotFoundExceptionTests`, `DuplicateEntityExceptionTests` |
 | Dependency injection registration | [NuciDAL.UnitTests/DependencyInjection/RepositoryServiceCollectionExtensionsTests.cs](NuciDAL.UnitTests/DependencyInjection/RepositoryServiceCollectionExtensionsTests.cs) | `RepositoryServiceCollectionExtensionsTests` |
-| File hydration, persistence, and standalone I/O | [NuciDAL.UnitTests](NuciDAL.UnitTests) | No direct tests currently exist; see [documentation coverage](docs/documentation-coverage.md#missing-direct-tests) |
+| File hydration, persistence, and standalone I/O | [NuciDAL.UnitTests/Repositories/FileRepositoryTests.cs](NuciDAL.UnitTests/Repositories/FileRepositoryTests.cs), [NuciDAL.IntegrationTests](NuciDAL.IntegrationTests) | `FileRepositoryTests` covers hydration, duplicate rejection, inserted-key rollback, seeded-state preservation, retry, and save orchestration; format integration tests cover JSON, XML, and CSV persistence |
 
 ## 📚 Related Documentation
 
