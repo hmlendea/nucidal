@@ -385,8 +385,8 @@ Hydration occurs before the save exception wrapper. A missing or malformed JSON/
 | XML collections | `XmlSerializer` configured for `List<T>` | XML element names and compatible constructors/properties derive from CLR types; an absent file is not interpreted as an empty store |
 | CSV collections | One entity per line, `Split(FieldSeparator)` parsing, `Convert.ChangeType`, and no quoting or escaping | `CsvRepository` uses comma; `CsvFile<T>` can receive another separator. The `Id` property is always column 0; remaining properties are ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`). The previous hacky reordering was removed. |
 | JSON objects | One generic object with camel-case, case-insensitive input, and indented output | This helper is independent of `JsonRepository`, which uses separate collection options |
-| XML objects | One generic object through `XmlSerializer(typeof(T))` | This helper is independent of `XmlRepository`, which configures a collection serializer |
-| Windows-1252 text | Complete text encoded and written as bytes | Runtime availability of the named code page is not configured by this library |
+| XML objects | One generic object through `XmlSerializer(typeof(T))`, written via `XmlWriter` with UTF-8 (no BOM) and indentation | The emitted declaration is `<?xml version="1.0" encoding="utf-8"?>`; this helper is independent of `XmlRepository`, which configures a collection serializer |
+| Windows-1252 text | Complete text encoded and written as bytes; unmappable characters throw `EncoderFallbackException`; null input throws `ArgumentNullException` | Runtime availability of the named code page is not configured by this library |
 
 CSV comments are accepted only while loading and are not preserved by save. Because fields are neither quoted nor escaped, values containing the separator or line terminators do not round-trip as one field. Adding, eliminating, or reordering public entity properties can alter the persisted column contract. The `[CsvColumn(Order)]` attribute provides explicit column ordering when needed.
 

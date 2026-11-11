@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text.Json;
 
 using NUnit.Framework;
@@ -71,13 +72,22 @@ namespace NuciDAL.UnitTests.IO
         }
 
         [Test]
-        public void GivenANullCollection_WhenSavingAndLoading_ThenNullIsReturned()
+        public void GivenANullCollection_WhenSaving_ThenAnEmptyFileIsCreated()
         {
             jsonFileCollection.SaveEntities(null);
-            IEnumerable<TestEntityDataObject> loadedEntities = jsonFileCollection.LoadEntities();
-
-            Assert.That(loadedEntities, Is.Null);
+            Assert.That(File.Exists(filePath), Is.True);
             Assert.That(File.ReadAllText(filePath), Is.EqualTo(NullJson));
+        }
+
+        [Test]
+        public void GivenANullJsonPayload_WhenLoading_ThenASerialisationExceptionIsThrown()
+        {
+            File.WriteAllText(filePath, NullJson);
+
+            SerializationException exception = Assert.Throws<SerializationException>(
+                () => jsonFileCollection.LoadEntities());
+
+            Assert.That(exception.Message, Does.Contain("null payload"));
         }
 
         [Test]

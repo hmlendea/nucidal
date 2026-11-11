@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -15,7 +16,10 @@ namespace NuciDAL.IO
         static Windows1252File()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            windows1252Encoding = Encoding.GetEncoding("windows-1252");
+            windows1252Encoding = Encoding.GetEncoding(
+                "windows-1252",
+                EncoderFallback.ExceptionFallback,
+                DecoderFallback.ExceptionFallback);
         }
 
         /// <summary>
@@ -23,8 +27,14 @@ namespace NuciDAL.IO
         /// </summary>
         /// <param name="path">The path to the file.</param>
         /// <param name="contents">The contents to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="contents"/> is <see langword="null"/>.</exception>
+        /// <exception cref="EncoderFallbackException">Thrown when <paramref name="contents"/> contains characters that cannot be encoded in Windows-1252.</exception>
         public static void WriteAllText(string path, string contents)
-            => File.WriteAllBytes(path, windows1252Encoding.GetBytes(contents.ToCharArray()));
+        {
+            ArgumentNullException.ThrowIfNull(contents);
+
+            AtomicFileWriter.WriteBytes(path, windows1252Encoding.GetBytes(contents));
+        }
 
         /// <summary>
         /// Writes all text to the specified file using Windows-1252 encoding asynchronously.
@@ -33,13 +43,16 @@ namespace NuciDAL.IO
         /// <param name="contents">The contents to write.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="contents"/> is <see langword="null"/>.</exception>
+        /// <exception cref="EncoderFallbackException">Thrown when <paramref name="contents"/> contains characters that cannot be encoded in Windows-1252.</exception>
         public static async Task WriteAllTextAsync(
             string path,
             string contents,
             CancellationToken cancellationToken = default)
-            => await File.WriteAllBytesAsync(
-                path,
-                windows1252Encoding.GetBytes(contents.ToCharArray()),
-                cancellationToken);
+        {
+            ArgumentNullException.ThrowIfNull(contents);
+
+            await AtomicFileWriter.WriteBytesAsync(path, windows1252Encoding.GetBytes(contents), cancellationToken);
+        }
     }
 }

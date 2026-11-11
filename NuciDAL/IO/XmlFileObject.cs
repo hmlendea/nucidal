@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace NuciDAL.IO
@@ -42,11 +44,18 @@ namespace NuciDAL.IO
         {
             XmlSerializer serialiser = new(Type);
 
-            using StringWriter stringWriter = new();
+            AtomicFileWriter.Write(path, fileStream =>
+            {
+                XmlWriterSettings settings = new()
+                {
+                    Encoding = new UTF8Encoding(false),
+                    Indent = true,
+                    OmitXmlDeclaration = false
+                };
 
-            serialiser.Serialize(stringWriter, obj);
-
-            File.WriteAllText(path, stringWriter.ToString());
+                using XmlWriter xmlWriter = XmlWriter.Create(fileStream, settings);
+                serialiser.Serialize(xmlWriter, obj);
+            });
         }
     }
 }

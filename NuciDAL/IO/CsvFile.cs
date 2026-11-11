@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -118,7 +119,7 @@ namespace NuciDAL.IO
             for (int i = 0; i < properties.Length; i++)
             {
                 PropertyInfo property = properties[i];
-                object value = Convert.ChangeType(fields[i], property.PropertyType);
+                object value = Convert.ChangeType(fields[i], property.PropertyType, CultureInfo.InvariantCulture);
                 property.SetValue(entity, value, null);
             }
 
@@ -132,7 +133,24 @@ namespace NuciDAL.IO
             IEnumerable<string> fieldValues = properties
                 .Select(property => GetPropertyFieldValue(entity, property));
 
+            foreach (PropertyInfo property in properties)
+            {
+                string fieldValue = GetPropertyFieldValue(entity, property);
+                ValidateFieldValue(fieldValue, property.Name);
+            }
+
             return string.Join(FieldSeparator, fieldValues);
+        }
+
+        private void ValidateFieldValue(string fieldValue, string propertyName)
+        {
+            if (fieldValue.Contains(FieldSeparator) ||
+                fieldValue.Contains('\r') ||
+                fieldValue.Contains('\n'))
+            {
+                throw new SerializationException(
+                    $"CSV field for property '{propertyName}' contains unrepresentable characters (separator, CR, or LF)");
+            }
         }
 
         private static string GetPropertyFieldValue(TDataObject entity, PropertyInfo property)
@@ -144,7 +162,9 @@ namespace NuciDAL.IO
                 return string.Empty;
             }
 
-            return value.ToString();
+            return value is IFormattable formattable
+                ? formattable.ToString(null, CultureInfo.InvariantCulture)
+                : value.ToString();
         }
 
         private static PropertyInfo[] GetOrderedProperties(Type entityType)

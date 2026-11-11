@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 
 namespace NuciDAL.IO
@@ -39,9 +40,11 @@ namespace NuciDAL.IO
         /// <param name="obj">Object to write.</param>
         public void Write(string path, T obj)
         {
-            string json = JsonSerializer.Serialize(obj, options);
-
-            File.WriteAllText(path, json);
+            AtomicFileWriter.Write(path, stream =>
+            {
+                using StreamWriter streamWriter = new(stream, new UTF8Encoding(false), 1024, true);
+                JsonSerializer.Serialize(streamWriter.BaseStream, obj, options);
+            });
         }
 
         private readonly JsonSerializerOptions options = new()
