@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
@@ -97,6 +98,25 @@ namespace NuciDAL.IntegrationTests.IO
             await Task.Run(() => xmlFileObject.Write(filePath, entity));
             TestEntityDataObject loadedEntity = await Task.Run(() => xmlFileObject.Read(filePath));
 
+            Assert.That(loadedEntity, Is.EqualTo(entity));
+            Assert.That(loadedEntity, Is.Not.SameAs(entity));
+        }
+
+        [Test]
+        public void GivenAnEntityWithNonAsciiCharacters_WhenWritingAndReading_ThenEncodingIsUtf8()
+        {
+            TestEntityDataObject entity = BuildEntity(
+                FirstEntityId,
+                "München Žlutý",
+                FirstEntityValue);
+
+            xmlFileObject.Write(filePath, entity);
+
+            string fileContent = File.ReadAllText(filePath, Encoding.UTF8);
+            Assert.That(fileContent, Does.Contain("encoding=\"utf-8\""));
+            Assert.That(fileContent, Does.Contain("München Žlutý"));
+
+            TestEntityDataObject loadedEntity = xmlFileObject.Read(filePath);
             Assert.That(loadedEntity, Is.EqualTo(entity));
             Assert.That(loadedEntity, Is.Not.SameAs(entity));
         }
