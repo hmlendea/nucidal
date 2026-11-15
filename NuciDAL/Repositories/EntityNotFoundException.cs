@@ -14,7 +14,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="entity">The entity.</param>
         public EntityNotFoundException(EntityBase entity)
-            : base(entity, $"The {entity.Id} {entity.GetType().Name} entity can not be found.")
+            : base(entity, BuildEntityMessage(entity.Id, entity.GetType().Name))
         {
         }
 
@@ -24,7 +24,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         public EntityNotFoundException(string entityId, Type entityType)
-            : base(entityId, entityType, $"The {entityId} {entityType.Name} entity can not be found.")
+            : base(entityId, entityType, BuildEntityMessage(entityId, entityType.Name))
         {
         }
 
@@ -43,7 +43,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         public EntityNotFoundException(string entityId, string entityType)
-            : base(entityId, entityType, $"The {entityId} {entityType} entity can not be found.")
+            : base(entityId, entityType, BuildEntityMessage(entityId, entityType))
         {
         }
 
@@ -53,7 +53,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">The entity.</param>
         /// <param name="innerException">Inner exception.</param>
         public EntityNotFoundException(EntityBase entity, Exception innerException)
-            : base(entity, $"The {entity.Id} {entity.GetType().Name} entity can not be found.", innerException)
+            : base(entity, BuildEntityMessage(entity.Id, entity.GetType().Name), innerException)
         {
         }
 
@@ -64,7 +64,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityType">Entity type.</param>
         /// <param name="innerException">Inner exception.</param>
         public EntityNotFoundException(string entityId, Type entityType, Exception innerException)
-            : base(entityId, entityType, $"The {entityId} {entityType.Name} entity can not be found.", innerException)
+            : base(entityId, entityType, BuildEntityMessage(entityId, entityType.Name), innerException)
         {
         }
 
@@ -75,8 +75,11 @@ namespace NuciDAL.Repositories
         /// <param name="entityType">Entity type.</param>
         /// <param name="innerException">Inner exception.</param>
         public EntityNotFoundException(string entityId, string entityType, Exception innerException)
-            : base(entityId, entityType, $"The {entityId} {entityType} entity can not be found.", innerException)
+            : base(entityId, entityType, BuildEntityMessage(entityId, entityType), innerException)
         {
         }
+
+        private static string BuildEntityMessage(string entityId, string entityType)
+            => $"The {entityId} {entityType} entity can not be found.";
     }
 }

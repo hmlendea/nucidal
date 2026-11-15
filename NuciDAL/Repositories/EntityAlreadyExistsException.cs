@@ -9,14 +9,15 @@ namespace NuciDAL.Repositories
     /// </summary>
     public class EntityAlreadyExistsException : EntityException
     {
-        private static string DefaultMessageFormat => "The '{0}' {1} already exists.";
+        private static string BuildMessage(string entityId, string entityType)
+            => $"The '{entityId}' {entityType} already exists.";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityAlreadyExistsException"/> exception.
         /// </summary>
         /// <param name="entity">The entity.</param>
         public EntityAlreadyExistsException(EntityBase entity)
-            : base(entity, string.Format(DefaultMessageFormat, entity.Id, entity.GetType().Name))
+            : base(entity, BuildMessage(entity.Id, entity.GetType().Name))
         {
         }
 
@@ -26,7 +27,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         public EntityAlreadyExistsException(string entityId, Type entityType)
-            : base(entityId, entityType, string.Format(DefaultMessageFormat, entityId, entityType.Name))
+            : base(entityId, entityType, BuildMessage(entityId, entityType.Name))
         {
         }
 
@@ -36,7 +37,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         public EntityAlreadyExistsException(string entityId, string entityType)
-            : base(entityId, entityType, string.Format(DefaultMessageFormat, entityId, entityType))
+            : base(entityId, entityType, BuildMessage(entityId, entityType))
         {
         }
 
@@ -46,7 +47,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">The entity.</param>
         /// <param name="innerException">Inner exception.</param>
         public EntityAlreadyExistsException(EntityBase entity, Exception innerException)
-            : base(entity, string.Format(DefaultMessageFormat, entity.Id, entity.GetType().Name), innerException)
+            : base(entity, BuildMessage(entity.Id, entity.GetType().Name), innerException)
         {
         }
 
@@ -57,7 +58,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityType">Entity type.</param>
         /// <param name="innerException">Inner exception.</param>
         public EntityAlreadyExistsException(string entityId, Type entityType, Exception innerException)
-            : base(entityId, entityType, string.Format(DefaultMessageFormat, entityId, entityType.Name), innerException)
+            : base(entityId, entityType, BuildMessage(entityId, entityType.Name), innerException)
         {
         }
 
@@ -68,7 +69,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityType">Entity type.</param>
         /// <param name="innerException">Inner exception.</param>
         public EntityAlreadyExistsException(string entityId, string entityType, Exception innerException)
-            : base(entityId, entityType, string.Format(DefaultMessageFormat, entityId, entityType), innerException)
+            : base(entityId, entityType, BuildMessage(entityId, entityType), innerException)
         {
         }
     }

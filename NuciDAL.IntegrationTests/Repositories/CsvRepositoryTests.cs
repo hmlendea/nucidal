@@ -9,6 +9,8 @@ using NuciDAL.IO;
 using NuciDAL.Repositories;
 using NuciDAL.IntegrationTests.Stubs;
 
+using static NuciDAL.IntegrationTests.Stubs.EntityFactory;
+
 namespace NuciDAL.IntegrationTests.Repositories
 {
     [TestFixture]
@@ -234,27 +236,5 @@ namespace NuciDAL.IntegrationTests.Repositories
             Assert.That(reopenedRepository.Get(3), Is.EqualTo(addedEntity));
             Assert.That(reopenedRepository.ContainsId(2), Is.False);
         }
-
-        private static TestEntityDataObject BuildEntity(
-            string entityId,
-            string entityName,
-            int entityValue)
-            => new()
-            {
-                Id = entityId,
-                Name = entityName,
-                Value = entityValue,
-            };
-
-        private static IntKeyEntityDataObject BuildIntegerKeyEntity(
-            int entityId,
-            string entityName,
-            int entityValue)
-            => new()
-            {
-                Id = entityId,
-                Name = entityName,
-                Value = entityValue,
-            };
     }
 }

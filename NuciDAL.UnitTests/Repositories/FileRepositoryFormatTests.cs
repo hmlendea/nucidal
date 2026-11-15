@@ -10,6 +10,8 @@ using NuciDAL.IO;
 using NuciDAL.Repositories;
 using NuciDAL.UnitTests.Stubs;
 
+using static NuciDAL.UnitTests.Stubs.EntityFactory;
+
 namespace NuciDAL.UnitTests.Repositories
 {
     [TestFixture]
@@ -287,26 +289,6 @@ namespace NuciDAL.UnitTests.Repositories
                     throw new ArgumentOutOfRangeException(nameof(fileFormat), fileFormat, null);
             }
         }
-
-        private static TestEntityDataObject BuildEntity(
-            string entityId,
-            string entityName,
-            int entityValue)
-            => new()
-            {
-                Id = entityId,
-                Name = entityName,
-                Value = entityValue,
-            };
-
-        private static IntKeyEntityDataObject BuildIntegerKeyEntity(
-            int entityId,
-            string entityName)
-            => new()
-            {
-                Id = entityId,
-                Name = entityName,
-            };
 
         private static string GetMalformedContent(RepositoryFileFormat fileFormat)
             => fileFormat switch

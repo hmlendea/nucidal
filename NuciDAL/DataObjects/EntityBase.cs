@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 
 using NuciExtensions;
@@ -27,6 +29,8 @@ namespace NuciDAL.DataObjects
     /// </remarks>
     public class EntityBase<TKey> : IEquatable<EntityBase<TKey>>
     {
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> ComparableProperties = new();
+
         /// <summary>
         /// Gets or sets the identifier.
         /// </summary>
@@ -55,15 +59,8 @@ namespace NuciDAL.DataObjects
                 return false;
             }
 
-            PropertyInfo[] props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            foreach (PropertyInfo prop in props)
+            foreach (PropertyInfo prop in GetComparableProperties())
             {
-                if (prop.GetIndexParameters().Length > 0)
-                {
-                    continue;
-                }
-
                 object thisValue = prop.GetValue(this);
                 object otherValue = prop.GetValue(other);
 
@@ -95,17 +92,10 @@ namespace NuciDAL.DataObjects
         /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
         public override int GetHashCode()
         {
-            PropertyInfo[] props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
             int hash = InitialHashValue;
 
-            foreach (PropertyInfo prop in props)
+            foreach (PropertyInfo prop in GetComparableProperties())
             {
-                if (prop.GetIndexParameters().Length > 0)
-                {
-                    continue;
-                }
-
                 object propertyValue = prop.GetValue(this);
 
                 if (propertyValue is not null)
@@ -120,6 +110,13 @@ namespace NuciDAL.DataObjects
         private static int InitialHashValue => 17;
 
         private static int HashCodeMultiplier => 31;
+
+        private PropertyInfo[] GetComparableProperties()
+            => ComparableProperties.GetOrAdd(
+                GetType(),
+                entityType => [.. entityType
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(prop => prop.GetIndexParameters().Length == 0)]);
 
         /// <summary>
         /// Returns a string that represents the current object in JSON format.

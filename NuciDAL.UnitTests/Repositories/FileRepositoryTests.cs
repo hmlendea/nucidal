@@ -10,6 +10,8 @@ using NUnit.Framework;
 using NuciDAL.Repositories;
 using NuciDAL.UnitTests.Stubs;
 
+using static NuciDAL.UnitTests.Stubs.EntityFactory;
+
 namespace NuciDAL.UnitTests.Repositories
 {
     [TestFixture]
@@ -590,16 +592,5 @@ namespace NuciDAL.UnitTests.Repositories
 
             throw new InvalidDataException(FetchFailureMessage);
         }
-
-        private static TestEntityDataObject BuildEntity(
-            string entityId,
-            string entityName,
-            int entityValue)
-            => new()
-            {
-                Id = entityId,
-                Name = entityName,
-                Value = entityValue,
-            };
     }
 }

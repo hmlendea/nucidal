@@ -12,7 +12,7 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | Entry point | Consumer calls `IRepository<TKey, TDataObject>` methods. |
 | Principal implementation | [`NuciDAL/Repositories/Repository.cs`](../NuciDAL/Repositories/Repository.cs): `Repository<TKey, TDataObject>`; `Add`, `TryAdd`, `ContainsId`, `Get`, `GetRandom`, `GetFirst`, `TryGet`, `TryGetFirst`, `GetAll`, `Find`, `Update`, `TryUpdate`, `Remove`, `TryRemove`, `EntitiesCount`. |
 | Supporting implementation | [`NuciDAL/Repositories/IRepository.cs`](../NuciDAL/Repositories/IRepository.cs): `IRepository<TKey, TDataObject>`. [`NuciDAL/DataObjects/EntityBase.cs`](../NuciDAL/DataObjects/EntityBase.cs): entity constraint and identifier. |
-| Domain logic | `Repository<TKey, TDataObject>.ExecuteWrite`, `ExecuteReadOperation`, `CloneEntity`, and keyed `ConcurrentDictionary` state. |
+| Domain logic | `Repository<TKey, TDataObject>.ExecuteWrite`, `CloneEntity`, `TryStoreEntity`, and keyed `ConcurrentDictionary` state. |
 | Data models | `EntityBase<TKey>` and the consumer's derived `TDataObject`. |
 | Persistence | In-memory only in `Repository<TKey, TDataObject>`; file persistence is supplied by [File Persistence](#file-persistence). |
 | Validation and errors | `EntityAlreadyExistsException` for duplicate add; `EntityNotFoundException` for missing get, update, or remove. |
@@ -25,7 +25,7 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | --- | --- |
 | Capability | Generic entity identity, reflection-based equality, hashing, and JSON string representation. |
 | Purpose | Supply the base contract required by repositories and stable value comparisons. |
-| Principal implementation | [`NuciDAL/DataObjects/EntityBase.cs`](../NuciDAL/DataObjects/EntityBase.cs): `EntityBase<TKey>`, `EntityBase`, `Equals`, `GetHashCode`, and `ToString`. |
+| Principal implementation | [`NuciDAL/DataObjects/EntityBase.cs`](../NuciDAL/DataObjects/EntityBase.cs): `EntityBase<TKey>`, `EntityBase`, `Equals`, `GetHashCode`, `GetComparableProperties`, and `ToString`. |
 | Supporting implementation | `NuciExtensions` JSON extensions used by `ToString` and repository cloning. |
 | Entry point and composition | Consumer derives a data object from `EntityBase<TKey>` or the string-keyed `EntityBase`; no application startup registration is required. |
 | Data models | `EntityBase<TKey>.Id`; consumer-defined public properties. |
@@ -57,7 +57,7 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | Data and serialisation | [`IFileRepository.cs`](../NuciDAL/Repositories/IFileRepository.cs): `SaveChanges`; collection helpers in [`NuciDAL/IO`](../NuciDAL/IO). |
 | Persistence | Format-specific `FetchEntitiesFromFile` and `PerformFileSave` implementations write to the configured local path. |
 | Validation and errors | `DuplicateEntityException` on duplicate identifiers during hydration; underlying parsing and filesystem exceptions remain format-specific. |
-| Tests | [`FileRepositoryTests.cs`](../NuciDAL.UnitTests/Repositories/FileRepositoryTests.cs) covers hydration, duplicate rejection, inserted-key rollback, seeded-state preservation, retry, read/write wrappers, and save orchestration; JSON, XML, and CSV integration tests cover format-backed hydration and persistence. |
+| Tests | [`FileRepositoryTests.cs`](../NuciDAL.UnitTests/Repositories/FileRepositoryTests.cs) covers hydration, duplicate rejection, inserted-key rollback, seeded-state preservation, retry, operation wrappers, and save orchestration; JSON, XML, and CSV integration tests cover format-backed hydration and persistence. |
 | Coverage gap | Missing files, permissions, external file changes, and cross-instance concurrent loading are covered only for selected scenarios; cross-process coordination and package consumption lack direct tests. |
 
 ## Serialisation And File I/O
@@ -69,7 +69,7 @@ This map provides the concept-to-code route for NuciDAL. Links point to reposito
 | Principal implementation | [`JsonFileCollection.cs`](../NuciDAL/IO/JsonFileCollection.cs): `JsonFileCollection<T>.LoadEntities` and `SaveEntities`; [`XmlFileCollection.cs`](../NuciDAL/IO/XmlFileCollection.cs): `XmlFileCollection<T>.LoadEntities` and `SaveEntities`; [`CsvFile.cs`](../NuciDAL/IO/CsvFile.cs): `CsvFile<TDataObject>.LoadEntities` and `SaveEntities`. |
 | Supporting implementation | [`JsonFileObject.cs`](../NuciDAL/IO/JsonFileObject.cs): `JsonFileObject<T>.Read` and `Write`; [`XmlFileObject.cs`](../NuciDAL/IO/XmlFileObject.cs): `XmlFileObject<T>.Read` and `Write`; [`Windows1252File.cs`](../NuciDAL/IO/Windows1252File.cs): `WriteAllText` and `WriteAllTextAsync`. |
 | Configuration | File path is constructor input; CSV field separator is constructor input with comma default; JSON uses camelCase and indented output; XML uses `XmlSerializer`; CSV treats `#` lines as comments. |
-| Algorithm | CSV reflection property ordering is implemented by `CsvFile<TDataObject>.GetOrderedProperties`; the `Id` property is always column 0; remaining properties are ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`). The previous `VERY HACKY` reordering was removed; parsing reports line context through `SerializationException`. JSON collections are deserialised directly from the file stream, so no whole-file string buffer is allocated, and a null payload raises `SerializationException`. |
+| Algorithm | CSV reflection property ordering is implemented by `CsvFile<TDataObject>.GetOrderedProperties`, backed by a per-type cache. The `Id` property is always column 0; remaining properties are ordered by `[CsvColumn(Order)]` attribute when present; otherwise by declaration order (via `MetadataToken`). The previous `VERY HACKY` reordering was removed; parsing reports line context through `SerializationException`. JSON collections are deserialised directly from the file stream, so no whole-file string buffer is allocated, and a null payload raises `SerializationException`. |
 | Tests | [`JsonFileCollectionTests.cs`](../NuciDAL.UnitTests/IO/JsonFileCollectionTests.cs), [`XmlFileCollectionTests.cs`](../NuciDAL.UnitTests/IO/XmlFileCollectionTests.cs), [`XmlFileObjectTests.cs`](../NuciDAL.UnitTests/IO/XmlFileObjectTests.cs), [`Windows1252FileTests.cs`](../NuciDAL.UnitTests/IO/Windows1252FileTests.cs). |
 | Coverage gap | Empty files, comments, field-count mismatch, null values, conversion errors, malformed JSON/XML, encoding, and file I/O failures lack direct tests. CSV collection I/O lacks direct tests. |
 

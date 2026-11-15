@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -18,6 +19,8 @@ namespace NuciDAL.IO
     /// <param name="filePath">File path.</param>
     public class CsvFile<TDataObject>(string filePath, char fieldSeparator) where TDataObject : new()
     {
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> OrderedProperties = new();
+
         /// <summary>
         /// Gets the name of the file.
         /// </summary>
@@ -102,6 +105,12 @@ namespace NuciDAL.IO
 
         private static char DefaultFieldSeparator => ',';
 
+        private static int FirstPropertyOrder => -1;
+
+        private static int UnorderedPropertyOrder => int.MaxValue;
+
+        private static string IdPropertyName => "Id";
+
         private TDataObject ReadLine(string line)
         {
             TDataObject entity = new();
@@ -109,8 +118,7 @@ namespace NuciDAL.IO
             PropertyInfo[] properties = GetOrderedProperties(entity.GetType());
 
             if (fields.Length < properties.Length ||
-                fields.Length != properties.Length &&
-                !string.IsNullOrWhiteSpace(fields[^1]))
+                fields.Length > properties.Length && !string.IsNullOrWhiteSpace(fields[^1]))
             {
                 throw new SerializationException(
                     $"Wrong number of CSV fields ({fields.Length}/{properties.Length})");
@@ -129,14 +137,13 @@ namespace NuciDAL.IO
         private string BuildLine(TDataObject entity)
         {
             PropertyInfo[] properties = GetOrderedProperties(entity.GetType());
-
-            IEnumerable<string> fieldValues = properties
-                .Select(property => GetPropertyFieldValue(entity, property));
+            List<string> fieldValues = new(properties.Length);
 
             foreach (PropertyInfo property in properties)
             {
                 string fieldValue = GetPropertyFieldValue(entity, property);
                 ValidateFieldValue(fieldValue, property.Name);
+                fieldValues.Add(fieldValue);
             }
 
             return string.Join(FieldSeparator, fieldValues);
@@ -168,19 +175,28 @@ namespace NuciDAL.IO
         }
 
         private static PropertyInfo[] GetOrderedProperties(Type entityType)
-        {
-            PropertyInfo[] allProperties = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            => OrderedProperties.GetOrAdd(entityType, BuildOrderedProperties);
 
-            return allProperties
-                .Select(p => new
+        private static PropertyInfo[] BuildOrderedProperties(Type entityType)
+            => [.. entityType
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Select(property => new
                 {
-                    Property = p,
-                    Order = p.Name == "Id" ? -1 : (p.GetCustomAttribute<CsvColumnAttribute>()?.Order ?? int.MaxValue)
+                    Property = property,
+                    Order = GetPropertyOrder(property)
                 })
-                .OrderBy(x => x.Order)
-                .ThenBy(x => x.Property.MetadataToken)
-                .Select(x => x.Property)
-                .ToArray();
+                .OrderBy(entry => entry.Order)
+                .ThenBy(entry => entry.Property.MetadataToken)
+                .Select(entry => entry.Property)];
+
+        private static int GetPropertyOrder(PropertyInfo property)
+        {
+            if (property.Name == IdPropertyName)
+            {
+                return FirstPropertyOrder;
+            }
+
+            return property.GetCustomAttribute<CsvColumnAttribute>()?.Order ?? UnorderedPropertyOrder;
         }
     }
 }

@@ -235,7 +235,7 @@ This script downloads and executes an external release helper from `https://raw.
 
 ## 🏗️ Architecture
 
-NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 4.2.0 and does not propose a target architecture.
+NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 4.3.1 and does not propose a target architecture.
 
 See the [Architecture Documentation](./ARCHITECTURE.md) for the system context, principal components, runtime flows, ownership boundaries, dependencies, constraints, and extension points.
 

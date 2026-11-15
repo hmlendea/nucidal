@@ -6,6 +6,8 @@ using NUnit.Framework;
 using NuciDAL.IO;
 using NuciDAL.UnitTests.Stubs;
 
+using static NuciDAL.UnitTests.Stubs.EntityFactory;
+
 namespace NuciDAL.UnitTests.IO
 {
     [TestFixture]
@@ -144,13 +146,5 @@ namespace NuciDAL.UnitTests.IO
                 () => fileObject.Read(xmlFilePath),
                 Throws.TypeOf<FileNotFoundException>());
         }
-
-        private static TestEntityDataObject BuildEntity(string id, string name, int value)
-            => new()
-            {
-                Id = id,
-                Name = name,
-                Value = value
-            };
     }
 }

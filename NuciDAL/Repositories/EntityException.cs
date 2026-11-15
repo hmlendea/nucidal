@@ -27,10 +27,8 @@ namespace NuciDAL.Repositories
         public EntityException(
             EntityBase entity,
             string message)
-            : base(message)
+            : this(entity.Id, entity.GetType().Name, message)
         {
-            EntityId = entity.Id;
-            EntityTypeName = entity.GetType().Name;
         }
 
         /// <summary>
@@ -43,10 +41,8 @@ namespace NuciDAL.Repositories
             string entityId,
             Type entityType,
             string message)
-            : base(message)
+            : this(entityId, entityType.Name, message)
         {
-            EntityId = entityId;
-            EntityTypeName = entityType.Name;
         }
 
         /// <summary>
@@ -75,10 +71,8 @@ namespace NuciDAL.Repositories
             EntityBase entity,
             string message,
             Exception innerException)
-            : base(message, innerException)
+            : this(entity.Id, entity.GetType().Name, message, innerException)
         {
-            EntityId = entity.Id;
-            EntityTypeName = entity.GetType().Name;
         }
 
         /// <summary>
@@ -93,10 +87,8 @@ namespace NuciDAL.Repositories
             Type entityType,
             string message,
             Exception innerException)
-            : base(message, innerException)
+            : this(entityId, entityType.Name, message, innerException)
         {
-            EntityId = entityId;
-            EntityTypeName = entityType.Name;
         }
 
         /// <summary>
