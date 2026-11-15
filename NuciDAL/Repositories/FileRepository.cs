@@ -25,7 +25,7 @@ namespace NuciDAL.Repositories
         /// <summary>
         /// Gets the total amount of entities currently stored in this repository.
         /// </summary>
-        public override int EntitiesCount => ExecuteReadOperation(() =>
+        public override int EntitiesCount => ExecuteOperation(() =>
             base.EntitiesCount);
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace NuciDAL.Repositories
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void Add(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override void Add(TDataObject entity) => ExecuteOperation(() =>
             base.Add(entity));
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns><see langword="true"/> if the entity was added; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public override bool TryAdd(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override bool TryAdd(TDataObject entity) => ExecuteOperation(() =>
             base.TryAdd(entity));
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>A boolean representing whether an entity with the specified identifier exists.</returns>
         /// <param name="id">Identifier.</param>
-        public override bool ContainsId(TKey id) => ExecuteReadOperation(() =>
+        public override bool ContainsId(TKey id) => ExecuteOperation(() =>
             base.ContainsId(id));
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>An enumerable of matching entities, evaluated lazily using LINQ-to-Objects.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
-        public override IEnumerable<TDataObject> Find(Func<TDataObject, bool> predicate) => ExecuteReadOperation(() =>
+        public override IEnumerable<TDataObject> Find(Func<TDataObject, bool> predicate) => ExecuteOperation(() =>
             base.Find(predicate));
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The entity.</returns>
         /// <param name="id">Identifier.</param>
-        public override TDataObject Get(TKey id) => ExecuteReadOperation(() =>
+        public override TDataObject Get(TKey id) => ExecuteOperation(() =>
             base.Get(id));
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The entity if it exists, null otherwise.</returns>
         /// <param name="id">Identifier.</param>
-        public override TDataObject? TryGet(TKey id) => ExecuteReadOperation(() =>
+        public override TDataObject? TryGet(TKey id) => ExecuteOperation(() =>
             base.TryGet(id));
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The first matching entity.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
-        public override TDataObject GetFirst(Func<TDataObject, bool> predicate) => ExecuteReadOperation(() =>
+        public override TDataObject GetFirst(Func<TDataObject, bool> predicate) => ExecuteOperation(() =>
             base.GetFirst(predicate));
 
         /// <summary>
@@ -113,28 +113,28 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns>The first matching entity if it exists, null otherwise.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
-        public override TDataObject? TryGetFirst(Func<TDataObject, bool> predicate) => ExecuteReadOperation(() =>
+        public override TDataObject? TryGetFirst(Func<TDataObject, bool> predicate) => ExecuteOperation(() =>
             base.TryGetFirst(predicate));
 
         /// <summary>
         /// Gets a random entity.
         /// </summary>
         /// <returns>A random entity.</returns>
-        public override TDataObject GetRandom() => ExecuteReadOperation(() =>
+        public override TDataObject GetRandom() => ExecuteOperation(() =>
             base.GetRandom());
 
         /// <summary>
         /// Gets all the entities.
         /// </summary>
         /// <returns>The entities.</returns>
-        public override IEnumerable<TDataObject> GetAll() => ExecuteReadOperation(() =>
+        public override IEnumerable<TDataObject> GetAll() => ExecuteOperation(() =>
             base.GetAll());
 
         /// <summary>
         /// Updates the specified entity's fields.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void Update(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override void Update(TDataObject entity) => ExecuteOperation(() =>
             base.Update(entity));
 
         /// <summary>
@@ -142,28 +142,28 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns><see langword="true"/> if the entity was updated; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public override bool TryUpdate(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override bool TryUpdate(TDataObject entity) => ExecuteOperation(() =>
             base.TryUpdate(entity));
 
         /// <summary>
         /// Inserts the specified entity or replaces the existing entity with the same identifier.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void Upsert(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override void Upsert(TDataObject entity) => ExecuteOperation(() =>
             base.Upsert(entity));
 
         /// <summary>
         /// Removes the entity with the specified identifier.
         /// </summary>
         /// <param name="id">Identifier.</param>
-        public override void Remove(TKey id) => ExecuteWriteOperation(() =>
+        public override void Remove(TKey id) => ExecuteOperation(() =>
             base.Remove(id));
 
         /// <summary>
         /// Removes the specified entity.
         /// </summary>
         /// <param name="entity">Entity.</param>
-        public override void Remove(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override void Remove(TDataObject entity) => ExecuteOperation(() =>
             base.Remove(entity));
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
-        public override bool TryRemove(TDataObject entity) => ExecuteWriteOperation(() =>
+        public override bool TryRemove(TDataObject entity) => ExecuteOperation(() =>
             base.TryRemove(entity));
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <returns><see langword="true"/> if the entity was removed; otherwise, <see langword="false"/>.</returns>
         /// <param name="id">Identifier.</param>
-        public override bool TryRemove(TKey id) => ExecuteWriteOperation(() =>
+        public override bool TryRemove(TKey id) => ExecuteOperation(() =>
             base.TryRemove(id));
 
         /// <summary>
@@ -259,21 +259,14 @@ namespace NuciDAL.Repositories
             }
         }
 
-        private void ExecuteWriteOperation(Action action)
+        private void ExecuteOperation(Action action)
         {
             LoadEntitiesIfNeeded();
 
             action();
         }
 
-        private TResult ExecuteWriteOperation<TResult>(Func<TResult> action)
-        {
-            LoadEntitiesIfNeeded();
-
-            return action();
-        }
-
-        private TResult ExecuteReadOperation<TResult>(Func<TResult> action)
+        private TResult ExecuteOperation<TResult>(Func<TResult> action)
         {
             LoadEntitiesIfNeeded();
 

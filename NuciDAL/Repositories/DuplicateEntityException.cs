@@ -14,7 +14,7 @@ namespace NuciDAL.Repositories
         /// </summary>
         /// <param name="entity">The entity.</param>
         public DuplicateEntityException(EntityBase entity)
-            : base(entity, $"The {entity.Id} {entity.GetType().Name} entity is duplicated.")
+            : base(entity, BuildMessage(entity.Id, entity.GetType().Name))
         {
         }
         
@@ -24,7 +24,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         public DuplicateEntityException(string entityId, Type entityType)
-            : base(entityId, entityType, $"The {entityId} {entityType.Name} entity is duplicated.")
+            : base(entityId, entityType, BuildMessage(entityId, entityType.Name))
         {
         }
 
@@ -34,7 +34,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityId">Entity identifier.</param>
         /// <param name="entityType">Entity type.</param>
         public DuplicateEntityException(string entityId, string entityType)
-            : base(entityId, entityType, $"The {entityId} {entityType} entity is duplicated.")
+            : base(entityId, entityType, BuildMessage(entityId, entityType))
         {
         }
 
@@ -44,7 +44,7 @@ namespace NuciDAL.Repositories
         /// <param name="entity">The entity.</param>
         /// <param name="innerException">Inner exception.</param>
         public DuplicateEntityException(EntityBase entity, Exception innerException)
-            : base(entity, $"The {entity.Id} {entity.GetType().Name} entity is duplicated.", innerException)
+            : base(entity, BuildMessage(entity.Id, entity.GetType().Name), innerException)
         {
         }
 
@@ -55,7 +55,7 @@ namespace NuciDAL.Repositories
         /// <param name="entityType">Entity type.</param>
         /// <param name="innerException">Inner exception.</param>
         public DuplicateEntityException(string entityId, Type entityType, Exception innerException)
-            : base(entityId, entityType, $"The {entityId} {entityType.Name} entity is duplicated.", innerException)
+            : base(entityId, entityType, BuildMessage(entityId, entityType.Name), innerException)
         {
         }
 
@@ -66,8 +66,11 @@ namespace NuciDAL.Repositories
         /// <param name="entityType">Entity type.</param>
         /// <param name="innerException">Inner exception.</param>
         public DuplicateEntityException(string entityId, string entityType, Exception innerException)
-            : base(entityId, entityType, $"The {entityId} {entityType} entity is duplicated.", innerException)
+            : base(entityId, entityType, BuildMessage(entityId, entityType), innerException)
         {
         }
+
+        private static string BuildMessage(string entityId, string entityType)
+            => $"The {entityId} {entityType} entity is duplicated.";
     }
 }

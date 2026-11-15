@@ -46,7 +46,7 @@ This document describes the verified current architecture of the NuciDAL .NET li
 
 ## 🎯 Purpose
 
-NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 4.2.0 and does not propose a target architecture.
+NuciDAL supplies generic repository contracts, an in-memory implementation, JSON, XML, and CSV file-backed implementations, and dependency injection registrations for their string-keyed variants. This document records the boundaries that contributors and consumers must preserve: clone-isolated repository state, lazy file hydration, explicit persistence, service lifetime, serialised format contracts, exception semantics, and dependency direction. It describes the library as implemented at version 4.3.1 and does not propose a target architecture.
 
 ## 🌐 System Context
 
@@ -110,7 +110,7 @@ The principal architecture boundaries are:
 - **File lifecycle:** `FileRepository` owns lazy hydration, duplicate detection during hydration, and explicit save orchestration.
 - **Format adapters:** Concrete file repositories and I/O helpers own serialisation, parsing, and filesystem access.
 - **Dependency injection composition:** `RepositoryServiceCollectionExtensions` owns singleton bindings for the string-keyed in-memory and file-backed implementations, with deferred store-path invocation for file repositories.
-- **Entity model:** `EntityBase<TKey>` supplies identity plus reflection-based value equality and hashing; consumers own derived domain properties.
+- **Entity model:** `EntityBase<TKey>` supplies identity plus reflection-based value equality and hashing over a cached per-type property list; consumers own derived domain properties.
 
 ## 🔄 Runtime Flow
 
@@ -162,7 +162,7 @@ The principal runtime sequence is:
 | `FileRepository<TKey, TDataObject>` | Coordinate lazy hydration, duplicate-key validation, and complete-file persistence | `Repository`, format hooks, filesystem exceptions | One loaded-state cache per file repository instance |
 | `JsonRepository`, `XmlRepository`, and `CsvRepository` | Bind file lifecycle hooks to the corresponding collection helper | `FileRepository`, I/O helpers | Each instance owns one helper configured with its constructor path |
 | `RepositoryServiceCollectionExtensions` | Register the in-memory repository or a deferred-path JSON, XML, or CSV repository through its public contract | Microsoft DI abstractions, repository contracts and implementations | Singleton per service registration; the consumer owns provider disposal |
-| Collection and object I/O helpers | Read and write JSON, XML, or CSV representations | .NET serialisation, reflection, conversion, and filesystem APIs | Stateless apart from path, type, options, or separator configuration |
+| Collection and object I/O helpers | Read and write JSON, XML, or CSV representations | .NET serialisation, reflection, conversion, and filesystem APIs | Immutable configuration per instance plus a process-wide, per-type CSV property-order cache |
 | Repository exceptions | Communicate duplicate, existing, or missing entity conditions with entity identifier and type context | `System.Exception` | Allocated per failed operation |
 | `Windows1252File` | Write text with Windows-1252 encoding, synchronously or asynchronously | .NET encoding and filesystem APIs | Static utility; no repository association |
 
@@ -375,7 +375,7 @@ sequenceDiagram
     end
 ```
 
-Hydration occurs before the save exception wrapper. A missing or malformed JSON/XML input can therefore terminate `SaveChanges()` with its original load exception, whereas failures raised by the format save hook become `IOException`. No retry, temporary-file exchange, rollback, or conflict detection is present.
+Hydration occurs before the save exception wrapper. A missing or malformed JSON/XML input can therefore terminate `SaveChanges()` with its original load exception, whereas failures raised by the format save hook become `IOException`. No retry, rollback, or conflict detection is present; replacement is atomic per file through a temporary file and move.
 
 ## ⚙️ File Format Semantics
 
@@ -467,7 +467,7 @@ The principal dependency rules are:
 
 ## 🚀 Deployment and Operations
 
-The deployment unit is the `NuciDAL` NuGet library, currently version 4.2.0 and targeted exclusively at `net10.0`. It executes within the consuming process and creates no service, worker, port, or background thread. A consumer can construct multiple repository instances with independent memory and lazy-load state, or own one repository singleton per service registration through its service provider.
+The deployment unit is the `NuciDAL` NuGet library, currently version 4.3.1 and targeted exclusively at `net10.0`. It executes within the consuming process and creates no service, worker, port, or background thread. A consumer can construct multiple repository instances with independent memory and lazy-load state, or own one repository singleton per service registration through its service provider.
 
 File-backed deployment requires a path accessible to the host process. JSON and XML files must exist and be readable before the first repository operation; CSV can commence from an absent file. The parent directory must exist for save operations. The caller owns final `SaveChanges()` timing because repository disposal and process shutdown do not persist pending mutations automatically.
 
@@ -476,7 +476,7 @@ File-backed deployment requires a path accessible to the host process. JSON and 
 | Process topology | In-process library within one consumer | Availability, startup, shutdown, and recovery inherit the host's topology |
 | Persistent state | Optional single JSON, XML, or CSV file per concrete repository instance | Host owns paths, permissions, backup, and external access coordination |
 | State loading | Complete lazy hydration cached for the instance lifetime | First use incurs I/O; external modifications are not observed afterwards |
-| State saving | Synchronous complete-file create or replacement (JSON uses atomic write via temporary file) | Cost increases with collection size; interruption can leave an incomplete file for CSV/XML because no atomic exchange or journal exists |
+| State saving | Synchronous complete-file create or replacement through a temporary file and atomic move | Cost increases with collection size; a process termination between write and move leaves an orphaned temporary file |
 | Scaling | Complete per-instance in-memory copy with no cross-instance coordination | Horizontal or multi-process use can produce stale reads and last-writer replacement |
 | Recovery | In-memory state remains after a save exception, but no automatic retry or rollback exists | Caller decides whether and when to retry and must verify file integrity after partial I/O failure |
 | Packaging | `dotnet pack` produces one .NET 10 NuGet package | Consumers targeting earlier frameworks cannot reference this release directly |
@@ -517,7 +517,7 @@ dotnet test NuciDAL.slnx
 - **Explicit persistence:** File-backed mutation is not durable until `SaveChanges()` succeeds, and no dirty-state indicator or automatic flush exists.
 - **One-time hydration:** A file repository does not observe later external file modifications and offers no public reload operation.
 - **Format asymmetry:** Missing JSON and XML files fail on first use, while a missing CSV file represents an empty collection.
-- **Non-atomic complete-file save (CSV, XML):** CSV and XML saves have no temporary-file exchange, transaction, journal, backup, or multi-file coordination. JSON saves use `AtomicFileWriter` for atomic replacement.
+- **Atomic complete-file save:** JSON, XML, and CSV saves write to a uniquely named temporary file in the target directory, flush it to disk, and replace the destination with an atomic move. There is no transaction boundary across multiple files, journal, backup retention, or conflict detection.
 - **CSV schema fragility:** Reflection order, property additions, delimiters, line terminators, and conversion compatibility affect round trips; quoting and escaping are absent.
 - **Partial duplicate hydration:** If hydration fails, whether because duplicate identifiers are discovered after earlier entities were inserted or because the source collection fails while being enumerated, only the entities inserted during that load are rolled back; pre-seeded state survives. A subsequent attempt retries the read and fails again deterministically.
 - **Per-instance synchronisation:** In-process coordination applies only to one repository instance; multiple instances or processes can overwrite divergent file snapshots.

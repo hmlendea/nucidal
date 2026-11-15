@@ -40,15 +40,11 @@ namespace NuciDAL.Repositories
         /// <param name="entity">Entity.</param>
         public virtual void Add(TDataObject entity) => ExecuteWrite(() =>
         {
-            ThrowIfNullEntityId(entity);
-
-            TDataObject entityClone = CloneEntity(entity);
-
-            if (!Entities.TryAdd(entityClone.Id, entityClone))
+            if (!TryStoreEntity(entity))
             {
                 throw new EntityAlreadyExistsException(
-                    entityClone.Id.ToString(),
-                    entityClone.GetType());
+                    entity.Id.ToString(),
+                    entity.GetType());
             }
         });
 
@@ -58,13 +54,7 @@ namespace NuciDAL.Repositories
         /// <returns><see langword="true"/> if the entity was added; otherwise, <see langword="false"/>.</returns>
         /// <param name="entity">Entity.</param>
         public virtual bool TryAdd(TDataObject entity) => ExecuteWrite(() =>
-        {
-            ThrowIfNullEntityId(entity);
-
-            TDataObject entityClone = CloneEntity(entity);
-
-            return Entities.TryAdd(entityClone.Id, entityClone);
-        });
+            TryStoreEntity(entity));
 
         /// <summary>
         /// Checks whether an entity with the specified identifier exists.
@@ -175,7 +165,7 @@ namespace NuciDAL.Repositories
         /// <returns>An enumerable of matching entities, evaluated lazily using LINQ-to-Objects.</returns>
         /// <param name="predicate">Predicate used to filter entities.</param>
         public virtual IEnumerable<TDataObject> Find(Func<TDataObject, bool> predicate)
-            => GetAll().Where(predicate).AsEnumerable();
+            => GetAll().Where(predicate);
 
         /// <summary>
         /// Updates the specified entity's fields.
@@ -291,8 +281,10 @@ namespace NuciDAL.Repositories
         /// </summary>
         protected readonly object SyncRoot = new();
 
+        private static string EntityIdParameterName => "entity." + nameof(EntityBase<TKey>.Id);
+
         [DoesNotReturn]
-        private void ThrowEntityNotFoundException(TKey id)
+        private static void ThrowEntityNotFoundException(TKey id)
             => throw new EntityNotFoundException(
                 id.ToString(),
                 typeof(TDataObject));
@@ -306,8 +298,19 @@ namespace NuciDAL.Repositories
             ArgumentNullException.ThrowIfNull(entity.Id, EntityIdParameterName);
         }
 
-        private static string EntityIdParameterName
-            => $"entity.{nameof(EntityBase<TKey>.Id)}";
+        /// <summary>
+        /// Validates and clones the specified entity before storing it.
+        /// </summary>
+        /// <returns><see langword="true"/> if the entity was added; otherwise, <see langword="false"/>.</returns>
+        /// <param name="entity">Entity.</param>
+        private bool TryStoreEntity(TDataObject entity)
+        {
+            ThrowIfNullEntityId(entity);
+
+            TDataObject entityClone = CloneEntity(entity);
+
+            return Entities.TryAdd(entityClone.Id, entityClone);
+        }
 
         private void ExecuteWrite(Action action)
         {
@@ -327,10 +330,7 @@ namespace NuciDAL.Repositories
 
         private TDataObject CloneEntity(TDataObject entity)
         {
-            if (entity is null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
+            ArgumentNullException.ThrowIfNull(entity);
 
             return entity.ToJson().FromJson<TDataObject>();
         }

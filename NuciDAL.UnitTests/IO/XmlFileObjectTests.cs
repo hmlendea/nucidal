@@ -7,6 +7,8 @@ using NUnit.Framework;
 using NuciDAL.IO;
 using NuciDAL.UnitTests.Stubs;
 
+using static NuciDAL.UnitTests.Stubs.EntityFactory;
+
 namespace NuciDAL.UnitTests.IO
 {
     [TestFixture]
@@ -122,16 +124,5 @@ namespace NuciDAL.UnitTests.IO
                 () => xmlFileObject.Read(filePath),
                 Throws.TypeOf<InvalidOperationException>());
         }
-
-        private static TestEntityDataObject BuildEntity(
-            string entityId,
-            string entityName,
-            int entityValue)
-            => new()
-            {
-                Id = entityId,
-                Name = entityName,
-                Value = entityValue,
-            };
     }
 }

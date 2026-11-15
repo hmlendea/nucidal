@@ -8,6 +8,8 @@ using NUnit.Framework;
 using NuciDAL.IO;
 using NuciDAL.IntegrationTests.Stubs;
 
+using static NuciDAL.IntegrationTests.Stubs.EntityFactory;
+
 namespace NuciDAL.IntegrationTests.IO
 {
     [TestFixture]
@@ -120,13 +122,5 @@ namespace NuciDAL.IntegrationTests.IO
             Assert.That(loadedEntity, Is.EqualTo(entity));
             Assert.That(loadedEntity, Is.Not.SameAs(entity));
         }
-
-        private static TestEntityDataObject BuildEntity(string id, string name, int value)
-            => new()
-            {
-                Id = id,
-                Name = name,
-                Value = value,
-            };
     }
 }
